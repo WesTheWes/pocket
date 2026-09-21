@@ -27,7 +27,9 @@ only (canvas-format HTML that does not run): match their spacing, sizes and copy
   src/index.css. Use the generated utilities; never hard-code colors.
 - Mobile first (designs are 390px wide). Home, Song and Practice get desktop layouts at `desk:`
   (900px). Every other screen stays a centered ~480px column.
-- Routes are in SCREENS.md. Screens live in their feature folder; shared UI in src/components.
+- Routes are in SCREENS.md and defined in src/app/routes.tsx; build links with `paths` from src/paths.ts. Screens live in their feature folder; shared UI in src/components.
+- Built so far: Home (features/repertoire) and Song (features/songs). Every other route renders a `ComingSoon` placeholder in src/app/routes.tsx; replace it as each screen lands.
+- After UI changes, look at the running app (phone 390px and desktop 1280px) against docs/design/reference, not just the tests. jsdom applies no CSS, so it cannot catch layout bugs such as a `hidden` class losing to a component's own `inline-flex`. Wrap in a `hidden desk:block` container instead of passing `hidden` to a component.
 - Tap targets at least 44px, aria-label on icon-only buttons, aria-pressed on toggle chips.
   Quality is always shown as meter + color + label, never color alone.
 - If the design docs or reference screens disagree with the Progress model or Architecture

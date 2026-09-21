@@ -1,10 +1,92 @@
 @import 'tailwindcss';
 
-:root {
-  color-scheme: light dark;
+/* Design tokens. Use the generated utilities (bg-surface, text-muted, rounded-card, desk:...). */
+@theme {
+  --color-canvas: #14110f;
+  --color-surface: #1d1917;
+  --color-surface-2: #272220;
+  --color-line: #352f2b;
+  --color-scrim: rgb(10 8 7 / 0.74);
+
+  --color-cream: #f4ebdd;
+  --color-muted: #a99e92;
+  --color-ink: #14110f; /* text on cream or orange fills */
+
+  --color-orange: #f49b62; /* primary action, progress bars */
+  --color-pink: #f08ba0;
+  --color-yellow: #f3cf6b; /* "done", focus ring */
+  --color-rose: #b8677a;
+
+  /* Quality scale: 1 = Can't yet ... 5 = Mastered */
+  --color-q1: #b8677a;
+  --color-q2: #f08ba0;
+  --color-q3: #f49b62;
+  --color-q4: #f3cf6b;
+  --color-q5: #f4ebdd;
+
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --radius-card: 20px;
+  --radius-row: 16px;
+  --radius-field: 14px;
+
+  --breakpoint-desk: 900px;
 }
 
-body {
-  margin: 0;
-  min-height: 100dvh;
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--color-canvas);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--color-yellow);
+    outline-offset: 2px;
+  }
+}
+
+/* Small section label above a group. */
+@utility eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Chord charts: monospace, keeps its own line breaks and spacing. */
+@utility chord-notes {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
 }

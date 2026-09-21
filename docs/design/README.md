@@ -8,7 +8,7 @@ This folder is the approved design. The rules for the data model, progress math,
 docs/design/
   README.md              this file: look and feel, behavior, layout, build order
   SCREENS.md             every screen: route, feature folder, contents, components
-  design-tokens.css      the original tokens, kept as reference (the app uses src/theme.css)
+  design-tokens.css      the original tokens, kept as reference (the app uses src/index.css)
   reference/screens/     the 19 design screens as HTML (visual reference only, see below)
 ```
 
@@ -59,7 +59,7 @@ Build mobile first (the mockups are 390px wide), then add the desktop layouts at
 
 ## Suggested build order
 
-1. Tokens (`src/theme.css`) and the shared components in `SCREENS.md`, with routes in `src/app`.
+1. Tokens (`src/index.css`) and the shared components in `SCREENS.md`, with routes in `src/app`.
 2. Dexie tables, repositories and a dev-only "Load sample data" action that imports `seedData`. Screens read with `useLiveQuery` and pass plain arrays to the functions in `src/domain/progress.ts`.
 3. Home and Song, with song create, edit and delete (`repertoire`, `songs`).
 4. Sections and structure editing (`songs`, `structure`).

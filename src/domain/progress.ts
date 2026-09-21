@@ -78,3 +78,35 @@ export function startingBpm(goal: Goal, attempts: Attempt[]): number {
   }
   return latest?.bpm ?? goal.targetBpm ?? DEFAULT_STARTING_BPM
 }
+
+export interface GoalStats {
+  goalCount: number
+  doneCount: number
+  /** 0 to 1 */
+  progress: number
+}
+
+/** Summary of a group of goals: a section's goals, or all of a song's goals. */
+export function goalStats(goals: Goal[], attempts: Attempt[]): GoalStats {
+  return {
+    goalCount: goals.length,
+    doneCount: doneCount(goals, attempts),
+    progress: averageProgress(goals, attempts),
+  }
+}
+
+/** When any of the goals was last practiced, or null if never. */
+export function lastPracticedAt(goals: Goal[], attempts: Attempt[]): number | null {
+  const goalIds = new Set(goals.map((goal) => goal.id))
+  let latest: number | null = null
+  for (const attempt of attempts) {
+    if (!goalIds.has(attempt.goalId)) continue
+    if (latest === null || attempt.at > latest) latest = attempt.at
+  }
+  return latest
+}
+
+/** Progress (0 to 1) as the whole percent shown in the UI. */
+export function toPercent(progress: number): number {
+  return Math.round(progress * 100)
+}

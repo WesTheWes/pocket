@@ -1,6 +1,6 @@
 /*
  * Pocket design tokens: ORIGINAL plain-CSS version, kept for reference only.
- * The app uses src/theme.css (Tailwind v4 @theme) instead. Do not import this file.
+ * The app uses src/index.css (Tailwind v4 @theme) instead. Do not import this file.
  * Name mapping: --bg is bg-canvas, --text and --cream are text-cream, the rest keep their names.
  *
  * Fonts: add this to index.html <head> (or self-host the same families):

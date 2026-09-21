@@ -10,6 +10,8 @@ export type SectionPatch = Partial<Pick<Section, 'name' | 'notes'>>
 
 export function createSectionsRepo({ db, newId }: RepoContext) {
   return {
+    list: () => db.sections.toArray(),
+
     /** A song's sections in their own order (not the play order in `Song.structure`). */
     listBySong: (songId: string) => db.sections.where('songId').equals(songId).sortBy('order'),
 

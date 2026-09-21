@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import App from './App'
 
 describe('App', () => {
-  it('renders the app title', () => {
+  it('starts on the Home screen', async () => {
     render(<App />)
-    expect(screen.getByRole('heading', { name: 'Pocket' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Pocket' })).toBeInTheDocument()
   })
 })

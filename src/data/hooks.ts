@@ -12,6 +12,8 @@ export const useSongs = () => useLiveQuery(() => repos.songs.list())
 export const useSong = (id: string) =>
   useLiveQuery(async () => (await repos.songs.get(id)) ?? null, [id])
 
+export const useAllSections = () => useLiveQuery(() => repos.sections.list())
+
 export const useSections = (songId: string) =>
   useLiveQuery(() => repos.sections.listBySong(songId), [songId])
 

@@ -7,9 +7,12 @@ import {
   firstUnfinishedGoal,
   goalDone,
   goalProgress,
+  goalStats,
+  lastPracticedAt,
   orderGoals,
   songStatus,
   startingBpm,
+  toPercent,
 } from './progress'
 
 const goal = makeGoal({ id: 'g', targetBpm: 84 })
@@ -185,5 +188,52 @@ describe('startingBpm', () => {
   it('falls back to the target tempo, then to 80', () => {
     expect(startingBpm(goal, [])).toBe(84)
     expect(startingBpm({ ...goal, targetBpm: null }, [])).toBe(80)
+  })
+})
+
+describe('goalStats', () => {
+  const a = makeGoal({ id: 'a', targetBpm: 100 })
+  const b = makeGoal({ id: 'b', targetBpm: 100 })
+  const attempts = [
+    makeAttempt({ goalId: 'a', bpm: 100, level: 4 }),
+    makeAttempt({ goalId: 'b', bpm: 50, level: 4 }),
+  ]
+
+  it('summarises a group of goals', () => {
+    const stats = goalStats([a, b], attempts)
+    expect(stats.goalCount).toBe(2)
+    expect(stats.doneCount).toBe(1)
+    expect(stats.progress).toBeCloseTo(0.75)
+  })
+
+  it('is all zeros for no goals', () => {
+    expect(goalStats([], attempts)).toEqual({ goalCount: 0, doneCount: 0, progress: 0 })
+  })
+})
+
+describe('lastPracticedAt', () => {
+  const a = makeGoal({ id: 'a' })
+  const b = makeGoal({ id: 'b' })
+
+  it('is the time of the most recent attempt on any of the goals', () => {
+    const attempts = [
+      makeAttempt({ goalId: 'a', at: 100 }),
+      makeAttempt({ goalId: 'b', at: 300 }),
+      makeAttempt({ goalId: 'other', at: 900 }),
+    ]
+    expect(lastPracticedAt([a, b], attempts)).toBe(300)
+  })
+
+  it('is null when nothing has been practiced', () => {
+    expect(lastPracticedAt([a], [])).toBeNull()
+    expect(lastPracticedAt([], [makeAttempt({ goalId: 'a', at: 5 })])).toBeNull()
+  })
+})
+
+describe('toPercent', () => {
+  it('rounds to a whole percent', () => {
+    expect(toPercent(0)).toBe(0)
+    expect(toPercent(0.6786)).toBe(68)
+    expect(toPercent(1)).toBe(100)
   })
 })
