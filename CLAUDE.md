@@ -35,6 +35,14 @@ src/
 - Session elapsed time must derive from the stored `startedAt`, never `Date.now()` at component mount.
 - Write domain tests first; domain code needs no mocks.
 
+## Progress model
+
+- Each practice attempt (`ProgressEntry`) logs an optional BPM plus a quality level stored as a number 1-5: 1 Can't yet, 2 Rough, 3 Shaky, 4 Solid, 5 Mastered. Labels live in one domain constant, never in stored data.
+- A goal has an optional, always-editable target BPM and a target level (default Solid, 4). It is done when some attempt reaches the target level at or above the target BPM. Goals with no target BPM use the level alone.
+- Goal progress = the fastest BPM logged at Solid or better, shown against the target BPM. Attempts rated Can't yet stay in the history but never count as progress.
+- The goal card shows progress, not a standalone rating. Levels appear only on individual attempts.
+- A song is "Learned" when every goal is done, with a manual override.
+
 ## Conventions
 
 - `erasableSyntaxOnly` is on: no TS enums or constructor parameter properties. Use string unions.
