@@ -69,8 +69,18 @@ export const sessionSchema = z.object({
   endedAt: timestamp.nullable(),
 })
 
+/** Everything in the database. Used for sample data now and JSON backup/restore later. */
+export const pocketDataSchema = z.object({
+  songs: z.array(songSchema),
+  sections: z.array(sectionSchema),
+  goals: z.array(goalSchema),
+  attempts: z.array(attemptSchema),
+  sessions: z.array(sessionSchema),
+})
+
 export type Song = z.infer<typeof songSchema>
 export type Section = z.infer<typeof sectionSchema>
 export type Goal = z.infer<typeof goalSchema>
 export type Attempt = z.infer<typeof attemptSchema>
 export type Session = z.infer<typeof sessionSchema>
+export type PocketData = z.infer<typeof pocketDataSchema>

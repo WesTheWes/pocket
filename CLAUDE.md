@@ -57,6 +57,25 @@ src/
   the pure functions in src/domain/session.ts, never from state set at mount. useSessionTimer
   only re-renders on an interval.
 
+## Data layer (src/data)
+
+- `createRepositories({ db, now, newId })` builds one repository per record type. The clock and ID
+  source are injected so tests are deterministic (`src/test/repos.ts` gives each test a fresh
+  in-memory database, a manual clock and IDs like `id-1`). The app's instance is `repos` from
+  `src/data`.
+- Screens read through the hooks in `src/data/hooks.ts` (`useLiveQuery` wrappers) and write through
+  `repos`. A hook returns `undefined` while loading; single-record hooks return `null` when the
+  record does not exist.
+- Repositories validate every write with the Zod schemas and enforce integrity and cascades inside
+  transactions: deleting a section removes its goals, their attempts and its structure slots;
+  deleting a song removes everything under it; deleting a goal removes its attempts.
+- `repos.sessions.startOrResume(songId)` is atomic; use it rather than checking then starting, so
+  StrictMode's doubled effects cannot create two sessions.
+- `repos.backup` has `exportAll`, `replaceAll` (validates first, then swaps in one transaction) and
+  `clear`. Sample data comes from `createSeedData(now)` in `src/data/seed.ts`.
+- Never name an error `NotFoundError`: Dexie turns any error with that name thrown inside a
+  transaction into its own `DexieError`. Ours is `RecordNotFoundError`.
+
 ## Progress model
 
 - Quality levels are stored as numbers 1-5: Can't yet, Rough, Shaky, Solid, Mastered. Labels live
