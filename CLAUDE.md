@@ -87,6 +87,8 @@ src/
 - `useMetronome` creates the metronome in an effect (not in render), so React StrictMode's extra mount cannot leave a disposed one.
 - `useSessionTimer` reads the clock through `useSyncExternalStore` and derives time from the stored session. It ticks in 250 ms steps, so it can read a hair behind real time.
 - An open session older than 12 hours (`isSessionStale`) is treated as abandoned: `startOrResume` ends it and starts a fresh one, and `getActive` ignores it.
+- Practice has no page for adding or editing goals: the pencil and "Add goal" on the goal card open `GoalSheet` (the same `GoalForm`) over the screen, so the metronome and timer keep running. The current section's goals are listed under the chips (phones), so you never have to page through them. On phones the metronome's play button is `fixed` to the bottom bar (the bar leaves a gap for it) so it stays reachable however tall the screen gets; on desktop it sits in the panel.
+- A `className` passed to `TextAreaField` replaces its default height and font (they are one setting), rather than stacking on them.
 - Practice remembers the tempo you set for each goal for the rest of the session (`tempoMemory.ts`, in sessionStorage so it survives a trip to Log attempt and a reload). A tempo logged after you set it wins (`chooseTempo`).
 - The current goal lives in the URL (`?goal=`) so a reload keeps your place. Landing on a goal resets the tempo to `startingBpm`.
 - Practice is one DOM that adapts with `desk:` classes (CSS `order` moves Finish and the timer), so each control exists once.

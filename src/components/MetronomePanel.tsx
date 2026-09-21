@@ -79,7 +79,9 @@ export function MetronomePanel({ bpm, onBpmChange, playing, onToggle, beat, supp
           aria-label={playing ? 'Stop metronome' : 'Start metronome'}
           aria-pressed={playing}
           onClick={onToggle}
-          className="flex size-[72px] items-center justify-center rounded-full bg-orange text-ink hover:brightness-105"
+          // On phones it is pinned to the bottom of the screen (the bar leaves a gap for it), so it is
+          // always reachable however tall the screen above it gets. On desktop it sits in the panel.
+          className="fixed bottom-2 left-1/2 z-20 flex size-[72px] -translate-x-1/2 items-center justify-center rounded-full bg-orange text-ink shadow-lg shadow-black/40 hover:brightness-105 desk:static desk:translate-x-0 desk:shadow-none"
         >
           <Icon name={playing ? 'pause' : 'play'} size={28} />
         </button>

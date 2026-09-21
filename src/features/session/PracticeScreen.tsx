@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { Button } from '../../components/Button'
 import { Icon } from '../../components/Icon'
-import { IconLink } from '../../components/IconButton'
+import { IconButton, IconLink } from '../../components/IconButton'
 import { MetronomePanel } from '../../components/MetronomePanel'
 import { Page } from '../../components/Page'
 import { ProgressBar } from '../../components/ProgressBar'
@@ -12,6 +12,7 @@ import { goalSummary } from '../../domain/goalSummary'
 import {
   averageProgress,
   firstUnfinishedGoal,
+  goalDone,
   goalProgress,
   orderGoals,
   toPercent,
@@ -23,6 +24,7 @@ import { withReturn } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
 import { SongNotFound } from '../songs/SongNotFound'
+import { GoalSheet, type GoalSheetTarget } from './GoalSheet'
 import { SongPickerSheet } from './SongPickerSheet'
 import { chooseTempo, recallTempo, rememberTempo } from './tempoMemory'
 import { useMetronome } from './useMetronome'
@@ -117,6 +119,7 @@ function PracticeView({
 }: ViewProps) {
   const [search, setSearch] = useSearchParams()
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [goalSheet, setGoalSheet] = useState<GoalSheetTarget | null>(null)
   const elapsed = useSessionTimer(session)
   const paused = session.pausedAt !== null
 
@@ -131,6 +134,7 @@ function PracticeView({
   )
   const index = requested >= 0 ? requested : Math.max(0, fallback)
   const goal: Goal | undefined = ordered[index]
+  const currentGroup = groups.find((group) => group.goals.some((g) => g.id === goal?.id))
   const previous = ordered[index - 1]
   const next = ordered[index + 1]
   const select = (id: string) => setSearch({ goal: id }, { replace: true })
@@ -291,6 +295,42 @@ function PracticeView({
           </div>
         )}
 
+        {currentGroup && currentGroup.goals.length > 1 && (
+          <nav
+            aria-label={`Goals in ${currentGroup.title}`}
+            className="mx-5 mt-2 flex max-h-[148px] flex-col gap-1 overflow-y-auto desk:hidden"
+          >
+            {currentGroup.goals.map((g) => {
+              const isCurrent = g.id === goal?.id
+              const done = goalDone(g, attempts)
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  aria-current={isCurrent ? 'true' : undefined}
+                  onClick={() => select(g.id)}
+                  className={cn(
+                    'flex h-11 items-center gap-3 rounded-xl px-3.5 text-left text-[15px]',
+                    isCurrent ? 'bg-surface-2 font-medium' : 'text-muted hover:bg-surface',
+                  )}
+                >
+                  <span className="min-w-0 flex-1 truncate">{g.title}</span>
+                  {done ? (
+                    <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-yellow">
+                      <Icon name="check" size={14} />
+                      Done
+                    </span>
+                  ) : (
+                    <span className="shrink-0 text-xs tabular-nums">
+                      {toPercent(goalProgress(g, attempts))}%
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </nav>
+        )}
+
         <section
           aria-label="Current goal"
           className="mx-5 mt-3 rounded-card bg-surface p-[18px] desk:mx-0 desk:mt-3 desk:rounded-[24px] desk:px-8 desk:py-7"
@@ -301,13 +341,21 @@ function PracticeView({
                 <div className="eyebrow">
                   {sectionName ?? 'Whole song'} · Goal {index + 1} of {ordered.length}
                 </div>
-                <Link
-                  to={paths.goal(song.id, goal.id)}
-                  state={withReturn(paths.practice(song.id, goal.id), { bpm })}
-                  className="-my-2.5 -mr-1.5 flex h-11 items-center px-1.5 text-[13px] font-semibold text-orange desk:text-sm"
-                >
-                  Log attempt
-                </Link>
+                <div className="-my-2.5 -mr-2 flex items-center">
+                  <Link
+                    to={paths.goal(song.id, goal.id)}
+                    state={withReturn(paths.practice(song.id, goal.id), { bpm })}
+                    className="flex h-11 items-center px-1.5 text-[13px] font-semibold text-orange desk:text-sm"
+                  >
+                    Log attempt
+                  </Link>
+                  <IconButton
+                    icon="edit"
+                    label="Edit goal"
+                    className="text-muted"
+                    onClick={() => setGoalSheet({ mode: 'edit', goal })}
+                  />
+                </div>
               </div>
               <h1 className="mt-1 font-display text-[27px] leading-[1.12] desk:mt-1.5 desk:text-[44px] desk:leading-[1.08]">
                 {goal.title}
@@ -319,8 +367,18 @@ function PracticeView({
               )}
               <div className="mt-4 desk:mt-[22px]">
                 <ProgressBar value={goalProgress(goal, attempts)} label="Goal progress" size="lg" />
-                <div className="mt-2 text-[13px] text-muted desk:text-sm">
-                  {goalSummary(goal, attempts)}
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <div className="min-w-0 truncate text-[13px] text-muted desk:text-sm">
+                    {goalSummary(goal, attempts)}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setGoalSheet({ mode: 'add', sectionId: goal.sectionId })}
+                    className="-my-3 -mr-1 flex h-11 shrink-0 items-center gap-1 px-1 text-[13px] font-semibold text-orange desk:text-sm"
+                  >
+                    <Icon name="plus" size={16} />
+                    Add goal
+                  </button>
                 </div>
               </div>
             </>
@@ -330,12 +388,13 @@ function PracticeView({
               <p className="mt-1.5 text-sm text-muted">
                 This song has no goals yet. Add some to track progress, or just use the metronome.
               </p>
-              <Link
-                to={paths.newGoal(song.id)}
+              <button
+                type="button"
+                onClick={() => setGoalSheet({ mode: 'add', sectionId: null })}
                 className="mt-3 inline-flex h-11 items-center text-sm font-semibold text-orange"
               >
                 Add a goal
-              </Link>
+              </button>
             </>
           )}
         </section>
@@ -357,16 +416,18 @@ function PracticeView({
               variant="secondary"
               disabled={!previous}
               onClick={() => previous && select(previous.id)}
-              className="h-[52px] flex-1 text-[15px]"
+              className="h-[52px] flex-1 whitespace-nowrap px-3! text-[15px]"
             >
               <Icon name="back" size={18} />
               Prev goal
             </Button>
+            {/* Room for the play button, which is pinned over this bar on phones. */}
+            <div aria-hidden="true" className="w-[72px] shrink-0 desk:hidden" />
             <Button
               variant="secondary"
               disabled={!next}
               onClick={() => next && select(next.id)}
-              className="h-[52px] flex-1 text-[15px]"
+              className="h-[52px] flex-1 whitespace-nowrap px-3! text-[15px]"
             >
               Next goal
               <Icon name="chevron" size={18} />
@@ -374,6 +435,18 @@ function PracticeView({
           </div>
         )}
       </div>
+
+      <GoalSheet
+        target={goalSheet}
+        songId={song.id}
+        sections={sections}
+        onClose={() => setGoalSheet(null)}
+        onSaved={(saved) => {
+          setGoalSheet(null)
+          // A new goal is what you were about to work on; an edited one is already showing.
+          if (goalSheet?.mode === 'add') select(saved.id)
+        }}
+      />
 
       <SongPickerSheet
         open={pickerOpen}

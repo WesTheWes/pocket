@@ -233,10 +233,7 @@ describe('choosing the goal', () => {
     await loadSamples()
     renderApp('/practice/rocket-man')
     expect(await screen.findByRole('heading', { name: 'Free practice' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Add a goal' })).toHaveAttribute(
-      'href',
-      '/songs/rocket-man/goals/new',
-    )
+    expect(screen.getByRole('button', { name: 'Add a goal' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Next goal' })).not.toBeInTheDocument()
     expect(tempo()).toHaveAttribute('aria-valuetext', '80 BPM')
   })
@@ -410,5 +407,314 @@ describe('finishing and switching', () => {
     expect((await repos.sessions.get(first.id))?.endedAt).not.toBeNull()
     await waitFor(async () => expect(await openSessions('sir-duke')).toHaveLength(1))
     expect(await openSessions('piano-man')).toEqual([])
+  })
+})
+
+describe('seeing the current section’s goals without paging', () => {
+  const sectionList = (name: string) => screen.findByRole('navigation', { name })
+
+  it('lists every goal in the current section, marking the one you are on', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g4')
+    const list = await sectionList('Goals in Chorus')
+    const rows = within(list).getAllByRole('button')
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toHaveTextContent('Full chorus with block chords')
+    expect(rows[1]).toHaveTextContent('Walk-up fill into bar 5')
+    expect(rows[0]).toHaveAttribute('aria-current', 'true')
+    expect(rows[1]).not.toHaveAttribute('aria-current')
+  })
+
+  it('jumps straight to a goal when you tap it', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    const { router } = renderApp('/practice/piano-man?goal=piano-man-g4')
+    const list = await sectionList('Goals in Chorus')
+    await user.click(within(list).getByRole('button', { name: /Walk-up fill into bar 5/ }))
+
+    expect(goalTitle()).toBe('Walk-up fill into bar 5')
+    expect(router.state.location.search).toBe('?goal=piano-man-g5')
+    expect(within(list).getByRole('button', { name: /Walk-up fill/ })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+  })
+
+  it('shows each goal’s progress, and Done for finished ones', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    const list = await sectionList('Goals in Verse')
+    const done = within(list).getByRole('button', { name: /Left hand waltz pattern/ })
+    expect(done).toHaveTextContent('Done')
+    const notDone = within(list).getByRole('button', { name: /First 4 bars/ })
+    expect(notDone).toHaveTextContent('76%')
+    expect(notDone).not.toHaveTextContent('Done')
+  })
+
+  it('is not shown for a section with just one goal', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g1') // Intro has a single goal
+    await screen.findByRole('timer', { name: 'Practice time' })
+    expect(screen.queryByRole('navigation', { name: /^Goals in/ })).not.toBeInTheDocument()
+  })
+
+  it('changes with the section as you move between goals', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g1')
+    await screen.findByRole('timer', { name: 'Practice time' })
+    expect(screen.queryByRole('navigation', { name: /^Goals in/ })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Next goal' }))
+    expect(await sectionList('Goals in Verse')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Next goal' }))
+    await user.click(screen.getByRole('button', { name: 'Next goal' }))
+    expect(await sectionList('Goals in Chorus')).toBeInTheDocument()
+  })
+
+  it('still has the full list of every goal for the desktop side panel', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g4')
+    const all = await screen.findByRole('navigation', { name: 'Goals' })
+    expect(within(all).getAllByRole('button')).toHaveLength(8)
+  })
+})
+
+describe('adding and editing goals during a session', () => {
+  const dialog = () => screen.findByRole('dialog')
+  const titleBox = () => screen.findByRole('textbox', { name: 'Title' })
+  const targetTempo = () => screen.getByRole('textbox', { name: 'Target tempo, in BPM' })
+
+  describe('editing the current goal', () => {
+    it('opens the goal in a sheet without leaving practice', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      const { router } = renderApp('/practice/piano-man?goal=piano-man-g3')
+      await user.click(await screen.findByRole('button', { name: 'Edit goal' }))
+
+      const sheet = await dialog()
+      expect(within(sheet).getByRole('heading', { name: 'Edit goal' })).toBeInTheDocument()
+      expect(await titleBox()).toHaveValue('First 4 bars with only bass and melody')
+      expect(targetTempo()).toHaveValue('84')
+      expect(within(sheet).getByRole('button', { name: 'Verse' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      )
+      expect(router.state.location.pathname).toBe('/practice/piano-man')
+    })
+
+    it('saves the changes and shows them at once', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g3')
+      await user.click(await screen.findByRole('button', { name: 'Edit goal' }))
+      const title = await titleBox()
+      await user.clear(title)
+      await user.type(title, 'Melody and bass, first 4 bars')
+      await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect(goalTitle()).toBe('Melody and bass, first 4 bars')
+      expect((await repos.goals.get('piano-man-g3'))?.title).toBe('Melody and bass, first 4 bars')
+      // Still the same goal, in the same place.
+      expect(screen.getByText('Verse · Goal 4 of 8')).toBeInTheDocument()
+    })
+
+    it('recalculates progress when you change the target tempo', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g3')
+      expect(await screen.findByText('fastest Solid 64 of 84 BPM')).toBeInTheDocument()
+      await user.click(screen.getByRole('button', { name: 'Edit goal' }))
+      await titleBox()
+      await user.clear(targetTempo())
+      await user.type(targetTempo(), '64')
+      await user.tab()
+      await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+      expect(await screen.findByText('fastest Solid 64 of 64 BPM')).toBeInTheDocument()
+      const list = screen.getByRole('navigation', { name: 'Goals in Verse' })
+      expect(within(list).getByRole('button', { name: /First 4 bars/ })).toHaveTextContent('Done')
+    })
+
+    it('keeps the sheet open and says what is wrong when the title is blank', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g3')
+      await user.click(await screen.findByRole('button', { name: 'Edit goal' }))
+      await user.clear(await titleBox())
+      await user.click(screen.getByRole('button', { name: 'Save changes' }))
+      expect(await screen.findByRole('alert')).toHaveTextContent('Enter a title')
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+      expect((await repos.goals.get('piano-man-g3'))?.title).toBe(
+        'First 4 bars with only bass and melody',
+      )
+    })
+
+    it('leaves everything alone when cancelled or closed with Escape', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g3')
+      await user.click(await screen.findByRole('button', { name: 'Edit goal' }))
+      await user.type(await titleBox(), ' EXTRA')
+      await user.click(within(await dialog()).getByRole('button', { name: 'Cancel' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect(goalTitle()).toBe('First 4 bars with only bass and melody')
+
+      await user.click(screen.getByRole('button', { name: 'Edit goal' }))
+      await titleBox()
+      await user.keyboard('{Escape}')
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect((await repos.goals.get('piano-man-g3'))?.title).toBe(
+        'First 4 bars with only bass and melody',
+      )
+    })
+
+    it('starts each edit fresh, showing that goal’s own values', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g3')
+      await user.click(await screen.findByRole('button', { name: 'Edit goal' }))
+      await user.type(await titleBox(), ' typed but cancelled')
+      await user.click(within(await dialog()).getByRole('button', { name: 'Cancel' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+      await user.click(screen.getByRole('button', { name: 'Next goal' }))
+      await user.click(screen.getByRole('button', { name: 'Edit goal' }))
+      expect(await titleBox()).toHaveValue('Full chorus with block chords')
+    })
+  })
+
+  describe('adding a goal', () => {
+    it('opens a sheet with the current section chosen', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g4')
+      await user.click(await screen.findByRole('button', { name: 'Add goal' }))
+      const sheet = await dialog()
+      expect(within(sheet).getByRole('heading', { name: 'Add goal' })).toBeInTheDocument()
+      expect(await titleBox()).toHaveValue('')
+      expect(within(sheet).getByRole('button', { name: 'Chorus' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      )
+    })
+
+    it('creates the goal and moves straight to it', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      const { router } = renderApp('/practice/piano-man?goal=piano-man-g4')
+      await user.click(await screen.findByRole('button', { name: 'Add goal' }))
+      await user.type(await titleBox(), 'Hands together, slowly')
+      await user.click(within(await dialog()).getByRole('button', { name: 'Add goal' }))
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect(
+        await screen.findByRole('heading', { name: 'Hands together, slowly', level: 1 }),
+      ).toBeInTheDocument()
+      expect(screen.getByText('Chorus · Goal 7 of 9')).toBeInTheDocument()
+      const created = (await repos.goals.listBySong('piano-man')).find(
+        (g) => g.title === 'Hands together, slowly',
+      )
+      expect(created).toMatchObject({ sectionId: 'piano-man-s2', targetBpm: 80 })
+      await waitFor(() => expect(router.state.location.search).toBe(`?goal=${created!.id}`))
+      // It appears in the section's list too, so all three Chorus goals are visible.
+      const list = screen.getByRole('navigation', { name: 'Goals in Chorus' })
+      expect(within(list).getAllByRole('button')).toHaveLength(3)
+    })
+
+    it('can add a whole-song goal instead', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g4')
+      await user.click(await screen.findByRole('button', { name: 'Add goal' }))
+      const sheet = await dialog()
+      await user.click(within(sheet).getByRole('button', { name: 'Whole song' }))
+      await user.type(await titleBox(), 'Play it for a friend')
+      await user.click(within(sheet).getByRole('button', { name: 'Add goal' }))
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect(await screen.findByText('Whole song · Goal 2 of 9')).toBeInTheDocument()
+      const created = (await repos.goals.listBySong('piano-man')).find(
+        (g) => g.title === 'Play it for a friend',
+      )
+      expect(created?.sectionId).toBeNull()
+    })
+
+    it('starts the metronome at the new goal’s target tempo', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g4')
+      await user.click(await screen.findByRole('button', { name: 'Add goal' }))
+      await user.type(await titleBox(), 'Quick one')
+      await user.clear(targetTempo())
+      await user.type(targetTempo(), '132')
+      await user.tab()
+      await user.click(within(await dialog()).getByRole('button', { name: 'Add goal' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      await waitFor(() => expect(tempo()).toHaveAttribute('aria-valuetext', '132 BPM'))
+    })
+
+    it('asks for a title and adds nothing without one', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g4')
+      await user.click(await screen.findByRole('button', { name: 'Add goal' }))
+      await user.click(within(await dialog()).getByRole('button', { name: 'Add goal' }))
+      expect(await screen.findByRole('alert')).toHaveTextContent('Enter a title')
+      expect(await repos.goals.listBySong('piano-man')).toHaveLength(8)
+    })
+
+    it('adds nothing when cancelled', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g4')
+      await user.click(await screen.findByRole('button', { name: 'Add goal' }))
+      await user.type(await titleBox(), 'Never mind')
+      await user.click(within(await dialog()).getByRole('button', { name: 'Cancel' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect(await repos.goals.listBySong('piano-man')).toHaveLength(8)
+    })
+
+    it('turns free practice into a real goal', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/rocket-man')
+      await user.click(await screen.findByRole('button', { name: 'Add a goal' }))
+      await user.type(await titleBox(), 'Learn the intro')
+      await user.click(within(await dialog()).getByRole('button', { name: 'Add goal' }))
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect(
+        await screen.findByRole('heading', { name: 'Learn the intro', level: 1 }),
+      ).toBeInTheDocument()
+      expect(screen.getByText('Whole song · Goal 1 of 1')).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: 'Free practice' })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('while practicing', () => {
+    it('keeps the metronome playing and the session running', async () => {
+      await loadSamples()
+      const user = userEvent.setup()
+      renderApp('/practice/piano-man?goal=piano-man-g4')
+      await user.click(await screen.findByRole('button', { name: 'Start metronome' }))
+      const [session] = await openSessions('piano-man')
+
+      await user.click(screen.getByRole('button', { name: 'Edit goal' }))
+      await user.type(await titleBox(), '!')
+      await user.click(screen.getByRole('button', { name: 'Save changes' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+      await user.click(screen.getByRole('button', { name: 'Add goal' }))
+      await user.type(await titleBox(), 'Another')
+      await user.click(within(await dialog()).getByRole('button', { name: 'Add goal' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+      expect(screen.getByRole('button', { name: 'Stop metronome' })).toBeInTheDocument()
+      expect(FakeAudioContext.instances).toHaveLength(1)
+      expect(FakeAudioContext.instances[0].closed).toBe(0)
+      expect((await openSessions('piano-man')).map((s) => s.id)).toEqual([session.id])
+    })
   })
 })

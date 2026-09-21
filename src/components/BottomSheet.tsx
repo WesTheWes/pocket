@@ -19,7 +19,7 @@ export function BottomSheet({ open, onOpenChange, title, description, children }
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-scrim" />
-        <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-[480px] rounded-t-[28px] bg-surface px-5 pb-7 pt-3.5 desk:inset-x-auto desk:bottom-auto desk:left-1/2 desk:top-1/2 desk:max-w-[440px] desk:-translate-x-1/2 desk:-translate-y-1/2 desk:rounded-[28px] desk:pt-7">
+        <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[92dvh] w-full max-w-[480px] overflow-y-auto rounded-t-[28px] bg-surface px-5 pb-7 pt-3.5 desk:inset-x-auto desk:bottom-auto desk:left-1/2 desk:top-1/2 desk:max-w-[440px] desk:-translate-x-1/2 desk:-translate-y-1/2 desk:rounded-[28px] desk:pt-7">
           <div
             aria-hidden="true"
             className="mx-auto mb-5 h-1 w-10 rounded-full bg-line desk:hidden"

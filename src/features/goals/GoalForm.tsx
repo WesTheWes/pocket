@@ -17,10 +17,19 @@ interface Props {
   onSubmit: (values: GoalFormValues) => Promise<void>
   /** Extra actions below the submit button, such as Delete. */
   footer?: ReactNode
+  /** Replaces the default page padding, e.g. when the form sits inside a sheet. */
+  className?: string
 }
 
 /** The fields shared by New goal and Edit goal. */
-export function GoalForm({ sections, defaultValues, submitLabel, onSubmit, footer }: Props) {
+export function GoalForm({
+  sections,
+  defaultValues,
+  submitLabel,
+  onSubmit,
+  footer,
+  className = 'px-5 pb-10 pt-2',
+}: Props) {
   const {
     register,
     handleSubmit,
@@ -42,7 +51,7 @@ export function GoalForm({ sections, defaultValues, submitLabel, onSubmit, foote
   const targets = [{ id: null, name: 'Whole song' }, ...sections]
 
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-[22px] px-5 pb-10 pt-2">
+    <form onSubmit={submit} noValidate className={`flex flex-col gap-[22px] ${className}`}>
       <div role="group" aria-labelledby="applies-to-label">
         <div id="applies-to-label" className="eyebrow">
           Applies to
