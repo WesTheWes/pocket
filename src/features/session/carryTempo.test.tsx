@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react'
+import { cleanup, fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { repos } from '../../data'
@@ -124,5 +124,99 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     await screen.findByRole('region', { name: 'History' })
     await user.click(screen.getAllByRole('button', { name: /^Edit attempt from/ })[2])
     expect(await logTempo()).toHaveValue('45') // the oldest attempt's own tempo
+  })
+})
+
+describe('Practice remembers the tempo you set for each goal', () => {
+  it('keeps it through a trip to Log attempt where nothing is logged', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp(PRACTICE)
+    await screen.findByRole('timer', { name: 'Practice time' })
+    fireEvent.change(metronome(), { target: { value: '120' } })
+    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await screen.findByRole('region', { name: 'History' })
+    await user.click(screen.getByRole('link', { name: 'Back' }))
+
+    await screen.findByRole('timer', { name: 'Practice time' })
+    expect(metronome()).toHaveAttribute('aria-valuetext', '120 BPM')
+  })
+
+  it('prefers a tempo you logged over the one you set', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp(PRACTICE)
+    await screen.findByRole('timer', { name: 'Practice time' })
+    fireEvent.change(metronome(), { target: { value: '120' } })
+    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    const tempoBox = await logTempo()
+    await user.clear(tempoBox)
+    await user.type(tempoBox, '90')
+    await user.tab()
+    await user.click(screen.getByRole('radio', { name: 'Solid' }))
+    await user.click(screen.getByRole('button', { name: 'Save attempt' }))
+    await screen.findByRole('status')
+    await user.click(screen.getByRole('link', { name: 'Back' }))
+
+    await screen.findByRole('timer', { name: 'Practice time' })
+    expect(metronome()).toHaveAttribute('aria-valuetext', '90 BPM')
+  })
+
+  it('goes back to your setting once you change it again after logging', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp(PRACTICE)
+    await screen.findByRole('timer', { name: 'Practice time' })
+    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(await screen.findByRole('radio', { name: 'Solid' }))
+    await user.click(screen.getByRole('button', { name: 'Save attempt' }))
+    await screen.findByRole('status')
+    await user.click(screen.getByRole('link', { name: 'Back' }))
+    await screen.findByRole('timer', { name: 'Practice time' })
+    fireEvent.change(metronome(), { target: { value: '110' } })
+
+    await user.click(screen.getByRole('button', { name: 'Next goal' }))
+    await user.click(screen.getByRole('button', { name: 'Prev goal' }))
+    expect(metronome()).toHaveAttribute('aria-valuetext', '110 BPM')
+  })
+
+  it('remembers a separate tempo for every goal', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp(PRACTICE)
+    await screen.findByRole('timer', { name: 'Practice time' })
+    fireEvent.change(metronome(), { target: { value: '100' } })
+    await user.click(screen.getByRole('button', { name: 'Next goal' }))
+    fireEvent.change(metronome(), { target: { value: '55' } })
+    await user.click(screen.getByRole('button', { name: 'Prev goal' }))
+    expect(metronome()).toHaveAttribute('aria-valuetext', '100 BPM')
+    await user.click(screen.getByRole('button', { name: 'Next goal' }))
+    expect(metronome()).toHaveAttribute('aria-valuetext', '55 BPM')
+  })
+
+  it('survives leaving the practice screen and coming back to the same session', async () => {
+    await loadSamples()
+    renderApp(PRACTICE)
+    await screen.findByRole('timer', { name: 'Practice time' })
+    fireEvent.change(metronome(), { target: { value: '105' } })
+
+    cleanup()
+    renderApp(PRACTICE)
+    await screen.findByRole('timer', { name: 'Practice time' })
+    expect(metronome()).toHaveAttribute('aria-valuetext', '105 BPM')
+  })
+
+  it('does not carry over into a new session', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp(PRACTICE)
+    await screen.findByRole('timer', { name: 'Practice time' })
+    fireEvent.change(metronome(), { target: { value: '120' } })
+    await user.click(screen.getByRole('button', { name: 'Finish practice' }))
+    await user.click(await screen.findByRole('link', { name: 'Practice again' }))
+
+    await screen.findByRole('timer', { name: 'Practice time' })
+    // A fresh session begins again at the last logged tempo for the goal it opens on.
+    expect(metronome()).not.toHaveAttribute('aria-valuetext', '120 BPM')
   })
 })

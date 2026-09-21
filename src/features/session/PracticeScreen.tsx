@@ -14,7 +14,6 @@ import {
   firstUnfinishedGoal,
   goalProgress,
   orderGoals,
-  startingBpm,
   toPercent,
 } from '../../domain/progress'
 import type { Attempt, Goal, Section, Session, Song } from '../../domain/schemas'
@@ -25,6 +24,7 @@ import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
 import { SongNotFound } from '../songs/SongNotFound'
 import { SongPickerSheet } from './SongPickerSheet'
+import { chooseTempo, recallTempo, rememberTempo } from './tempoMemory'
 import { useMetronome } from './useMetronome'
 import { useSessionTimer } from './useSessionTimer'
 
@@ -135,13 +135,21 @@ function PracticeView({
   const next = ordered[index + 1]
   const select = (id: string) => setSearch({ goal: id }, { replace: true })
 
-  // Landing on a goal sets the metronome to where you left off. State is adjusted during render
-  // (React's pattern for "reset when a prop changes") so there is no frame with the old tempo.
+  // Landing on a goal sets the metronome to the tempo you last set for it in this session, unless
+  // you have logged a tempo since (see chooseTempo). State is adjusted during render (React's
+  // pattern for "reset when a prop changes") so there is no frame with the old tempo.
   const goalKey = goal?.id ?? null
-  const initialBpm = goal ? startingBpm(goal, attempts) : FREE_PLAY_BPM
-  const [tempo, setTempo] = useState({ goalKey, bpm: initialBpm })
-  if (tempo.goalKey !== goalKey) setTempo({ goalKey, bpm: initialBpm })
+  const startBpm = () =>
+    goal
+      ? chooseTempo(recallTempo(session.id, goalKey), goal, attempts)
+      : (recallTempo(session.id, null)?.bpm ?? FREE_PLAY_BPM)
+  const [tempo, setTempo] = useState(() => ({ goalKey, bpm: startBpm() }))
+  if (tempo.goalKey !== goalKey) setTempo({ goalKey, bpm: startBpm() })
   const bpm = tempo.bpm
+  const changeBpm = (next: number) => {
+    setTempo({ goalKey, bpm: next })
+    rememberTempo(session.id, goalKey, next, Date.now())
+  }
   const metronome = useMetronome(bpm)
 
   const sectionName = goal ? sections.find((s) => s.id === goal.sectionId)?.name : undefined
@@ -335,7 +343,7 @@ function PracticeView({
         <div className="mt-1 desk:mt-4">
           <MetronomePanel
             bpm={bpm}
-            onBpmChange={(next) => setTempo({ goalKey, bpm: next })}
+            onBpmChange={changeBpm}
             playing={metronome.playing}
             onToggle={metronome.toggle}
             beat={metronome.beat}

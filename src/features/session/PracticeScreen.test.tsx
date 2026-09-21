@@ -262,7 +262,7 @@ describe('the metronome tempo', () => {
     expect(tempo()).toHaveAttribute('aria-valuetext', '100 BPM')
   })
 
-  it('resets to each goal’s tempo when you move to it', async () => {
+  it('starts each goal at its own tempo, and remembers what you set on it', async () => {
     await loadSamples()
     const user = userEvent.setup()
     renderApp('/practice/piano-man')
@@ -274,7 +274,7 @@ describe('the metronome tempo', () => {
     await user.click(screen.getByRole('button', { name: 'Next goal' }))
     expect(tempo()).toHaveAttribute('aria-valuetext', '76 BPM') // Intro goal: last logged 76
     await user.click(screen.getByRole('button', { name: 'Prev goal' }))
-    expect(tempo()).toHaveAttribute('aria-valuetext', '70 BPM') // back to its own start, not 71
+    expect(tempo()).toHaveAttribute('aria-valuetext', '71 BPM') // back to what you set, not 70
   })
 
   it('changes by one with Slower and Faster, and by the slider', async () => {
