@@ -1,6 +1,17 @@
 import type { ReactNode } from 'react'
 
-export type IconName = 'back' | 'edit' | 'plus' | 'play' | 'search' | 'chevron' | 'sort' | 'list'
+export type IconName =
+  | 'back'
+  | 'edit'
+  | 'plus'
+  | 'play'
+  | 'search'
+  | 'chevron'
+  | 'sort'
+  | 'list'
+  | 'check'
+  | 'grip'
+  | 'close'
 
 const glyphs: Record<IconName, ReactNode> = {
   back: <path d="M15 5l-7 7 7 7" />,
@@ -21,6 +32,18 @@ const glyphs: Record<IconName, ReactNode> = {
   chevron: <path d="M9 5l7 7-7 7" />,
   sort: <path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3" />,
   list: <path d="M5 7h14M5 12h14M5 17h9" />,
+  check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  grip: (
+    <>
+      <circle cx="9" cy="7" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="7" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="17" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="17" r="1.2" fill="currentColor" stroke="none" />
+    </>
+  ),
+  close: <path d="M6 6l12 12M18 6L6 18" />,
 }
 
 /** Decorative: give the button or link around it an accessible name. */

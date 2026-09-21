@@ -94,3 +94,11 @@ export const songFormSchema = z.object({
 })
 
 export type SongFormValues = z.infer<typeof songFormSchema>
+
+/** What the New section and Edit section forms collect. */
+export const sectionFormSchema = z.object({
+  name: z.string().trim().min(1, 'Enter a name'),
+  notes: z.string(),
+})
+
+export type SectionFormValues = z.infer<typeof sectionFormSchema>

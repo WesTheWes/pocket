@@ -12,3 +12,18 @@ export function deleteWarning(sectionCount: number, goalCount: number): string {
   ]
   return `Its ${parts.join(', ')} and all progress history will be removed. ${undone}`
 }
+
+/** The consequence line in the "Delete section?" confirmation. */
+export function sectionDeleteWarning(goalCount: number, structureSlots: number): string {
+  const undone = 'This can’t be undone.'
+  const leavesStructure = 'it will be taken out of the song structure'
+
+  if (goalCount > 0) {
+    const goals = `Its ${plural(goalCount, 'goal')} and their progress history will be removed`
+    return structureSlots > 0
+      ? `${goals}, and ${leavesStructure}. ${undone}`
+      : `${goals}. ${undone}`
+  }
+  if (structureSlots > 0) return `It will be taken out of the song structure. ${undone}`
+  return `The section will be removed. ${undone}`
+}

@@ -7,7 +7,7 @@ export function Chip({
   children,
   className,
   ...rest
-}: { selected: boolean; children: ReactNode } & Omit<
+}: { selected?: boolean; children: ReactNode } & Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   'aria-pressed'
 >) {
