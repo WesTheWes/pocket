@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pocket — Edit section</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#14110F}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit}
+input::placeholder,textarea::placeholder{color:#A99E92;opacity:1}
+a:focus-visible,button:focus-visible{outline:2px solid #F3CF6B;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:980px;background:#14110F;color:#F4EBDD;font-family:'DM Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;">
+<div style="display:flex;align-items:center;justify-content:space-between;height:60px;padding:8px 12px 0 8px;"><a href="Song.dc.html" aria-label="Back" style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:22px;background:transparent;color:#F4EBDD;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><div style="font-size:15px;font-weight:600;">Edit section</div><div style="display:flex;min-width:44px;justify-content:flex-end;"></div></div>
+<div style="display:flex;flex-direction:column;gap:20px;padding:8px 20px 0;">
+<div>
+<div style="display:flex;flex-direction:column;gap:8px;"><label for="sname" style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A99E92;">Name</label><input id="sname" type="text" value="Verse" placeholder="Section name" style="width:100%;border-radius:14px;background:#1D1917;border:1px solid #352F2B;color:#F4EBDD;font-size:16px;padding:0 16px;height:52px;"></div>
+<div style="display:flex;flex-wrap:wrap;gap:0 8px;margin-top:4px;"><button type="button" aria-pressed="false" style="height:44px;padding:0;background:transparent;border:0;"><span style="display:flex;align-items:center;height:36px;padding:0 16px;border-radius:18px;border:1px solid #352F2B;background:transparent;color:#F4EBDD;font-size:14px;font-weight:500;white-space:nowrap;">Intro</span></button><button type="button" aria-pressed="true" style="height:44px;padding:0;background:transparent;border:0;"><span style="display:flex;align-items:center;height:36px;padding:0 16px;border-radius:18px;border:1px solid #F4EBDD;background:#F4EBDD;color:#14110F;font-size:14px;font-weight:500;white-space:nowrap;">Verse</span></button><button type="button" aria-pressed="false" style="height:44px;padding:0;background:transparent;border:0;"><span style="display:flex;align-items:center;height:36px;padding:0 16px;border-radius:18px;border:1px solid #352F2B;background:transparent;color:#F4EBDD;font-size:14px;font-weight:500;white-space:nowrap;">Pre-chorus</span></button><button type="button" aria-pressed="false" style="height:44px;padding:0;background:transparent;border:0;"><span style="display:flex;align-items:center;height:36px;padding:0 16px;border-radius:18px;border:1px solid #352F2B;background:transparent;color:#F4EBDD;font-size:14px;font-weight:500;white-space:nowrap;">Chorus</span></button><button type="button" aria-pressed="false" style="height:44px;padding:0;background:transparent;border:0;"><span style="display:flex;align-items:center;height:36px;padding:0 16px;border-radius:18px;border:1px solid #352F2B;background:transparent;color:#F4EBDD;font-size:14px;font-weight:500;white-space:nowrap;">Bridge</span></button><button type="button" aria-pressed="false" style="height:44px;padding:0;background:transparent;border:0;"><span style="display:flex;align-items:center;height:36px;padding:0 16px;border-radius:18px;border:1px solid #352F2B;background:transparent;color:#F4EBDD;font-size:14px;font-weight:500;white-space:nowrap;">Solo</span></button><button type="button" aria-pressed="false" style="height:44px;padding:0;background:transparent;border:0;"><span style="display:flex;align-items:center;height:36px;padding:0 16px;border-radius:18px;border:1px solid #352F2B;background:transparent;color:#F4EBDD;font-size:14px;font-weight:500;white-space:nowrap;">Outro</span></button></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;"><label for="snotes" style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A99E92;">Notes</label><textarea id="snotes" placeholder="Fingering, feel, tricky spots" style="width:100%;border-radius:14px;background:#1D1917;border:1px solid #352F2B;color:#F4EBDD;font-size:16px;padding:0 16px;min-height:130px;padding:14px 16px;line-height:1.6;resize:none;">Left hand: root, fifth, fifth in 3/4. Let the G/B in bar 2 walk down. Don’t rush the pickup into the chorus.</textarea></div>
+<div><div style="display:flex;align-items:center;justify-content:space-between;height:44px;"><div style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A99E92;">Goals in this section</div><a href="NewGoal.dc.html" style="display:flex;align-items:center;gap:6px;height:44px;padding:0 4px;color:#F49B62;font-size:14px;font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M12 5v14M5 12h14"/></svg>Add</a></div><div style="display:flex;flex-direction:column;gap:10px;"><a href="GoalProgress.dc.html" style="display:block;padding:14px 16px;border-radius:16px;background:#1D1917;">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div style="font-size:16px;font-weight:500;line-height:1.3;">Left hand waltz pattern</div><span style="display:flex;align-items:center;gap:4px;color:#F3CF6B;font-size:12px;font-weight:600;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Met</span></div>
+<div style="margin-top:12px;"><div style="display:flex;gap:3px;width:100%;"><div style="flex:1;height:6px;border-radius:3px;background:#F3CF6B;"></div><div style="flex:1;height:6px;border-radius:3px;background:#F3CF6B;"></div><div style="flex:1;height:6px;border-radius:3px;background:#F3CF6B;"></div><div style="flex:1;height:6px;border-radius:3px;background:#F3CF6B;"></div><div style="flex:1;height:6px;border-radius:3px;background:#272220;"></div></div></div>
+<div style="display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:13px;color:#A99E92;"><span style="font-variant-numeric:tabular-nums;">72 / 72 BPM</span><span>Solid</span></div>
+</a><a href="GoalProgress.dc.html" style="display:block;padding:14px 16px;border-radius:16px;background:#1D1917;">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;"><div style="font-size:16px;font-weight:500;line-height:1.3;">First 4 bars with only bass and melody</div></div>
+<div style="margin-top:12px;"><div style="display:flex;gap:3px;width:100%;"><div style="flex:1;height:6px;border-radius:3px;background:#F49B62;"></div><div style="flex:1;height:6px;border-radius:3px;background:#F49B62;"></div><div style="flex:1;height:6px;border-radius:3px;background:#F49B62;"></div><div style="flex:1;height:6px;border-radius:3px;background:#272220;outline:1.5px solid #F3CF6B;outline-offset:1.5px;"></div><div style="flex:1;height:6px;border-radius:3px;background:#272220;"></div></div></div>
+<div style="display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:13px;color:#A99E92;"><span style="font-variant-numeric:tabular-nums;">76 / 84 BPM</span><span>Some mistakes → Solid</span></div>
+</a></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"><a href="Song.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 22px;border-radius:26px;background:#F49B62;color:#14110F;font-weight:600;font-size:16px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Save changes</a><a href="DeleteSection.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 22px;border-radius:26px;border:1px solid #F08BA0;color:#F08BA0;font-weight:600;font-size:16px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Delete section</a></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

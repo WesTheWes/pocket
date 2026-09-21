@@ -1,0 +1,223 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "DeleteGoal.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Delete goal",
+      "w": 390,
+      "x": 940,
+      "y": 3260
+    },
+    "DeleteSection.dc.html": {
+      "h": 980,
+      "is_interactive": true,
+      "title": "Delete section",
+      "w": 390,
+      "x": 2350,
+      "y": 1920
+    },
+    "DeleteSong.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Delete song",
+      "w": 390,
+      "x": 940,
+      "y": 1920
+    },
+    "DesktopHome.dc.html": {
+      "h": 720,
+      "is_interactive": true,
+      "title": "Home \u00b7 desktop",
+      "w": 1280,
+      "x": 0,
+      "y": 4920
+    },
+    "DesktopPractice.dc.html": {
+      "h": 820,
+      "is_interactive": true,
+      "title": "Practice \u00b7 desktop",
+      "w": 1280,
+      "x": 2720,
+      "y": 4920
+    },
+    "DesktopSong.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Song \u00b7 desktop",
+      "w": 1280,
+      "x": 1360,
+      "y": 4920
+    },
+    "EditGoal.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Edit goal",
+      "w": 390,
+      "x": 470,
+      "y": 3260
+    },
+    "EditSection.dc.html": {
+      "h": 980,
+      "is_interactive": true,
+      "title": "Edit section",
+      "w": 390,
+      "x": 1880,
+      "y": 1920
+    },
+    "EditSong.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Edit song",
+      "w": 390,
+      "x": 470,
+      "y": 1920
+    },
+    "GoalProgress.dc.html": {
+      "h": 1300,
+      "is_interactive": true,
+      "title": "Goal progress",
+      "w": 390,
+      "x": 1410,
+      "y": 3260
+    },
+    "Goals.dc.html": {
+      "h": 1560,
+      "is_interactive": true,
+      "title": "Goals",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 980,
+      "is_interactive": true,
+      "title": "Home",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "NewGoal.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "New goal",
+      "w": 390,
+      "x": 0,
+      "y": 3260
+    },
+    "NewSection.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "New section",
+      "w": 390,
+      "x": 1410,
+      "y": 1920
+    },
+    "NewSong.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "New song",
+      "w": 390,
+      "x": 0,
+      "y": 1920
+    },
+    "Practice.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Practice",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Review.dc.html": {
+      "h": 1080,
+      "is_interactive": true,
+      "title": "Practice review",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
+    "Song.dc.html": {
+      "h": 1200,
+      "is_interactive": true,
+      "title": "Song",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Structure.dc.html": {
+      "h": 940,
+      "is_interactive": true,
+      "title": "Song structure",
+      "w": 390,
+      "x": 2820,
+      "y": 1920
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-21T16:59:31Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "row1": {
+      "kind": "title1",
+      "maxW": 2270,
+      "text": "Core flow \u00b7 mobile",
+      "w": 240,
+      "x": 0,
+      "y": -240
+    },
+    "row2": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Songs, sections and structure \u00b7 mobile",
+      "w": 240,
+      "x": 0,
+      "y": 1680
+    },
+    "row3": {
+      "kind": "title1",
+      "maxW": 1800,
+      "text": "Goals and progress \u00b7 mobile",
+      "w": 240,
+      "x": 0,
+      "y": 3020
+    },
+    "row4": {
+      "kind": "title1",
+      "maxW": 4000,
+      "text": "Desktop",
+      "w": 240,
+      "x": 0,
+      "y": 4680
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Song.dc.html",
+    "Goals.dc.html",
+    "Practice.dc.html",
+    "Review.dc.html",
+    "NewSong.dc.html",
+    "EditSong.dc.html",
+    "DeleteSong.dc.html",
+    "NewSection.dc.html",
+    "EditSection.dc.html",
+    "DeleteSection.dc.html",
+    "Structure.dc.html",
+    "NewGoal.dc.html",
+    "EditGoal.dc.html",
+    "DeleteGoal.dc.html",
+    "GoalProgress.dc.html",
+    "DesktopHome.dc.html",
+    "DesktopSong.dc.html",
+    "DesktopPractice.dc.html"
+  ],
+  "pages": [],
+  "title": "Pocket"
+}

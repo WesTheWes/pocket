@@ -17,6 +17,22 @@ Before calling work done, run typecheck, lint, and test.
 
 Vite, React 19, TypeScript, React Router, Tailwind v4, Dexie (+ `dexie-react-hooks`), Zod, React Hook Form, Vitest + Testing Library. Playwright, Radix, and `vite-plugin-pwa` are planned but not yet installed.
 
+## Design
+
+The approved design is in docs/design/. Before building or changing UI, read
+docs/design/README.md and SCREENS.md. The files in reference/screens/ are visual reference
+only (canvas-format HTML that does not run): match their spacing, sizes and copy, do not copy markup.
+
+- Tokens (colors, fonts, radii, the `desk` breakpoint) live in the `@theme` block in
+  src/index.css. Use the generated utilities; never hard-code colors.
+- Mobile first (designs are 390px wide). Home, Song and Practice get desktop layouts at `desk:`
+  (900px). Every other screen stays a centered ~480px column.
+- Routes are in SCREENS.md. Screens live in their feature folder; shared UI in src/components.
+- Tap targets at least 44px, aria-label on icon-only buttons, aria-pressed on toggle chips.
+  Quality is always shown as meter + color + label, never color alone.
+- If the design docs or reference screens disagree with the Progress model or Architecture
+  sections of this file, this file wins.
+
 ## Architecture rules
 
 ```
@@ -34,14 +50,31 @@ src/
 - Zod schemas are the source of truth for data shapes and JSON import/export.
 - Session elapsed time must derive from the stored `startedAt`, never `Date.now()` at component mount.
 - Write domain tests first; domain code needs no mocks.
+- src/features/session/metronome.ts is the only Web Audio code. Schedule beats with look-ahead on
+  the AudioContext clock (never a bare setInterval), start it from a click handler, and dispose it
+  on unmount. useMetronome wraps it.
+- Session time is derived from the stored session (startedAt, pausedMs, pausedAt, endedAt) with
+  the pure functions in src/domain/session.ts, never from state set at mount. useSessionTimer
+  only re-renders on an interval.
 
 ## Progress model
 
-- Each practice attempt (`ProgressEntry`) logs an optional BPM plus a quality level stored as a number 1-5: 1 Can't yet, 2 Rough, 3 Shaky, 4 Solid, 5 Mastered. Labels live in one domain constant, never in stored data.
-- A goal has an optional, always-editable target BPM and a target level (default Solid, 4). It is done when some attempt reaches the target level at or above the target BPM. Goals with no target BPM use the level alone.
-- Goal progress = the fastest BPM logged at Solid or better, shown against the target BPM. Attempts rated Can't yet stay in the history but never count as progress.
-- The goal card shows progress, not a standalone rating. Levels appear only on individual attempts.
-- A song is "Learned" when every goal is done, with a manual override.
+- Quality levels are stored as numbers 1-5: Can't yet, Rough, Shaky, Solid, Mastered. Labels live
+  in one constant in src/domain/quality.ts.
+- Each attempt logs an optional BPM and a level, and may carry a sessionId.
+- A goal has an optional, always-editable target BPM. There is no per-goal target level: every goal
+  is measured against Solid (4).
+- A goal is done when some attempt at Solid or better reaches the target BPM (with no target BPM,
+  any Solid or better attempt). Attempts rated Can't yet never count.
+- Goal progress = fastest BPM logged at Solid or better / target BPM, capped at 1. Section progress
+  and song progress are the average of their goals' progress (whole-song goals count toward the
+  song). All of this is derived in src/domain/progress.ts, never stored.
+- Goal cards show progress ("fastest Solid 72 of 84"), not a standalone rating. Levels appear on
+  individual attempts: history rows, the log form, the session review.
+- A song is "Learned" when every goal is done, with a manual override. The Home filter the design
+  calls "Mastered" is "Learned".
+- Practice review compares each goal's progress before the session with progress after it, using
+  the attempts tagged with that sessionId.
 
 ## Conventions
 

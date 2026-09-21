@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pocket — Delete song</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#14110F}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit}
+input::placeholder,textarea::placeholder{color:#A99E92;opacity:1}
+a:focus-visible,button:focus-visible{outline:2px solid #F3CF6B;outline-offset:2px}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;background:#14110F;color:#F4EBDD;font-family:'DM Sans',system-ui,sans-serif;font-size:16px;line-height:1.4;overflow:hidden;">
+<div style="display:flex;align-items:center;justify-content:space-between;height:60px;padding:8px 12px 0 8px;"><a href="Song.dc.html" aria-label="Back" style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:22px;background:transparent;color:#F4EBDD;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><div style="font-size:15px;font-weight:600;">Edit song</div><div style="display:flex;min-width:44px;justify-content:flex-end;"></div></div>
+<div style="display:flex;flex-direction:column;gap:20px;padding:8px 20px 0;">
+<div style="display:flex;flex-direction:column;gap:8px;"><label for="title" style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A99E92;">Title</label><input id="title" type="text" value="Piano Man" placeholder="Song title" style="width:100%;border-radius:14px;background:#1D1917;border:1px solid #352F2B;color:#F4EBDD;font-size:16px;padding:0 16px;height:52px;"></div>
+<div style="display:flex;flex-direction:column;gap:8px;"><label for="artist" style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A99E92;">Artist</label><input id="artist" type="text" value="Billy Joel" placeholder="Artist" style="width:100%;border-radius:14px;background:#1D1917;border:1px solid #352F2B;color:#F4EBDD;font-size:16px;padding:0 16px;height:52px;"></div>
+<div style="display:flex;flex-direction:column;gap:8px;"><label for="chords" style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A99E92;">Chord notes</label><textarea id="chords" placeholder="Chords, feel, anything you want to remember" style="width:100%;border-radius:14px;background:#1D1917;border:1px solid #352F2B;color:#F4EBDD;font-size:16px;padding:0 16px;min-height:230px;padding:14px 16px;line-height:1.6;resize:none;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:14px;">Intro    C G/B Am Am/G F C/E Dm7 G7
+Verse    C G/B Am C/G F C/E Dm7 G7
+Chorus   F C/E Dm G7 C Am F G
+Bridge   Am F C G (build, then stride)</textarea></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"><a href="Song.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 22px;border-radius:26px;background:#F49B62;color:#14110F;font-weight:600;font-size:16px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Save changes</a><a href="DeleteSong.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 22px;border-radius:26px;border:1px solid #F08BA0;color:#F08BA0;font-weight:600;font-size:16px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Delete song</a></div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(10,8,7,.74);display:flex;flex-direction:column;justify-content:flex-end;">
+<div style="background:#1D1917;border-radius:28px 28px 0 0;padding:14px 20px 28px;">
+<div style="width:40px;height:4px;border-radius:2px;background:#352F2B;margin:0 auto 22px;"></div>
+<div style="font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:30px;line-height:1.1;">Delete “Piano Man”?</div>
+<div style="font-size:15px;color:#A99E92;margin-top:10px;">Its 5 sections, 8 goals and all progress history will be removed. This can’t be undone.</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:24px;">
+<a href="EditSong.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:26px;background:#F08BA0;color:#14110F;font-weight:600;font-size:16px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Delete song</a>
+<a href="EditSong.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 22px;border-radius:26px;background:#272220;border:1px solid #352F2B;color:#F4EBDD;font-weight:600;font-size:16px;">Cancel</a>
+</div></div></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+/*
+ * Pocket design tokens: ORIGINAL plain-CSS version, kept for reference only.
+ * The app uses src/theme.css (Tailwind v4 @theme) instead. Do not import this file.
+ * Name mapping: --bg is bg-canvas, --text and --cream are text-cream, the rest keep their names.
+ *
+ * Fonts: add this to index.html <head> (or self-host the same families):
+ * <link rel="preconnect" href="https://fonts.googleapis.com">
+ * <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ * <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+ */
+:root {
+  /* Surfaces */
+  --bg: #14110f;
+  --surface: #1d1917;
+  --surface-2: #272220;
+  --line: #352f2b;
+  --scrim: rgba(10, 8, 7, 0.74);
+
+  /* Text */
+  --text: #f4ebdd;
+  --muted: #a99e92;
+  --ink: #14110f; /* text on light or orange fills */
+
+  /* Warm highlights */
+  --orange: #f49b62; /* primary action, progress bars */
+  --pink: #f08ba0;
+  --yellow: #f3cf6b; /* "met" state, target marker, focus ring */
+  --cream: #f4ebdd;
+  --rose: #b8677a;
+
+  /* Quality scale: 1 = can't play at all ... 5 = mastered */
+  --q1: #b8677a;
+  --q2: #f08ba0;
+  --q3: #f49b62;
+  --q4: #f3cf6b;
+  --q5: #f4ebdd;
+
+  /* Type */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Radii */
+  --radius-card: 20px;
+  --radius-row: 16px;
+  --radius-field: 14px;
+  --radius-pill: 999px;
+
+  /* Sizing */
+  --tap: 44px; /* minimum touch target */
+  --gutter: 20px; /* mobile page padding */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+/* Reusable type styles */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.chord-notes {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
