@@ -3,6 +3,7 @@ import { QualityMeter } from '../../components/QualityMeter'
 import { QUALITY_LABELS } from '../../domain/quality'
 import type { GoalChange } from '../../domain/session'
 import { cn } from '../../lib/cn'
+import { withReturn } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { beforeAfterText, changeTag } from './reviewText'
 
@@ -11,10 +12,13 @@ export function WorkedOnCard({
   change,
   sectionName,
   songId,
+  returnTo,
 }: {
   change: GoalChange
   sectionName: string
   songId: string
+  /** Where the back arrow on the goal's progress screen should come back to. */
+  returnTo: string
 }) {
   const { goal, attempts, improved } = change
   return (
@@ -26,6 +30,7 @@ export function WorkedOnCard({
         </div>
         <IconLink
           to={paths.goal(songId, goal.id)}
+          state={withReturn(returnTo)}
           icon="edit"
           label={`Edit progress for ${goal.title}`}
           className="text-muted"

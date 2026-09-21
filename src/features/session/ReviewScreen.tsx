@@ -82,6 +82,7 @@ export function ReviewScreen() {
                 change={change}
                 sectionName={sectionName(change.goal.sectionId)}
                 songId={song.id}
+                returnTo={paths.review(song.id, session.id)}
               />
             ))}
           </ul>

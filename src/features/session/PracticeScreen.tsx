@@ -20,6 +20,7 @@ import {
 import type { Attempt, Goal, Section, Session, Song } from '../../domain/schemas'
 import { cn } from '../../lib/cn'
 import { formatDuration } from '../../lib/formatDuration'
+import { withReturn } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
 import { SongNotFound } from '../songs/SongNotFound'
@@ -294,6 +295,7 @@ function PracticeView({
                 </div>
                 <Link
                   to={paths.goal(song.id, goal.id)}
+                  state={withReturn(paths.practice(song.id, goal.id))}
                   className="-my-2.5 -mr-1.5 flex h-11 items-center px-1.5 text-[13px] font-semibold text-orange desk:text-sm"
                 >
                   Log attempt

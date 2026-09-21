@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { AttemptRow } from '../../components/AttemptRow'
 import { ConfirmSheet } from '../../components/BottomSheet'
 import { Icon } from '../../components/Icon'
@@ -14,6 +14,7 @@ import { goalDone, goalProgress } from '../../domain/progress'
 import { QUALITY_LABELS } from '../../domain/quality'
 import type { Attempt } from '../../domain/schemas'
 import { formatAttemptDate } from '../../lib/formatDate'
+import { returnTarget } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
 import { AttemptForm } from './AttemptForm'
@@ -21,6 +22,7 @@ import { GoalNotFound } from './GoalNotFound'
 
 export function GoalProgressScreen() {
   const { songId = '', goalId = '' } = useParams()
+  const location = useLocation()
   const song = useSong(songId)
   const sections = useSections(songId)
   const goal = useGoal(goalId)
@@ -54,8 +56,16 @@ export function GoalProgressScreen() {
   return (
     <Page>
       <TopBar
-        backTo={paths.goals(song.id)}
-        right={<IconLink to={paths.editGoal(song.id, goal.id)} icon="edit" label="Edit goal" />}
+        // Back to the screen that sent you here (Practice, Review), else the Goals list.
+        backTo={returnTarget(location.state, paths.goals(song.id))}
+        right={
+          <IconLink
+            to={paths.editGoal(song.id, goal.id)}
+            state={location.state}
+            icon="edit"
+            label="Edit goal"
+          />
+        }
       />
       <div className="px-5 pt-2">
         <div className="eyebrow">{sectionName ?? 'Whole song'}</div>

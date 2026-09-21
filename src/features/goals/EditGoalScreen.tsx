@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
 import { Button } from '../../components/Button'
 import { ConfirmSheet } from '../../components/BottomSheet'
 import { Page } from '../../components/Page'
 import { TopBar } from '../../components/TopBar'
 import { repos } from '../../data'
 import { useGoal, useGoalAttempts, useSections, useSong } from '../../data/hooks'
+import { returnTarget } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
 import { goalDeleteWarning } from './deleteWarning'
@@ -15,6 +16,7 @@ import { GoalNotFound } from './GoalNotFound'
 export function EditGoalScreen() {
   const { songId = '', goalId = '' } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const song = useSong(songId)
   const sections = useSections(songId)
   const goal = useGoal(goalId)
@@ -37,7 +39,8 @@ export function EditGoalScreen() {
     setDeleteError(undefined)
     try {
       await repos.goals.delete(goalId)
-      navigate(paths.goals(songId), { replace: true })
+      // Back to Practice or Review if that's where you came from, else the Goals list.
+      navigate(returnTarget(location.state, paths.goals(songId)), { replace: true })
     } catch {
       setDeleting(false)
       setDeleteError('Couldn’t delete the goal. Please try again.')
@@ -46,7 +49,7 @@ export function EditGoalScreen() {
 
   return (
     <Page>
-      <TopBar backTo={paths.goal(song.id, goal.id)} title="Edit goal" />
+      <TopBar backTo={paths.goal(song.id, goal.id)} backState={location.state} title="Edit goal" />
       <GoalForm
         // Defaults are read once, so live updates never overwrite what is being typed.
         key={goal.id}
@@ -60,7 +63,7 @@ export function EditGoalScreen() {
         submitLabel="Save changes"
         onSubmit={async (values) => {
           await repos.goals.update(goal.id, values)
-          navigate(paths.goal(song.id, goal.id))
+          navigate(paths.goal(song.id, goal.id), { state: location.state })
         }}
         footer={
           <Button variant="danger" onClick={() => setConfirming(true)}>
