@@ -84,3 +84,13 @@ export type Goal = z.infer<typeof goalSchema>
 export type Attempt = z.infer<typeof attemptSchema>
 export type Session = z.infer<typeof sessionSchema>
 export type PocketData = z.infer<typeof pocketDataSchema>
+
+/** What the New song and Edit song forms collect. */
+export const songFormSchema = z.object({
+  title: z.string().trim().min(1, 'Enter a title'),
+  artist: z.string().trim(),
+  chordNotes: z.string(),
+  learnedOverride: z.boolean(),
+})
+
+export type SongFormValues = z.infer<typeof songFormSchema>

@@ -1,5 +1,7 @@
 import type { RouteObject } from 'react-router'
 import { HomeScreen } from '../features/repertoire/HomeScreen'
+import { EditSongScreen } from '../features/songs/EditSongScreen'
+import { NewSongScreen } from '../features/songs/NewSongScreen'
 import { SongScreen } from '../features/songs/SongScreen'
 import { ComingSoon, NotFoundScreen } from './ComingSoon'
 
@@ -9,9 +11,9 @@ import { ComingSoon, NotFoundScreen } from './ComingSoon'
  */
 export const routes: RouteObject[] = [
   { path: '/', element: <HomeScreen /> },
-  { path: '/songs/new', element: <ComingSoon screen="New song" /> },
+  { path: '/songs/new', element: <NewSongScreen /> },
   { path: '/songs/:songId', element: <SongScreen /> },
-  { path: '/songs/:songId/edit', element: <ComingSoon screen="Edit song" /> },
+  { path: '/songs/:songId/edit', element: <EditSongScreen /> },
   { path: '/songs/:songId/sections/new', element: <ComingSoon screen="New section" /> },
   { path: '/songs/:songId/sections/:sectionId', element: <ComingSoon screen="Edit section" /> },
   { path: '/songs/:songId/structure', element: <ComingSoon screen="Structure" /> },

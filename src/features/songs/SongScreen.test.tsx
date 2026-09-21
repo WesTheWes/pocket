@@ -83,7 +83,7 @@ describe('SongScreen', () => {
   it('guides you when a song has no sections, structure or goals yet', async () => {
     await loadSamples()
     renderApp('/songs/rocket-man')
-    expect(await screen.findByText('0 of 0 goals done')).toBeInTheDocument()
+    expect(await screen.findByText('No goals yet')).toBeInTheDocument()
     expect(screen.getByText(/Break the song into sections/)).toBeInTheDocument()
     expect(screen.getByText(/Set the order the sections are played/)).toBeInTheDocument()
     expect(screen.getByText('Add chords and notes')).toBeInTheDocument()

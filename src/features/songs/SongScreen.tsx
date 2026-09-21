@@ -10,6 +10,7 @@ import { TopBar } from '../../components/TopBar'
 import { useGoals, useSections, useSong, useSongAttempts } from '../../data/hooks'
 import { goalStats, toPercent } from '../../domain/progress'
 import { paths } from '../../paths'
+import { SongNotFound } from './SongNotFound'
 
 export function SongScreen() {
   const { songId = '' } = useParams()
@@ -21,17 +22,7 @@ export function SongScreen() {
   // Still loading from IndexedDB.
   if (song === undefined || !sections || !goals || !attempts) return <Page wide />
 
-  if (song === null) {
-    return (
-      <Page>
-        <TopBar backTo={paths.home} />
-        <div className="px-5 pt-8">
-          <h1 className="font-display text-4xl">Song not found</h1>
-          <p className="mt-2 text-muted">It may have been deleted.</p>
-        </div>
-      </Page>
-    )
-  }
+  if (song === null) return <SongNotFound />
 
   const overall = goalStats(goals, attempts)
   const percent = toPercent(overall.progress)
@@ -72,8 +63,9 @@ export function SongScreen() {
           <div className="px-5 pt-5 desk:px-0 desk:pt-7">
             <div className="mb-2.5 flex items-baseline justify-between">
               <span className="text-[13px] text-muted desk:text-sm">
-                {overall.doneCount} of {overall.goalCount}{' '}
-                {overall.goalCount === 1 ? 'goal' : 'goals'} done
+                {overall.goalCount === 0
+                  ? 'No goals yet'
+                  : `${overall.doneCount} of ${overall.goalCount} ${overall.goalCount === 1 ? 'goal' : 'goals'} done`}
               </span>
               <span className="text-[13px] font-semibold tabular-nums desk:text-sm">
                 {percent}%
