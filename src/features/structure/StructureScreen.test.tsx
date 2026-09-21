@@ -93,6 +93,8 @@ describe('StructureScreen', () => {
     await user.click(screen.getByRole('button', { name: 'Save structure' }))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/songs/piano-man'))
+    // The editor's own list is also called "Play order", so wait until the Song screen is showing.
+    await screen.findByRole('heading', { name: 'Piano Man', level: 1 })
     const song = await repos.songs.get('piano-man')
     expect(song?.structure.map((id) => id.replace('piano-man-s', ''))).toEqual([
       '0',

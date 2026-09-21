@@ -1,4 +1,5 @@
 import type { RouteObject } from 'react-router'
+import { BackupScreen } from '../features/backup/BackupScreen'
 import { HomeScreen } from '../features/repertoire/HomeScreen'
 import { EditSongScreen } from '../features/songs/EditSongScreen'
 import { NewSongScreen } from '../features/songs/NewSongScreen'
@@ -18,6 +19,7 @@ import { RootLayout } from './RootLayout'
 /** The route table from docs/design/SCREENS.md. */
 const screens: RouteObject[] = [
   { path: '/', element: <HomeScreen /> },
+  { path: '/backup', element: <BackupScreen /> },
   { path: '/songs/new', element: <NewSongScreen /> },
   { path: '/songs/:songId', element: <SongScreen /> },
   { path: '/songs/:songId/edit', element: <EditSongScreen /> },

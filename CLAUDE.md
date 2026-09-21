@@ -96,6 +96,14 @@ src/
 - The current goal lives in the URL (`?goal=`) so a reload keeps your place. Landing on a goal resets the tempo to `startingBpm`.
 - Practice is one DOM that adapts with `desk:` classes (CSS `order` moves Finish and the timer), so each control exists once.
 
+## Backup (src/features/backup, src/domain/backup.ts)
+
+- A backup is one JSON file: `{ app: "pocket", version, exportedAt, data }` (`createBackup` / `serializeBackup`). Bump `BACKUP_VERSION` when the shape of `data` changes and teach `parseBackup` to upgrade older files.
+- `parseBackup` never throws; a bad file comes back with a plain-language reason. Besides the Zod shape it runs `checkIntegrity` (every reference points at a real record). `repos.backup.replaceAll` and `addMissing` run the same checks, so a damaged file cannot be written.
+- Restore has two modes: `addMissing` (adds songs the device lacks, whole; never touches a song already there; all or nothing) and `replaceAll` (behind a confirmation).
+- The Backup screen is at `/backup`, linked from the bottom of Home. It records the last export date in localStorage.
+- Tests use `configure({ asyncUtilTimeout: 4000 })` (src/test/setup.ts) because hundreds of IndexedDB-backed tests share the CPU. If a test fails only in the full run, suspect a race, not the timeout.
+
 ## Progress model
 
 - Quality levels are stored as numbers 1-5: Can't yet, Rough, Shaky, Solid, Mastered. Labels live

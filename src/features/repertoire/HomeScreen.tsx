@@ -151,6 +151,15 @@ export function HomeScreen() {
             </Link>
           </div>
         )}
+        <div className="mt-8 flex justify-center">
+          <Link
+            to={paths.backup}
+            className="flex h-11 items-center gap-2 px-3 text-sm text-muted hover:text-cream"
+          >
+            <Icon name="download" size={16} />
+            Back up & restore
+          </Link>
+        </div>
         <DevTools />
       </div>
 

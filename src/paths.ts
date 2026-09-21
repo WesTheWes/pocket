@@ -1,6 +1,7 @@
 /** Every URL in the app. Build links with these instead of writing strings. */
 export const paths = {
   home: '/',
+  backup: '/backup',
   newSong: '/songs/new',
   song: (songId: string) => `/songs/${songId}`,
   editSong: (songId: string) => `/songs/${songId}/edit`,
