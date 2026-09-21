@@ -4,6 +4,10 @@ import { EditSongScreen } from '../features/songs/EditSongScreen'
 import { NewSongScreen } from '../features/songs/NewSongScreen'
 import { EditSectionScreen } from '../features/songs/EditSectionScreen'
 import { NewSectionScreen } from '../features/songs/NewSectionScreen'
+import { EditGoalScreen } from '../features/goals/EditGoalScreen'
+import { GoalProgressScreen } from '../features/goals/GoalProgressScreen'
+import { GoalsScreen } from '../features/goals/GoalsScreen'
+import { NewGoalScreen } from '../features/goals/NewGoalScreen'
 import { SongScreen } from '../features/songs/SongScreen'
 import { StructureScreen } from '../features/structure/StructureScreen'
 import { ComingSoon, NotFoundScreen } from './ComingSoon'
@@ -20,10 +24,10 @@ export const routes: RouteObject[] = [
   { path: '/songs/:songId/sections/new', element: <NewSectionScreen /> },
   { path: '/songs/:songId/sections/:sectionId', element: <EditSectionScreen /> },
   { path: '/songs/:songId/structure', element: <StructureScreen /> },
-  { path: '/songs/:songId/goals', element: <ComingSoon screen="Goals" /> },
-  { path: '/songs/:songId/goals/new', element: <ComingSoon screen="New goal" /> },
-  { path: '/songs/:songId/goals/:goalId', element: <ComingSoon screen="Goal progress" /> },
-  { path: '/songs/:songId/goals/:goalId/edit', element: <ComingSoon screen="Edit goal" /> },
+  { path: '/songs/:songId/goals', element: <GoalsScreen /> },
+  { path: '/songs/:songId/goals/new', element: <NewGoalScreen /> },
+  { path: '/songs/:songId/goals/:goalId', element: <GoalProgressScreen /> },
+  { path: '/songs/:songId/goals/:goalId/edit', element: <EditGoalScreen /> },
   { path: '/practice/:songId', element: <ComingSoon screen="Practice" /> },
   {
     path: '/practice/:songId/review/:sessionId',

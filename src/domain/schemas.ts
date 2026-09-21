@@ -102,3 +102,13 @@ export const sectionFormSchema = z.object({
 })
 
 export type SectionFormValues = z.infer<typeof sectionFormSchema>
+
+/** What the New goal and Edit goal forms collect. */
+export const goalFormSchema = z.object({
+  sectionId: id.nullable(),
+  title: z.string().trim().min(1, 'Enter a title'),
+  description: z.string(),
+  targetBpm: bpmSchema.nullable(),
+})
+
+export type GoalFormValues = z.infer<typeof goalFormSchema>

@@ -95,8 +95,8 @@ describe('SongScreen', () => {
   })
 
   it('goes to a placeholder, not a dead end, for screens that are not built yet', async () => {
-    renderApp('/songs/piano-man/goals')
-    expect(await screen.findByRole('heading', { name: 'Goals' })).toBeInTheDocument()
+    renderApp('/practice/piano-man')
+    expect(await screen.findByRole('heading', { name: 'Practice' })).toBeInTheDocument()
     expect(screen.getByText(/designed but not built yet/)).toBeInTheDocument()
   })
 })

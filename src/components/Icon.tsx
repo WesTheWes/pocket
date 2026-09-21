@@ -12,6 +12,7 @@ export type IconName =
   | 'check'
   | 'grip'
   | 'close'
+  | 'trash'
 
 const glyphs: Record<IconName, ReactNode> = {
   back: <path d="M15 5l-7 7 7 7" />,
@@ -44,6 +45,12 @@ const glyphs: Record<IconName, ReactNode> = {
     </>
   ),
   close: <path d="M6 6l12 12M18 6L6 18" />,
+  trash: (
+    <>
+      <path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" />
+      <path d="M10 11v5M14 11v5" />
+    </>
+  ),
 }
 
 /** Decorative: give the button or link around it an accessible name. */

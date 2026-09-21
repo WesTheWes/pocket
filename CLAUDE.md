@@ -28,9 +28,10 @@ only (canvas-format HTML that does not run): match their spacing, sizes and copy
 - Mobile first (designs are 390px wide). Home, Song and Practice get desktop layouts at `desk:`
   (900px). Every other screen stays a centered ~480px column.
 - Routes are in SCREENS.md and defined in src/app/routes.tsx; build links with `paths` from src/paths.ts. Screens live in their feature folder; shared UI in src/components.
-- Built so far: Home (features/repertoire); Song, New/Edit song (with delete and the manual Learned switch), New/Edit section (with delete) (features/songs); the Structure editor with drag and keyboard reordering (features/structure). Every other route renders a `ComingSoon` placeholder in src/app/routes.tsx; replace it as each screen lands.
+- Built so far: Home (features/repertoire); Song, New/Edit song, New/Edit section (features/songs); Structure editor (features/structure); Goals list, New/Edit goal, Goal progress with attempt logging (features/goals). Still `ComingSoon` placeholders in src/app/routes.tsx: Practice and Practice review.
 - After UI changes, look at the running app (phone 390px and desktop 1280px) against docs/design/reference, not just the tests. jsdom applies no CSS, so it cannot catch layout bugs such as a `hidden` class losing to a component's own `inline-flex`. Wrap in a `hidden desk:block` container instead of passing `hidden` to a component.
 - Drag and drop uses dnd-kit (handle-only pointer drag, plus keyboard: Space to lift, arrows, Space to drop). jsdom cannot drag, so test the pure logic in unit tests and verify dragging in a real browser.
+- Attempts logged from Goal progress pick up the song's open practice session (`repos.sessions.getActive`) at save time, so Practice can simply link to a goal's progress screen.
 - Tap targets at least 44px, aria-label on icon-only buttons, aria-pressed on toggle chips.
   Quality is always shown as meter + color + label, never color alone.
 - If the design docs or reference screens disagree with the Progress model or Architecture
