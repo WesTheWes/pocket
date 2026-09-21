@@ -71,8 +71,9 @@ export function TextAreaField({
         aria-describedby={error ? `${fieldId}-error` : undefined}
         className={cn(
           control,
-          'min-h-[230px] resize-none px-4 py-3.5 font-mono text-sm leading-[1.6]',
-          className,
+          'resize-none px-4 py-3.5 leading-[1.6]',
+          // Height and font are one setting: a caller's replaces the default rather than stacking.
+          className ?? 'min-h-[230px] font-mono text-sm',
         )}
         {...rest}
       />
