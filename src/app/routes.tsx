@@ -13,9 +13,10 @@ import { ReviewScreen } from '../features/session/ReviewScreen'
 import { SongScreen } from '../features/songs/SongScreen'
 import { StructureScreen } from '../features/structure/StructureScreen'
 import { NotFoundScreen } from './NotFoundScreen'
+import { RootLayout } from './RootLayout'
 
 /** The route table from docs/design/SCREENS.md. */
-export const routes: RouteObject[] = [
+const screens: RouteObject[] = [
   { path: '/', element: <HomeScreen /> },
   { path: '/songs/new', element: <NewSongScreen /> },
   { path: '/songs/:songId', element: <SongScreen /> },
@@ -34,3 +35,5 @@ export const routes: RouteObject[] = [
   },
   { path: '*', element: <NotFoundScreen /> },
 ]
+
+export const routes: RouteObject[] = [{ element: <RootLayout />, children: screens }]

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { returnTarget, tempoFrom, withReturn } from './returnTo'
+import { practiceReturn, returnTarget, tempoFrom, withReturn } from './returnTo'
 
 describe('returnTarget', () => {
   it('goes back to the screen that said where back should go', () => {
@@ -49,5 +49,21 @@ describe('carrying a tempo along with the link', () => {
     }
     expect(tempoFrom({ bpm: 30 })).toBe(30)
     expect(tempoFrom({ bpm: 240 })).toBe(240)
+  })
+})
+
+describe('practiceReturn', () => {
+  it('finds the practice session to go back to', () => {
+    expect(practiceReturn({ returnTo: '/practice/piano-man?goal=g1' })).toBe(
+      '/practice/piano-man?goal=g1',
+    )
+    expect(practiceReturn({ returnTo: '/practice/piano-man' })).toBe('/practice/piano-man')
+  })
+
+  it('does not count the review, the goals list, or nothing at all', () => {
+    expect(practiceReturn({ returnTo: '/practice/piano-man/review/s1' })).toBeUndefined()
+    expect(practiceReturn({ returnTo: '/songs/piano-man/goals' })).toBeUndefined()
+    expect(practiceReturn(null)).toBeUndefined()
+    expect(practiceReturn({})).toBeUndefined()
   })
 })

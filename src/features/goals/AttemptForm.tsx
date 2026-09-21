@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Button } from '../../components/Button'
 import { QualityPicker } from '../../components/QualityPicker'
 import { Stepper } from '../../components/Stepper'
+import { useToast } from '../../components/toastContext'
 import { repos } from '../../data'
 import { startingBpm } from '../../domain/progress'
 import type { QualityLevel } from '../../domain/quality'
@@ -17,18 +18,20 @@ interface Props {
   editing?: Attempt
   /** Called after an edit is saved or cancelled. */
   onDone: () => void
+  /** Called after a new attempt has been saved (e.g. to go back to Practice). */
+  onLogged?: () => void
 }
 
 /**
  * Logs an attempt: the tempo you played and how it felt. Remount it (change its `key`) to start
  * a different attempt. New attempts pick up the song's open practice session, if there is one.
  */
-export function AttemptForm({ goal, attempts, initialBpm, editing, onDone }: Props) {
+export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLogged }: Props) {
+  const { notify } = useToast()
   const fallbackBpm = initialBpm ?? startingBpm(goal, attempts)
   const [bpm, setBpm] = useState<number | null>(editing ? editing.bpm : fallbackBpm)
   const [level, setLevel] = useState<QualityLevel | null>(editing?.level ?? null)
   const [error, setError] = useState<string>()
-  const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const ref = useRef<HTMLFormElement>(null)
 
@@ -48,12 +51,14 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone }: Pro
     try {
       if (editing) {
         await repos.attempts.update(editing.id, { bpm, level })
+        notify('Attempt updated')
         onDone()
       } else {
         const session = await repos.sessions.getActive(goal.songId)
         await repos.attempts.create({ goalId: goal.id, bpm, level, sessionId: session?.id ?? null })
         setLevel(null)
-        setSaved(true)
+        notify('Attempt saved')
+        onLogged?.()
       }
     } catch {
       setError('Couldn’t save the attempt. Please try again.')
@@ -78,7 +83,6 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone }: Pro
         value={bpm}
         onChange={(next) => {
           setBpm(next)
-          setSaved(false)
         }}
         noneLabel="No tempo"
         fallback={fallbackBpm}
@@ -91,18 +95,12 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone }: Pro
           onChange={(next) => {
             setLevel(next)
             setError(undefined)
-            setSaved(false)
           }}
         />
       </div>
       {error && (
         <p role="alert" className="text-sm text-pink">
           {error}
-        </p>
-      )}
-      {saved && (
-        <p role="status" className="text-sm text-yellow">
-          Attempt saved.
         </p>
       )}
       <div className="flex flex-col gap-2.5">

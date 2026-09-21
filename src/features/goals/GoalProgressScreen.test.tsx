@@ -130,7 +130,7 @@ describe('logging an attempt', () => {
     await user.click(screen.getByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Attempt saved.')
+    expect(await screen.findByRole('status')).toHaveTextContent('Attempt saved')
     // It became the goal's fastest Solid tempo, which meets the target.
     expect(await screen.findByText('fastest Solid 84 of 84 BPM')).toBeInTheDocument()
     expect(screen.getByText('Done')).toBeInTheDocument()

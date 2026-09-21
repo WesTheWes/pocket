@@ -52,7 +52,7 @@ describe('back from Goal progress returns to where you came from', () => {
     await user.click(await screen.findByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
     await screen.findByRole('status')
-    await user.click(back())
+    // Saving took us back to the practice session by itself; no need to press back.
 
     await screen.findByRole('heading', { name: 'Full chorus with block chords', level: 1 })
     expect((await openSessions()).map((s) => s.id)).toEqual([session.id])

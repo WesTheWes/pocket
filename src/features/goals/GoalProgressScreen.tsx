@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { useLocation, useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
 import { AttemptRow } from '../../components/AttemptRow'
 import { ConfirmSheet } from '../../components/BottomSheet'
 import { Icon } from '../../components/Icon'
 import { IconLink } from '../../components/IconButton'
 import { Page } from '../../components/Page'
 import { ProgressBar } from '../../components/ProgressBar'
+import { useToast } from '../../components/toastContext'
 import { TopBar } from '../../components/TopBar'
 import { repos } from '../../data'
 import { useGoal, useGoalAttempts, useSections, useSong } from '../../data/hooks'
@@ -14,7 +15,7 @@ import { goalDone, goalProgress } from '../../domain/progress'
 import { QUALITY_LABELS } from '../../domain/quality'
 import type { Attempt } from '../../domain/schemas'
 import { formatAttemptDate } from '../../lib/formatDate'
-import { returnTarget, tempoFrom } from '../../lib/returnTo'
+import { practiceReturn, returnTarget, tempoFrom } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
 import { AttemptForm } from './AttemptForm'
@@ -23,6 +24,8 @@ import { GoalNotFound } from './GoalNotFound'
 export function GoalProgressScreen() {
   const { songId = '', goalId = '' } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
+  const { notify } = useToast()
   const song = useSong(songId)
   const sections = useSections(songId)
   const goal = useGoal(goalId)
@@ -46,6 +49,7 @@ export function GoalProgressScreen() {
     setRemoveError(undefined)
     try {
       await repos.attempts.delete(removing.id)
+      notify('Attempt deleted')
       if (editing?.id === removing.id) setEditing(undefined)
       setRemoving(undefined)
     } catch {
@@ -94,6 +98,11 @@ export function GoalProgressScreen() {
           attempts={attempts}
           // From Practice, start at the metronome's tempo instead of the last logged one.
           initialBpm={tempoFrom(location.state)}
+          // Logging from Practice: once it is saved, go straight back to the session.
+          onLogged={() => {
+            const practice = practiceReturn(location.state)
+            if (practice) navigate(practice)
+          }}
           editing={editing}
           onDone={() => setEditing(undefined)}
         />

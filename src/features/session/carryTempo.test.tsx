@@ -155,8 +155,7 @@ describe('Practice remembers the tempo you set for each goal', () => {
     await user.tab()
     await user.click(screen.getByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
-    await screen.findByRole('status')
-    await user.click(screen.getByRole('link', { name: 'Back' }))
+    await screen.findByRole('status') // saving takes you straight back to Practice
 
     await screen.findByRole('timer', { name: 'Practice time' })
     expect(metronome()).toHaveAttribute('aria-valuetext', '90 BPM')
@@ -170,8 +169,7 @@ describe('Practice remembers the tempo you set for each goal', () => {
     await user.click(screen.getByRole('link', { name: 'Log attempt' }))
     await user.click(await screen.findByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
-    await screen.findByRole('status')
-    await user.click(screen.getByRole('link', { name: 'Back' }))
+    await screen.findByRole('status') // saving takes you straight back to Practice
     await screen.findByRole('timer', { name: 'Practice time' })
     fireEvent.change(metronome(), { target: { value: '110' } })
 

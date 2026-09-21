@@ -35,3 +35,11 @@ export function returnTarget(state: unknown, fallback: string): string {
     typeof returnTo === 'string' && returnTo.startsWith('/') && !returnTo.startsWith('//')
   return insideApp ? returnTo : fallback
 }
+
+const PRACTICE_SESSION = /^\/practice\/[^/?]+(\?.*)?$/
+
+/** The practice session to go back to, if that is where you came from (not the review). */
+export function practiceReturn(state: unknown): string | undefined {
+  const to = returnTarget(state, '')
+  return PRACTICE_SESSION.test(to) ? to : undefined
+}
