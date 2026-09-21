@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StrictMode } from 'react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
@@ -716,5 +716,108 @@ describe('adding and editing goals during a session', () => {
       expect(FakeAudioContext.instances[0].closed).toBe(0)
       expect((await openSessions('piano-man')).map((s) => s.id)).toEqual([session.id])
     })
+  })
+})
+
+describe('notes during practice', () => {
+  const notes = () => screen.findByRole('region', { name: 'Notes' })
+  const CHORD_INTRO = 'Intro    C G/B Am Am/G F C/E Dm7 G7'
+
+  it('shows the current section’s notes', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g3') // Verse
+    const panel = await notes()
+    expect(within(panel).getByRole('tab', { name: 'Verse notes' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    expect(within(panel).getByRole('tabpanel')).toHaveTextContent(
+      'Left hand: root, fifth, fifth in 3/4.',
+    )
+  })
+
+  it('shows the whole song’s chord chart on its own tab, laid out as written', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    const panel = await notes()
+    await user.click(within(panel).getByRole('tab', { name: 'Chords' }))
+    const chart = within(panel).getByRole('tabpanel').textContent ?? ''
+    expect(chart.split('\n')[0]).toBe(CHORD_INTRO)
+    expect(chart).toContain('Bridge   Am F C G (build, then stride)')
+  })
+
+  it('has just the chord chart for a section without notes', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g1') // Intro: no notes of its own
+    const panel = await notes()
+    expect(within(panel).getAllByRole('tab')).toHaveLength(1)
+    expect(within(panel).getByRole('tabpanel').textContent).toContain(CHORD_INTRO)
+  })
+
+  it('has just the chord chart for a whole-song goal', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g0')
+    const panel = await notes()
+    expect(within(panel).queryByRole('tab', { name: /notes/ })).not.toBeInTheDocument()
+    expect(within(panel).getByRole('tab', { name: 'Chords' })).toBeInTheDocument()
+  })
+
+  it('follows you from section to section', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    const panel = await notes()
+    expect(within(panel).getByRole('tabpanel')).toHaveTextContent('Left hand: root')
+    await user.click(screen.getByRole('button', { name: 'Next goal' })) // Chorus
+    expect(within(panel).getByRole('tab', { name: 'Chorus notes' })).toBeInTheDocument()
+    expect(within(panel).getByRole('tabpanel')).toHaveTextContent('Block chords in the right hand')
+  })
+
+  it('minimizes, and stays minimized the next time you practice', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    const panel = await notes()
+    await user.click(within(panel).getByRole('button', { name: 'Notes' }))
+    expect(within(panel).queryByRole('tabpanel')).not.toBeInTheDocument()
+    expect(within(panel).getByText('Verse notes · Chords')).toBeInTheDocument()
+
+    cleanup()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    const again = await notes()
+    expect(within(again).getByRole('button', { name: 'Notes' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    )
+  })
+
+  it('shows nothing when the song has no notes at all', async () => {
+    await loadSamples()
+    renderApp('/practice/rocket-man')
+    await screen.findByRole('heading', { name: 'Free practice' })
+    expect(screen.queryByRole('region', { name: 'Notes' })).not.toBeInTheDocument()
+  })
+
+  it('updates as soon as the notes are edited elsewhere', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    const panel = await notes()
+    await repos.sections.update('piano-man-s1', { notes: 'New advice for the verse.' })
+    await waitFor(() =>
+      expect(within(panel).getByRole('tabpanel')).toHaveTextContent('New advice for the verse.'),
+    )
+  })
+
+  it('does not interrupt the metronome', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    await user.click(await screen.findByRole('button', { name: 'Start metronome' }))
+    const panel = await notes()
+    await user.click(within(panel).getByRole('button', { name: 'Notes' }))
+    await user.click(within(panel).getByRole('button', { name: 'Notes' }))
+    await user.click(within(panel).getByRole('tab', { name: 'Chords' }))
+    expect(screen.getByRole('button', { name: 'Stop metronome' })).toBeInTheDocument()
   })
 })

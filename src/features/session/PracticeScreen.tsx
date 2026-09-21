@@ -25,6 +25,7 @@ import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
 import { SongNotFound } from '../songs/SongNotFound'
 import { GoalSheet, type GoalSheetTarget } from './GoalSheet'
+import { PracticeNotes } from './PracticeNotes'
 import { SongPickerSheet } from './SongPickerSheet'
 import { chooseTempo, recallTempo, rememberTempo } from './tempoMemory'
 import { useMetronome } from './useMetronome'
@@ -156,7 +157,8 @@ function PracticeView({
   }
   const metronome = useMetronome(bpm)
 
-  const sectionName = goal ? sections.find((s) => s.id === goal.sectionId)?.name : undefined
+  const currentSection = goal ? sections.find((s) => s.id === goal.sectionId) : undefined
+  const sectionName = currentSection?.name
   const sectionLabel = (g: Goal) => sections.find((s) => s.id === g.sectionId)?.name ?? 'Whole song'
 
   return (
@@ -398,6 +400,12 @@ function PracticeView({
             </>
           )}
         </section>
+
+        <PracticeNotes
+          sectionName={sectionName}
+          sectionNotes={currentSection?.notes ?? ''}
+          chordNotes={song.chordNotes}
+        />
 
         <div className="mt-1 desk:mt-4">
           <MetronomePanel

@@ -22,6 +22,8 @@ interface SongSeed {
   artist: string
   chordNotes?: string
   sections: string[]
+  /** Notes for some sections, by section name. */
+  sectionNotes?: Record<string, string>
   /** Section names in play order. */
   structure: string[]
   goals: GoalSeed[]
@@ -40,6 +42,12 @@ const pianoMan: SongSeed = {
     'Bridge   Am F C G (build, then stride)',
   ].join('\n'),
   sections: ['Intro', 'Verse', 'Chorus', 'Bridge', 'Outro'],
+  sectionNotes: {
+    Verse:
+      'Left hand: root, fifth, fifth in 3/4. Let the G/B in bar 2 walk down. Don’t rush the pickup into the chorus.',
+    Chorus:
+      'Block chords in the right hand with an octave in the bass. Save the big dynamics for the last chorus.',
+  },
   structure: ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Outro'],
   createdDaysAgo: 20,
   session: { daysAgo: 2, minutes: 24, pausedMinutes: 3 },
@@ -217,7 +225,7 @@ export function createSeedData(now: number): PocketData {
         id: `${seed.id}-s${order}`,
         songId: seed.id,
         name,
-        notes: '',
+        notes: seed.sectionNotes?.[name] ?? '',
         order,
       }
       sectionIds.set(name, section.id)

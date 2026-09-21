@@ -16,6 +16,7 @@ export type IconName =
   | 'pause'
   | 'minus'
   | 'down'
+  | 'up'
 
 const glyphs: Record<IconName, ReactNode> = {
   back: <path d="M15 5l-7 7 7 7" />,
@@ -56,6 +57,7 @@ const glyphs: Record<IconName, ReactNode> = {
   ),
   minus: <path d="M5 12h14" />,
   down: <path d="M6 9l6 6 6-6" />,
+  up: <path d="M6 15l6-6 6 6" />,
   trash: (
     <>
       <path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" />
