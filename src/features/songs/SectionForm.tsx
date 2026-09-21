@@ -16,10 +16,19 @@ interface Props {
   extra?: ReactNode
   /** Extra actions below the submit button, such as Delete. */
   footer?: ReactNode
+  /** Replaces the default page padding, e.g. when the form sits inside a sheet. */
+  className?: string
 }
 
 /** The fields shared by New section and Edit section. */
-export function SectionForm({ defaultValues, submitLabel, onSubmit, extra, footer }: Props) {
+export function SectionForm({
+  defaultValues,
+  submitLabel,
+  onSubmit,
+  extra,
+  footer,
+  className = 'px-5 pb-10 pt-2',
+}: Props) {
   const {
     register,
     handleSubmit,
@@ -40,7 +49,7 @@ export function SectionForm({ defaultValues, submitLabel, onSubmit, extra, foote
   })
 
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-5 px-5 pb-10 pt-2">
+    <form onSubmit={submit} noValidate className={`flex flex-col gap-5 ${className}`}>
       <div>
         <TextField
           label="Name"

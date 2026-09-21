@@ -15,10 +15,19 @@ interface Props {
   showLearned?: boolean
   /** Extra actions below the submit button, such as Delete. */
   footer?: ReactNode
+  /** Replaces the default page padding, e.g. when the form sits inside a sheet. */
+  className?: string
 }
 
 /** The fields shared by New song and Edit song. */
-export function SongForm({ defaultValues, submitLabel, onSubmit, showLearned, footer }: Props) {
+export function SongForm({
+  defaultValues,
+  submitLabel,
+  onSubmit,
+  showLearned,
+  footer,
+  className = 'px-5 pb-10 pt-2',
+}: Props) {
   const {
     register,
     handleSubmit,
@@ -35,7 +44,7 @@ export function SongForm({ defaultValues, submitLabel, onSubmit, showLearned, fo
   })
 
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-5 px-5 pb-10 pt-2">
+    <form onSubmit={submit} noValidate className={`flex flex-col gap-5 ${className}`}>
       <TextField
         label="Title"
         placeholder="Song title"

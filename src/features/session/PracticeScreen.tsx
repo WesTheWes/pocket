@@ -12,7 +12,6 @@ import { goalSummary } from '../../domain/goalSummary'
 import {
   averageProgress,
   firstUnfinishedGoal,
-  goalDone,
   goalProgress,
   orderGoals,
   toPercent,
@@ -24,7 +23,15 @@ import { withReturn } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
 import { SongNotFound } from '../songs/SongNotFound'
+import {
+  EditMenuSheet,
+  SectionSheet,
+  SongSheet,
+  StructureSheet,
+  type EditSheetKind,
+} from './EditSheets'
 import { GoalSheet, type GoalSheetTarget } from './GoalSheet'
+import { GoalStatus } from './GoalStatus'
 import { PracticeNotes } from './PracticeNotes'
 import { SongPickerSheet } from './SongPickerSheet'
 import { chooseTempo, recallTempo, rememberTempo } from './tempoMemory'
@@ -121,6 +128,7 @@ function PracticeView({
   const [search, setSearch] = useSearchParams()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [goalSheet, setGoalSheet] = useState<GoalSheetTarget | null>(null)
+  const [editSheet, setEditSheet] = useState<EditSheetKind | null>(null)
   const elapsed = useSessionTimer(session)
   const paused = session.pausedAt !== null
 
@@ -180,6 +188,12 @@ function PracticeView({
             </span>
             <Icon name="down" size={18} />
           </button>
+          <IconButton
+            icon="more"
+            variant="outline"
+            label="Edit song, sections and structure"
+            onClick={() => setEditSheet('menu')}
+          />
         </div>
 
         <Button
@@ -233,19 +247,22 @@ function PracticeView({
               aria-current={g.id === goal?.id ? 'true' : undefined}
               onClick={() => select(g.id)}
               className={cn(
-                'block min-h-[52px] w-full rounded-xl px-3.5 py-1.5 text-left hover:bg-surface-2',
+                'flex min-h-[52px] w-full items-center gap-3 rounded-xl px-3.5 py-1.5 text-left hover:bg-surface-2',
                 g.id === goal?.id && 'bg-surface-2',
               )}
             >
-              <span
-                className={cn(
-                  'block text-xs font-semibold uppercase tracking-[0.06em]',
-                  g.id === goal?.id ? 'text-orange' : 'text-muted',
-                )}
-              >
-                {sectionLabel(g)}
+              <span className="min-w-0 flex-1">
+                <span
+                  className={cn(
+                    'block text-xs font-semibold uppercase tracking-[0.06em]',
+                    g.id === goal?.id ? 'text-orange' : 'text-muted',
+                  )}
+                >
+                  {sectionLabel(g)}
+                </span>
+                <span className="block truncate text-[15px] font-medium">{g.title}</span>
               </span>
-              <span className="block truncate text-[15px] font-medium">{g.title}</span>
+              <GoalStatus goal={g} attempts={attempts} />
             </button>
           ))}
         </nav>
@@ -304,7 +321,6 @@ function PracticeView({
           >
             {currentGroup.goals.map((g) => {
               const isCurrent = g.id === goal?.id
-              const done = goalDone(g, attempts)
               return (
                 <button
                   key={g.id}
@@ -317,16 +333,7 @@ function PracticeView({
                   )}
                 >
                   <span className="min-w-0 flex-1 truncate">{g.title}</span>
-                  {done ? (
-                    <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-yellow">
-                      <Icon name="check" size={14} />
-                      Done
-                    </span>
-                  ) : (
-                    <span className="shrink-0 text-xs tabular-nums">
-                      {toPercent(goalProgress(g, attempts))}%
-                    </span>
-                  )}
+                  <GoalStatus goal={g} attempts={attempts} />
                 </button>
               )
             })}
@@ -456,6 +463,31 @@ function PracticeView({
         }}
       />
 
+      <EditMenuSheet
+        open={editSheet === 'menu'}
+        onOpenChange={(open) => !open && setEditSheet(null)}
+        sectionName={sectionName}
+        onPick={setEditSheet}
+      />
+      <SongSheet open={editSheet === 'song'} song={song} onClose={() => setEditSheet(null)} />
+      <SectionSheet
+        open={editSheet === 'section'}
+        songId={song.id}
+        section={currentSection}
+        onClose={() => setEditSheet(null)}
+      />
+      <SectionSheet
+        open={editSheet === 'newSection'}
+        songId={song.id}
+        onClose={() => setEditSheet(null)}
+      />
+      <StructureSheet
+        open={editSheet === 'structure'}
+        song={song}
+        sections={sections}
+        onClose={() => setEditSheet(null)}
+        onAddSection={() => setEditSheet('newSection')}
+      />
       <SongPickerSheet
         open={pickerOpen}
         onOpenChange={setPickerOpen}
