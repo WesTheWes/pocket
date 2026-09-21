@@ -371,3 +371,39 @@ describe('backup', () => {
     expect(Object.values(all).every((rows) => rows.length === 0)).toBe(true)
   })
 })
+
+describe('abandoned sessions', () => {
+  const HOUR = 60 * 60 * 1000
+
+  async function setup() {
+    const ctx = makeTestRepos(0)
+    const song = await ctx.repos.songs.create({ title: 'S' })
+    return { ...ctx, song }
+  }
+
+  it('resumes a session that is still recent', async () => {
+    const { repos, song, advance } = await setup()
+    const first = await repos.sessions.startOrResume(song.id)
+    advance(11 * HOUR)
+    expect((await repos.sessions.startOrResume(song.id)).id).toBe(first.id)
+  })
+
+  it('closes a session left open for over 12 hours and starts a fresh one', async () => {
+    const { repos, song, advance } = await setup()
+    const abandoned = await repos.sessions.startOrResume(song.id)
+    advance(13 * HOUR)
+    const fresh = await repos.sessions.startOrResume(song.id)
+
+    expect(fresh.id).not.toBe(abandoned.id)
+    expect(fresh.startedAt).toBe(13 * HOUR)
+    expect((await repos.sessions.get(abandoned.id))?.endedAt).toBe(13 * HOUR)
+    expect(await repos.sessions.listBySong(song.id)).toHaveLength(2)
+  })
+
+  it('does not report an abandoned session as the active one', async () => {
+    const { repos, song, advance } = await setup()
+    await repos.sessions.startOrResume(song.id)
+    advance(13 * HOUR)
+    expect(await repos.sessions.getActive(song.id)).toBeUndefined()
+  })
+})

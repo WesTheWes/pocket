@@ -8,14 +8,13 @@ import { EditGoalScreen } from '../features/goals/EditGoalScreen'
 import { GoalProgressScreen } from '../features/goals/GoalProgressScreen'
 import { GoalsScreen } from '../features/goals/GoalsScreen'
 import { NewGoalScreen } from '../features/goals/NewGoalScreen'
+import { PracticeRoute } from '../features/session/PracticeScreen'
+import { ReviewScreen } from '../features/session/ReviewScreen'
 import { SongScreen } from '../features/songs/SongScreen'
 import { StructureScreen } from '../features/structure/StructureScreen'
-import { ComingSoon, NotFoundScreen } from './ComingSoon'
+import { NotFoundScreen } from './NotFoundScreen'
 
-/**
- * The route table from docs/design/SCREENS.md. Screens not built yet render a placeholder;
- * replace the `ComingSoon` element as each one lands.
- */
+/** The route table from docs/design/SCREENS.md. */
 export const routes: RouteObject[] = [
   { path: '/', element: <HomeScreen /> },
   { path: '/songs/new', element: <NewSongScreen /> },
@@ -28,10 +27,10 @@ export const routes: RouteObject[] = [
   { path: '/songs/:songId/goals/new', element: <NewGoalScreen /> },
   { path: '/songs/:songId/goals/:goalId', element: <GoalProgressScreen /> },
   { path: '/songs/:songId/goals/:goalId/edit', element: <EditGoalScreen /> },
-  { path: '/practice/:songId', element: <ComingSoon screen="Practice" /> },
+  { path: '/practice/:songId', element: <PracticeRoute /> },
   {
     path: '/practice/:songId/review/:sessionId',
-    element: <ComingSoon screen="Practice review" />,
+    element: <ReviewScreen />,
   },
   { path: '*', element: <NotFoundScreen /> },
 ]

@@ -73,3 +73,11 @@ export function sessionChanges(session: Session, goals: Goal[], attempts: Attemp
     ]
   })
 }
+
+/** An open session older than this was almost certainly abandoned, not still being practiced. */
+export const STALE_SESSION_MS = 12 * 60 * 60 * 1000
+
+/** True for a session that was never finished and has been open for over 12 hours. */
+export function isSessionStale(session: Session, now: number): boolean {
+  return session.endedAt === null && now - session.startedAt > STALE_SESSION_MS
+}

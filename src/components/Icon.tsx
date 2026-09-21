@@ -13,6 +13,9 @@ export type IconName =
   | 'grip'
   | 'close'
   | 'trash'
+  | 'pause'
+  | 'minus'
+  | 'down'
 
 const glyphs: Record<IconName, ReactNode> = {
   back: <path d="M15 5l-7 7 7 7" />,
@@ -45,6 +48,14 @@ const glyphs: Record<IconName, ReactNode> = {
     </>
   ),
   close: <path d="M6 6l12 12M18 6L6 18" />,
+  pause: (
+    <>
+      <rect x="7" y="5" width="3.5" height="14" rx="1" fill="currentColor" stroke="none" />
+      <rect x="13.5" y="5" width="3.5" height="14" rx="1" fill="currentColor" stroke="none" />
+    </>
+  ),
+  minus: <path d="M5 12h14" />,
+  down: <path d="M6 9l6 6 6-6" />,
   trash: (
     <>
       <path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" />

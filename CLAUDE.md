@@ -28,7 +28,7 @@ only (canvas-format HTML that does not run): match their spacing, sizes and copy
 - Mobile first (designs are 390px wide). Home, Song and Practice get desktop layouts at `desk:`
   (900px). Every other screen stays a centered ~480px column.
 - Routes are in SCREENS.md and defined in src/app/routes.tsx; build links with `paths` from src/paths.ts. Screens live in their feature folder; shared UI in src/components.
-- Built so far: Home (features/repertoire); Song, New/Edit song, New/Edit section (features/songs); Structure editor (features/structure); Goals list, New/Edit goal, Goal progress with attempt logging (features/goals). Still `ComingSoon` placeholders in src/app/routes.tsx: Practice and Practice review.
+- Every screen in the design is built: Home (features/repertoire); Song, New/Edit song, New/Edit section (features/songs); Structure editor (features/structure); Goals, New/Edit goal, Goal progress (features/goals); Practice and Review (features/session). Unknown addresses show the NotFoundScreen in src/app.
 - After UI changes, look at the running app (phone 390px and desktop 1280px) against docs/design/reference, not just the tests. jsdom applies no CSS, so it cannot catch layout bugs such as a `hidden` class losing to a component's own `inline-flex`. Wrap in a `hidden desk:block` container instead of passing `hidden` to a component.
 - Drag and drop uses dnd-kit (handle-only pointer drag, plus keyboard: Space to lift, arrows, Space to drop). jsdom cannot drag, so test the pure logic in unit tests and verify dragging in a real browser.
 - Attempts logged from Goal progress pick up the song's open practice session (`repos.sessions.getActive`) at save time, so Practice can simply link to a goal's progress screen.
@@ -79,6 +79,15 @@ src/
   `clear`. Sample data comes from `createSeedData(now)` in `src/data/seed.ts`.
 - Never name an error `NotFoundError`: Dexie turns any error with that name thrown inside a
   transaction into its own `DexieError`. Ours is `RecordNotFoundError`.
+
+## Practice (src/features/session)
+
+- The metronome is split in two: `scheduler.ts` is pure look-ahead timing (a timer only wakes it; beats are placed on the audio clock, so they never drift) and `metronome.ts` is the thin Web Audio wrapper. Both are tested with fakes; `src/test/fakeAudio.ts` stubs `AudioContext` for screen tests.
+- `useMetronome` creates the metronome in an effect (not in render), so React StrictMode's extra mount cannot leave a disposed one.
+- `useSessionTimer` reads the clock through `useSyncExternalStore` and derives time from the stored session. It ticks in 250 ms steps, so it can read a hair behind real time.
+- An open session older than 12 hours (`isSessionStale`) is treated as abandoned: `startOrResume` ends it and starts a fresh one, and `getActive` ignores it.
+- The current goal lives in the URL (`?goal=`) so a reload keeps your place. Landing on a goal resets the tempo to `startingBpm`.
+- Practice is one DOM that adapts with `desk:` classes (CSS `order` moves Finish and the timer), so each control exists once.
 
 ## Progress model
 

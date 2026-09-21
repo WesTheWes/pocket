@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { makeAttempt, makeGoal, makeSession } from '../test/factories'
 import {
   endSession,
+  isSessionStale,
   pauseSession,
   resumeSession,
   sessionChanges,
@@ -155,5 +156,25 @@ describe('sessionChanges', () => {
     const early = solid('a', 60, 2_000, 's')
     const [change] = sessionChanges(session, [goal], [late, early])
     expect(change.attempts).toEqual([early, late])
+  })
+})
+
+describe('isSessionStale', () => {
+  const HOUR = 60 * 60 * 1000
+
+  it('is false for a session that is still recent', () => {
+    expect(isSessionStale(makeSession({ startedAt: 0 }), 11 * HOUR)).toBe(false)
+  })
+
+  it('is true for an open session left running for more than 12 hours', () => {
+    expect(isSessionStale(makeSession({ startedAt: 0 }), 12 * HOUR + 1)).toBe(true)
+  })
+
+  it('applies to a paused session too', () => {
+    expect(isSessionStale(makeSession({ startedAt: 0, pausedAt: HOUR }), 30 * HOUR)).toBe(true)
+  })
+
+  it('is never true for a session that has ended', () => {
+    expect(isSessionStale(makeSession({ startedAt: 0, endedAt: HOUR }), 100 * HOUR)).toBe(false)
   })
 })

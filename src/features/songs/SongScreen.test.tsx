@@ -94,9 +94,9 @@ describe('SongScreen', () => {
     expect(await screen.findByText('Song not found')).toBeInTheDocument()
   })
 
-  it('goes to a placeholder, not a dead end, for screens that are not built yet', async () => {
-    renderApp('/practice/piano-man')
-    expect(await screen.findByRole('heading', { name: 'Practice' })).toBeInTheDocument()
-    expect(screen.getByText(/designed but not built yet/)).toBeInTheDocument()
+  it('shows Page not found for an address that matches nothing', async () => {
+    renderApp('/nowhere')
+    expect(await screen.findByText('Page not found')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/')
   })
 })
