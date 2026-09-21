@@ -11,6 +11,8 @@ interface Props {
   goal: Goal
   /** The goal's attempts, used to pick a sensible starting tempo. */
   attempts: Attempt[]
+  /** Tempo to start a new attempt at (e.g. the metronome's). Defaults to the last logged one. */
+  initialBpm?: number
   /** Set to edit an existing attempt instead of logging a new one. */
   editing?: Attempt
   /** Called after an edit is saved or cancelled. */
@@ -21,8 +23,8 @@ interface Props {
  * Logs an attempt: the tempo you played and how it felt. Remount it (change its `key`) to start
  * a different attempt. New attempts pick up the song's open practice session, if there is one.
  */
-export function AttemptForm({ goal, attempts, editing, onDone }: Props) {
-  const fallbackBpm = startingBpm(goal, attempts)
+export function AttemptForm({ goal, attempts, initialBpm, editing, onDone }: Props) {
+  const fallbackBpm = initialBpm ?? startingBpm(goal, attempts)
   const [bpm, setBpm] = useState<number | null>(editing ? editing.bpm : fallbackBpm)
   const [level, setLevel] = useState<QualityLevel | null>(editing?.level ?? null)
   const [error, setError] = useState<string>()

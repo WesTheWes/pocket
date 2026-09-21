@@ -1,3 +1,5 @@
+import { MAX_BPM, MIN_BPM } from '../domain/schemas'
+
 /*
  * "Back" should return to the screen you came from. A screen that links to a shared page (like a
  * goal's progress, reachable from Goals, Practice and Review) passes the address to come back to
@@ -7,11 +9,23 @@
 
 export interface ReturnState {
   returnTo: string
+  /** A tempo the next screen should start from, such as the metronome's. */
+  bpm?: number
 }
 
-/** Link state saying "the back arrow on the next screen should come back to `path`". */
-export function withReturn(path: string): ReturnState {
-  return { returnTo: path }
+/**
+ * Link state saying "the back arrow on the next screen should come back to `path`", and
+ * optionally "start your tempo at `bpm`".
+ */
+export function withReturn(path: string, extras: { bpm?: number } = {}): ReturnState {
+  return { returnTo: path, ...extras }
+}
+
+/** The tempo the previous screen passed along, if it is a whole number the app allows. */
+export function tempoFrom(state: unknown): number | undefined {
+  const bpm = (state as Partial<ReturnState> | null | undefined)?.bpm
+  const valid = typeof bpm === 'number' && Number.isInteger(bpm) && bpm >= MIN_BPM && bpm <= MAX_BPM
+  return valid ? bpm : undefined
 }
 
 /** Where a back arrow should go: the screen that sent you here, else `fallback`. */

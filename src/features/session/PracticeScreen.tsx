@@ -295,7 +295,7 @@ function PracticeView({
                 </div>
                 <Link
                   to={paths.goal(song.id, goal.id)}
-                  state={withReturn(paths.practice(song.id, goal.id))}
+                  state={withReturn(paths.practice(song.id, goal.id), { bpm })}
                   className="-my-2.5 -mr-1.5 flex h-11 items-center px-1.5 text-[13px] font-semibold text-orange desk:text-sm"
                 >
                   Log attempt

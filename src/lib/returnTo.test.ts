@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { returnTarget, withReturn } from './returnTo'
+import { returnTarget, tempoFrom, withReturn } from './returnTo'
 
 describe('returnTarget', () => {
   it('goes back to the screen that said where back should go', () => {
@@ -26,5 +26,28 @@ describe('returnTarget', () => {
 describe('withReturn', () => {
   it('builds the link state that returnTarget reads', () => {
     expect(returnTarget(withReturn('/practice/x'), '/fallback')).toBe('/practice/x')
+  })
+})
+
+describe('carrying a tempo along with the link', () => {
+  it('passes a tempo in the link state, next to the way back', () => {
+    const state = withReturn('/practice/x', { bpm: 96 })
+    expect(returnTarget(state, '/fallback')).toBe('/practice/x')
+    expect(tempoFrom(state)).toBe(96)
+  })
+
+  it('has no tempo unless one was passed', () => {
+    expect(tempoFrom(withReturn('/practice/x'))).toBeUndefined()
+    expect(tempoFrom(null)).toBeUndefined()
+    expect(tempoFrom(undefined)).toBeUndefined()
+    expect(tempoFrom({})).toBeUndefined()
+  })
+
+  it('ignores anything that is not a whole tempo between 30 and 240', () => {
+    for (const bpm of [29, 241, 90.5, NaN, '96', null, -10]) {
+      expect(tempoFrom({ returnTo: '/x', bpm })).toBeUndefined()
+    }
+    expect(tempoFrom({ bpm: 30 })).toBe(30)
+    expect(tempoFrom({ bpm: 240 })).toBe(240)
   })
 })

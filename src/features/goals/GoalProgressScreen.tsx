@@ -14,7 +14,7 @@ import { goalDone, goalProgress } from '../../domain/progress'
 import { QUALITY_LABELS } from '../../domain/quality'
 import type { Attempt } from '../../domain/schemas'
 import { formatAttemptDate } from '../../lib/formatDate'
-import { returnTarget } from '../../lib/returnTo'
+import { returnTarget, tempoFrom } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
 import { AttemptForm } from './AttemptForm'
@@ -92,6 +92,8 @@ export function GoalProgressScreen() {
           key={editing?.id ?? 'new'}
           goal={goal}
           attempts={attempts}
+          // From Practice, start at the metronome's tempo instead of the last logged one.
+          initialBpm={tempoFrom(location.state)}
           editing={editing}
           onDone={() => setEditing(undefined)}
         />
