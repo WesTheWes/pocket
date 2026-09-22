@@ -10,12 +10,22 @@ Local-first web app for tracking progress learning songs (pop and jazz, piano-fi
 - `npm run lint`: Oxlint (not ESLint)
 - `npm run format`: Prettier
 - `npm run build`: typecheck + production build
+- `npm run generate-pwa-assets`: regenerate the PWA icon PNGs from `public/icon-source.svg`. Run it whenever that source SVG changes.
 
 Before calling work done, run typecheck, lint, and test.
 
 ## Stack
 
-Vite, React 19, TypeScript, React Router, Tailwind v4, Dexie (+ `dexie-react-hooks`), Zod, React Hook Form, Vitest + Testing Library. Playwright, Radix, and `vite-plugin-pwa` are planned but not yet installed.
+Vite, React 19, TypeScript, React Router, Tailwind v4, Dexie (+ `dexie-react-hooks`), Zod, React Hook Form, Vitest + Testing Library, vite-plugin-pwa. Playwright and Radix (for BottomSheet/ConfirmSheet) are the only stack items from the original plan still outstanding.
+
+## PWA and deploy
+
+- Deployed to GitHub Pages at `https://westhewes.github.io/pocket/` via `.github/workflows/deploy.yml` on every push to `main`. `vite.config.ts`'s `base` is `/pocket/` only when the workflow sets `GITHUB_PAGES=true`; local dev/build/preview stay at `/`. `src/App.tsx`'s router `basename` reads `import.meta.env.BASE_URL`, so it can never drift out of sync with `base` — never hardcode `/pocket/` anywhere else.
+- GitHub Pages has no server-side rewrite, so a direct load or refresh of a deep route would 404. The deploy workflow copies `dist/index.html` to `dist/404.html` after the build; because this app uses real browser history (not hash routing), the address bar already shows the right URL when GitHub serves that 404 fallback, and the router just boots normally from it. Verified locally by serving `dist/` from a `/pocket/` subpath with a script that mimics this exact fallback (see the PR/commit that added this — no permanent script is kept in the repo).
+- `vite-plugin-pwa` uses `registerType: 'prompt'`, deliberately not `'autoUpdate'`: Practice runs a live metronome and a ticking session timer, and a forced reload mid-session would be jarring. `src/app/PwaUpdater.tsx` (mounted in `RootLayout`, inside `ToastProvider`) lets a new version install and wait, and only mentions it via the toast once it has taken over.
+- The manifest's icons come from `public/icon-source.svg` (a 512×512 master), rasterized by `@vite-pwa/assets-generator` (`pwa-assets.config.ts`, preset `'minimal-2023'` — note the hyphenated name; `minimal2023Preset` does not exist in the installed version) into `public/pwa-*.png`, `public/maskable-icon-512x512.png`, `public/apple-touch-icon-180x180.png` and `public/favicon.ico`. Edit the source SVG and rerun `npm run generate-pwa-assets` rather than hand-editing any PNG.
+- Google Fonts (loaded from the CDN in `index.html`) are covered by `workbox.runtimeCaching` in `vite.config.ts`, so they survive offline after the first online load. A user who installs the app and goes offline before ever opening it online even once will see system fonts until they're next online — a real, undocumented-elsewhere limitation, not a bug.
+- IndexedDB (Dexie) and `localStorage`/`sessionStorage` are unaffected by any of this: the service worker only intercepts `fetch` for static assets and the two Google Fonts hosts, never IndexedDB access, and both storage APIs are already origin-scoped (not path-scoped), so serving from `/pocket/` changes nothing about where existing data lives. This is also why the `pocket:` prefix on every localStorage/sessionStorage key matters: `westhewes.github.io` is one shared origin across any future project pages on the account.
 
 ## Design
 
