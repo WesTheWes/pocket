@@ -1,10 +1,19 @@
 import { MAX_BPM, MIN_BPM } from '../domain/schemas'
+import type { Subdivision } from '../domain/subdivision'
 import { BeatDots } from './BeatDots'
+import { Chip } from './Chip'
 import { Icon } from './Icon'
 
 /** The slider covers the useful range; the buttons and typed values go wider. */
 const SLIDER_MIN = 40
 const SLIDER_MAX = 200
+
+const SUBDIVISIONS: Array<{ value: Subdivision; label: string }> = [
+  { value: 'quarter', label: 'Quarters' },
+  { value: 'eighth', label: '8ths' },
+  { value: 'triplet', label: 'Triplets' },
+  { value: 'sixteenth', label: '16ths' },
+]
 
 interface Props {
   bpm: number
@@ -15,13 +24,25 @@ interface Props {
   beat: number | null
   /** False when this browser has no audio. */
   supported: boolean
+  /** Click on every beat, or also between beats. */
+  subdivision: Subdivision
+  onSubdivisionChange: (subdivision: Subdivision) => void
 }
 
 const round =
   'flex shrink-0 items-center justify-center rounded-full border border-line disabled:opacity-40'
 
 /** Beat dots, tempo controls and play. Stacked on phones, one row on desktop. */
-export function MetronomePanel({ bpm, onBpmChange, playing, onToggle, beat, supported }: Props) {
+export function MetronomePanel({
+  bpm,
+  onBpmChange,
+  playing,
+  onToggle,
+  beat,
+  supported,
+  subdivision,
+  onSubdivisionChange,
+}: Props) {
   const set = (next: number) => onBpmChange(Math.min(MAX_BPM, Math.max(MIN_BPM, next)))
 
   return (
@@ -71,6 +92,17 @@ export function MetronomePanel({ bpm, onBpmChange, playing, onToggle, beat, supp
           onChange={(event) => set(Number(event.target.value))}
           className="block h-11 w-full accent-orange"
         />
+        <div role="group" aria-label="Clicks per beat" className="flex justify-center gap-1.5">
+          {SUBDIVISIONS.map(({ value, label }) => (
+            <Chip
+              key={value}
+              selected={subdivision === value}
+              onClick={() => onSubdivisionChange(value)}
+            >
+              {label}
+            </Chip>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col items-center gap-2">

@@ -17,9 +17,11 @@ import {
   toPercent,
 } from '../../domain/progress'
 import type { Attempt, Goal, Section, Session, Song } from '../../domain/schemas'
+import { SUBDIVISIONS } from '../../domain/subdivision'
 import { cn } from '../../lib/cn'
 import { formatDuration } from '../../lib/formatDuration'
 import { withReturn } from '../../lib/returnTo'
+import { useStoredChoice } from '../../lib/useStoredChoice'
 import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
 import { SongNotFound } from '../songs/SongNotFound'
@@ -163,7 +165,12 @@ function PracticeView({
     setTempo({ goalKey, bpm: next })
     rememberTempo(session.id, goalKey, next, Date.now())
   }
-  const metronome = useMetronome(bpm)
+  const [subdivision, setSubdivision] = useStoredChoice(
+    'pocket:metronome:subdivision',
+    SUBDIVISIONS,
+    'quarter',
+  )
+  const metronome = useMetronome(bpm, subdivision)
 
   const currentSection = goal ? sections.find((s) => s.id === goal.sectionId) : undefined
   const sectionName = currentSection?.name
@@ -422,6 +429,8 @@ function PracticeView({
             onToggle={metronome.toggle}
             beat={metronome.beat}
             supported={metronome.supported}
+            subdivision={subdivision}
+            onSubdivisionChange={setSubdivision}
           />
         </div>
 

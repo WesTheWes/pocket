@@ -1,4 +1,10 @@
-import { createScheduler, type Scheduler, type SchedulerDeps } from './scheduler'
+import {
+  createScheduler,
+  type ClickKind,
+  type Scheduler,
+  type SchedulerDeps,
+  type Subdivision,
+} from './scheduler'
 
 /*
  * The only Web Audio code in the app. It is described by these small interfaces, rather than the
@@ -31,22 +37,31 @@ export interface AudioContextLike {
 
 export const ACCENT_HZ = 1600
 export const CLICK_HZ = 1100
+export const SUB_HZ = 800
 
 const CLICK_SECONDS = 0.05
 
-/** A short percussive blip at `time`, louder and higher on the downbeat. */
-function playClick(context: AudioContextLike, time: number, accent: boolean) {
+const SOUNDS: Record<ClickKind, { hz: number; volume: number; seconds: number }> = {
+  accent: { hz: ACCENT_HZ, volume: 0.5, seconds: CLICK_SECONDS },
+  beat: { hz: CLICK_HZ, volume: 0.3, seconds: CLICK_SECONDS },
+  // Between beats: lower, quieter and shorter, so the beat still stands out.
+  sub: { hz: SUB_HZ, volume: 0.15, seconds: 0.035 },
+}
+
+/** A short percussive blip at `time`: loudest and highest on the downbeat, softest between beats. */
+function playClick(context: AudioContextLike, time: number, kind: ClickKind) {
+  const { hz, volume, seconds } = SOUNDS[kind]
   const oscillator = context.createOscillator()
   const gain = context.createGain()
   oscillator.type = 'square'
-  oscillator.frequency.value = accent ? ACCENT_HZ : CLICK_HZ
+  oscillator.frequency.value = hz
   gain.gain.setValueAtTime(0.0001, time)
-  gain.gain.exponentialRampToValueAtTime(accent ? 0.5 : 0.3, time + 0.002)
-  gain.gain.exponentialRampToValueAtTime(0.0001, time + CLICK_SECONDS)
+  gain.gain.exponentialRampToValueAtTime(volume, time + 0.002)
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + seconds)
   oscillator.connect(gain)
   gain.connect(context.destination)
   oscillator.start(time)
-  oscillator.stop(time + CLICK_SECONDS + 0.01)
+  oscillator.stop(time + seconds + 0.01)
 }
 
 export interface Metronome {
@@ -57,6 +72,8 @@ export interface Metronome {
   start(bpm: number): boolean
   stop(): void
   setBpm(bpm: number): void
+  /** Click on every beat, or on eighths, triplets or sixteenths. Takes effect on the next beat. */
+  setSubdivision(subdivision: Subdivision): void
   isRunning(): boolean
   /** The beat (0 to 3) sounding right now, for the beat dots. */
   beatAt(): number | null
@@ -82,6 +99,7 @@ export function createMetronome(deps: MetronomeDeps = {}): Metronome {
   let context: AudioContextLike | null = null
   let scheduler: Scheduler | null = null
   let disposed = false
+  let subdivision: Subdivision = 'quarter'
 
   // The context is created on first start, which is inside the user's tap.
   function ensure(): Scheduler | null {
@@ -92,10 +110,11 @@ export function createMetronome(deps: MetronomeDeps = {}): Metronome {
     context = created
     scheduler = createScheduler({
       now: () => created.currentTime,
-      click: (time, accent) => playClick(created, time, accent),
+      click: (time, kind) => playClick(created, time, kind),
       setTimer,
       clearTimer,
     })
+    scheduler.setSubdivision(subdivision)
     return scheduler
   }
 
@@ -112,6 +131,10 @@ export function createMetronome(deps: MetronomeDeps = {}): Metronome {
     },
     setBpm(bpm) {
       scheduler?.setBpm(bpm)
+    },
+    setSubdivision(next) {
+      subdivision = next
+      scheduler?.setSubdivision(next)
     },
     isRunning: () => scheduler?.isRunning() ?? false,
     beatAt: () => (scheduler && context ? scheduler.beatAt(context.currentTime) : null),

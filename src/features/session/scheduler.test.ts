@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { createScheduler } from './scheduler'
+import { createScheduler, type ClickKind } from './scheduler'
 
 /** A fake audio clock and a timer we fire by hand. */
 function fake() {
   let time = 0
   let pending: (() => void) | null = null
-  const clicks: Array<{ time: number; accent: boolean; scheduledAt: number }> = []
+  const clicks: Array<{ time: number; kind: ClickKind; accent: boolean; scheduledAt: number }> = []
   const scheduler = createScheduler({
     now: () => time,
-    click: (at, accent) => clicks.push({ time: at, accent, scheduledAt: time }),
+    click: (at, kind) =>
+      clicks.push({ time: at, kind, accent: kind === 'accent', scheduledAt: time }),
     setTimer: (callback) => {
       pending = callback
       return 1
@@ -140,6 +141,59 @@ describe('createScheduler', () => {
     t.scheduler.stop()
     t.scheduler.start(120)
     expect(t.clicks[t.clicks.length - 1].accent).toBe(true)
+  })
+
+  describe('subdivisions', () => {
+    it('clicks twice a beat on eighths, with the beat louder than the click between', () => {
+      const t = fake()
+      t.scheduler.setSubdivision('eighth')
+      t.scheduler.start(120)
+      t.run(2)
+      const times = t.clicks.map((c) => c.time)
+      times.forEach((time, index) => expect(time).toBeCloseTo(0.05 + index * 0.25, 9))
+      expect(t.clicks.slice(0, 4).map((c) => c.kind)).toEqual(['accent', 'sub', 'beat', 'sub'])
+    })
+
+    it('splits each beat into three for triplets and four for sixteenths', () => {
+      for (const [subdivision, count] of [
+        ['triplet', 3],
+        ['sixteenth', 4],
+      ] as const) {
+        const t = fake()
+        t.scheduler.setSubdivision(subdivision)
+        t.scheduler.start(60)
+        t.run(4)
+        const times = t.clicks.map((c) => c.time)
+        times.forEach((time, index) => expect(time).toBeCloseTo(0.05 + index / count, 9))
+        const kinds = t.clicks.map((c) => c.kind)
+        expect(kinds.slice(0, count + 1)).toEqual([
+          'accent',
+          ...Array(count - 1).fill('sub'),
+          'beat',
+        ])
+      }
+    })
+
+    it('switches subdivision on the next beat, keeping the beats on the grid', () => {
+      const t = fake()
+      t.scheduler.start(60)
+      t.run(1.5)
+      t.scheduler.setSubdivision('sixteenth')
+      t.run(4)
+      const beats = t.clicks.filter((c) => c.kind !== 'sub').map((c) => c.time)
+      beats.forEach((time, index) => expect(time).toBeCloseTo(0.05 + index, 9))
+      const firstSub = t.clicks.find((c) => c.kind === 'sub')!
+      expect((firstSub.time - 0.05) % 1).toBeCloseTo(0.25, 9)
+    })
+
+    it('reports only the beats, not the clicks between them, in beatAt', () => {
+      const t = fake()
+      t.scheduler.setSubdivision('sixteenth')
+      t.scheduler.start(120)
+      t.run(2)
+      expect(t.scheduler.beatAt(0.3)).toBe(0)
+      expect(t.scheduler.beatAt(0.56)).toBe(1)
+    })
   })
 
   describe('beatAt', () => {

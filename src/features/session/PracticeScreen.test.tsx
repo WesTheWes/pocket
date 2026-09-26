@@ -316,6 +316,25 @@ describe('the metronome', () => {
     expect(screen.getByRole('button', { name: 'Start metronome' })).toBeInTheDocument()
   })
 
+  it('clicks on quarters by default, and remembers a subdivision you pick', async () => {
+    localStorage.removeItem('pocket:metronome:subdivision')
+    await loadSamples()
+    const user = userEvent.setup()
+    const { unmount } = renderApp('/practice/piano-man')
+    const group = within(await screen.findByRole('group', { name: 'Clicks per beat' }))
+    expect(group.getByRole('button', { name: 'Quarters' })).toHaveAttribute('aria-pressed', 'true')
+
+    await user.click(group.getByRole('button', { name: 'Triplets' }))
+    expect(group.getByRole('button', { name: 'Triplets' })).toHaveAttribute('aria-pressed', 'true')
+    expect(group.getByRole('button', { name: 'Quarters' })).toHaveAttribute('aria-pressed', 'false')
+    unmount()
+
+    renderApp('/practice/piano-man')
+    const again = within(await screen.findByRole('group', { name: 'Clicks per beat' }))
+    expect(again.getByRole('button', { name: 'Triplets' })).toHaveAttribute('aria-pressed', 'true')
+    localStorage.removeItem('pocket:metronome:subdivision')
+  })
+
   it('keeps playing when you move to the next goal', async () => {
     await loadSamples()
     const user = userEvent.setup()

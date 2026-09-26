@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ACCENT_HZ, CLICK_HZ, createMetronome, type AudioContextLike } from './metronome'
+import { ACCENT_HZ, CLICK_HZ, createMetronome, SUB_HZ, type AudioContextLike } from './metronome'
 
 class FakeParam {
   calls: Array<[string, number, number]> = []
@@ -135,6 +135,18 @@ describe('createMetronome', () => {
     }
     const pitches = t.context.oscillators.map((o) => o.frequency.value)
     expect(pitches.slice(0, 5)).toEqual([ACCENT_HZ, CLICK_HZ, CLICK_HZ, CLICK_HZ, ACCENT_HZ])
+  })
+
+  it('plays softer, lower clicks between beats, keeping a subdivision chosen before start', () => {
+    const t = setup()
+    t.metronome.setSubdivision('eighth')
+    t.metronome.start(240)
+    for (let i = 1; i <= 50; i++) {
+      t.context.currentTime = i * 0.025
+      t.wake()
+    }
+    const pitches = t.context.oscillators.map((o) => o.frequency.value)
+    expect(pitches.slice(0, 4)).toEqual([ACCENT_HZ, SUB_HZ, CLICK_HZ, SUB_HZ])
   })
 
   it('reuses one context across stops and starts', () => {

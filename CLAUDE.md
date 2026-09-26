@@ -94,6 +94,7 @@ src/
 ## Practice (src/features/session)
 
 - The metronome is split in two: `scheduler.ts` is pure look-ahead timing (a timer only wakes it; beats are placed on the audio clock, so they never drift) and `metronome.ts` is the thin Web Audio wrapper. Both are tested with fakes; `src/test/fakeAudio.ts` stubs `AudioContext` for screen tests.
+- The metronome can click between beats: quarters, 8ths, triplets or 16ths (`Subdivision` in src/domain/subdivision.ts). The scheduler plays each beat as `accent`/`beat` and the clicks between as `sub` (lower, quieter, shorter), and only switches subdivision on a beat so the grid never lurches. `beatAt` still reports beats only. The choice is remembered in localStorage (`useStoredChoice`, key `pocket:metronome:subdivision`).
 - `useMetronome` creates the metronome in an effect (not in render), so React StrictMode's extra mount cannot leave a disposed one.
 - `useSessionTimer` reads the clock through `useSyncExternalStore` and derives time from the stored session. It ticks in 250 ms steps, so it can read a hair behind real time.
 - An open session older than 12 hours (`isSessionStale`) is treated as abandoned: `startOrResume` ends it and starts a fresh one, and `getActive` ignores it.

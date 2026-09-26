@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createMetronome, type Metronome } from './metronome'
+import type { Subdivision } from './scheduler'
 
 /**
  * Owns a metronome for the lifetime of a screen. The metronome is created in an effect, not
  * during render, so React StrictMode's extra mount/unmount cannot leave us holding a disposed
  * one, and it is disposed on unmount so audio never outlives the screen.
  */
-export function useMetronome(bpm: number) {
+export function useMetronome(bpm: number, subdivision: Subdivision = 'quarter') {
   const metronome = useRef<Metronome | null>(null)
   const [playing, setPlaying] = useState(false)
   const [beat, setBeat] = useState<number | null>(null)
@@ -24,6 +25,10 @@ export function useMetronome(bpm: number) {
   useEffect(() => {
     metronome.current?.setBpm(bpm)
   }, [bpm])
+
+  useEffect(() => {
+    metronome.current?.setSubdivision(subdivision)
+  }, [subdivision])
 
   // Follow the audio clock so the beat dots pulse with the click, not with React's timing.
   useEffect(() => {
