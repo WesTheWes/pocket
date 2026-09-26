@@ -291,6 +291,15 @@ describe('sessions', () => {
     expect(await repos.sessions.getActive(song.id)).toMatchObject({ id: second.id })
   })
 
+  it('lists every session, oldest first', async () => {
+    const { repos, song, advance } = await setup()
+    const first = await repos.sessions.startOrResume(song.id)
+    await repos.sessions.end(first.id)
+    advance(1_000)
+    const second = await repos.sessions.startOrResume(song.id)
+    expect((await repos.sessions.list()).map((s) => s.id)).toEqual([first.id, second.id])
+  })
+
   it('keeps time across a pause and a reload of the stored session', async () => {
     const { repos, song, advance } = await setup()
     const started = await repos.sessions.startOrResume(song.id)

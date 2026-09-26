@@ -1,4 +1,4 @@
-import { fastestSolidBpm, goalDone } from './progress'
+import { averageProgress, fastestSolidBpm, goalDone, goalProgress } from './progress'
 import type { Attempt, Goal, Session } from './schemas'
 
 /**
@@ -36,10 +36,26 @@ export interface GoalChange {
   after: number | null
   /** After minus before; null unless both exist. */
   deltaBpm: number | null
+  /** Goal progress (0 to 1) before the session. */
+  progressBefore: number
+  /** Goal progress (0 to 1) after the session. */
+  progressAfter: number
   becameDone: boolean
   improved: boolean
-  /** This session's attempts for the goal, oldest first. */
+  /** The goal's most recent attempt before the session, or null if there was none. */
+  lastBefore: Attempt | null
+  /** This session's attempts for the goal, oldest first. Never empty. */
   attempts: Attempt[]
+}
+
+/**
+ * Splits a song's attempts around a session: `earlier` were logged before it started, and
+ * `afterAll` adds the session's own attempts to those (but nothing from later sessions).
+ */
+export function splitAtSession(session: Session, attempts: Attempt[]) {
+  const earlier = attempts.filter((a) => a.sessionId !== session.id && a.at < session.startedAt)
+  const inSession = attempts.filter((a) => a.sessionId === session.id)
+  return { earlier, inSession, afterAll: [...earlier, ...inSession] }
 }
 
 /**
@@ -47,9 +63,7 @@ export interface GoalChange {
  * session (attempts logged earlier) with progress after it (those plus the session's attempts).
  */
 export function sessionChanges(session: Session, goals: Goal[], attempts: Attempt[]): GoalChange[] {
-  const earlier = attempts.filter((a) => a.sessionId !== session.id && a.at < session.startedAt)
-  const inSession = attempts.filter((a) => a.sessionId === session.id)
-  const afterAll = [...earlier, ...inSession]
+  const { earlier, inSession, afterAll } = splitAtSession(session, attempts)
 
   return goals.flatMap((goal) => {
     const worked = inSession.filter((a) => a.goalId === goal.id).sort((a, b) => a.at - b.at)
@@ -59,6 +73,9 @@ export function sessionChanges(session: Session, goals: Goal[], attempts: Attemp
     const after = fastestSolidBpm(goal, afterAll)
     const becameDone = !goalDone(goal, earlier) && goalDone(goal, afterAll)
     const gotFaster = after !== null && (before === null || after > before)
+    const lastBefore = earlier
+      .filter((a) => a.goalId === goal.id)
+      .reduce<Attempt | null>((latest, a) => (latest === null || a.at > latest.at ? a : latest), null)
 
     return [
       {
@@ -66,12 +83,25 @@ export function sessionChanges(session: Session, goals: Goal[], attempts: Attemp
         before,
         after,
         deltaBpm: before !== null && after !== null ? after - before : null,
+        progressBefore: goalProgress(goal, earlier),
+        progressAfter: goalProgress(goal, afterAll),
         becameDone,
         improved: becameDone || gotFaster,
+        lastBefore,
         attempts: worked,
       },
     ]
   })
+}
+
+/** The song's overall progress (every goal, 0 to 1) before and after the session. */
+export function songProgressChange(
+  session: Session,
+  goals: Goal[],
+  attempts: Attempt[],
+): { before: number; after: number } {
+  const { earlier, afterAll } = splitAtSession(session, attempts)
+  return { before: averageProgress(goals, earlier), after: averageProgress(goals, afterAll) }
 }
 
 /** An open session older than this was almost certainly abandoned, not still being practiced. */

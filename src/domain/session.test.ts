@@ -7,6 +7,7 @@ import {
   resumeSession,
   sessionChanges,
   sessionElapsedMs,
+  songProgressChange,
 } from './session'
 
 const SECOND = 1000
@@ -150,12 +151,57 @@ describe('sessionChanges', () => {
     expect(change.after).toBe(72)
   })
 
+  it('reports goal progress before and after the session', () => {
+    const goal = makeGoal({ id: 'a', targetBpm: 80 })
+    const attempts = [solid('a', 40, 500), solid('a', 60, 2_000, 's')]
+    const [change] = sessionChanges(session, [goal], attempts)
+    expect(change.progressBefore).toBe(0.5)
+    expect(change.progressAfter).toBe(0.75)
+  })
+
+  it('remembers the most recent attempt before the session, whatever its level', () => {
+    const goal = makeGoal({ id: 'a' })
+    const older = solid('a', 50, 100)
+    const latest = makeAttempt({ goalId: 'a', bpm: 54, level: 2, at: 800 })
+    const attempts = [latest, older, solid('a', 60, 2_000, 's')]
+    expect(sessionChanges(session, [goal], attempts)[0].lastBefore).toEqual(latest)
+  })
+
+  it('has no attempt before the session for a goal first played in it', () => {
+    const goal = makeGoal({ id: 'a' })
+    const [change] = sessionChanges(session, [goal], [solid('a', 60, 2_000, 's')])
+    expect(change.lastBefore).toBeNull()
+  })
+
   it("lists the session's attempts oldest first", () => {
     const goal = makeGoal({ id: 'a' })
     const late = solid('a', 70, 3_000, 's')
     const early = solid('a', 60, 2_000, 's')
     const [change] = sessionChanges(session, [goal], [late, early])
     expect(change.attempts).toEqual([early, late])
+  })
+})
+
+describe('songProgressChange', () => {
+  const session = makeSession({ id: 's', startedAt: 1_000, endedAt: 5_000 })
+
+  it('averages every goal of the song before and after the session', () => {
+    const worked = makeGoal({ id: 'a', targetBpm: 80 })
+    const untouched = makeGoal({ id: 'b', targetBpm: 80 })
+    const attempts = [
+      makeAttempt({ goalId: 'a', bpm: 40, level: 4, at: 500 }),
+      makeAttempt({ goalId: 'b', bpm: 80, level: 4, at: 500 }),
+      makeAttempt({ goalId: 'a', bpm: 80, level: 4, at: 2_000, sessionId: 's' }),
+      makeAttempt({ goalId: 'b', bpm: 20, level: 4, at: 9_000, sessionId: 'later' }),
+    ]
+    expect(songProgressChange(session, [worked, untouched], attempts)).toEqual({
+      before: 0.75,
+      after: 1,
+    })
+  })
+
+  it('is zero before and after for a song with no goals', () => {
+    expect(songProgressChange(session, [], [])).toEqual({ before: 0, after: 0 })
   })
 })
 

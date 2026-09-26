@@ -22,6 +22,8 @@ export function createSessionsRepo({ db, now, newId }: RepoContext) {
   return {
     get: (id: string) => db.sessions.get(id),
 
+    list: () => db.sessions.orderBy('startedAt').toArray(),
+
     listBySong: (songId: string) => db.sessions.where('songId').equals(songId).sortBy('startedAt'),
 
     /** The song's session that has not ended yet, if any. Ignores one that was abandoned. */
