@@ -67,13 +67,10 @@ describe('recentImprovements', () => {
   it("only looks at the session's own song", () => {
     const session = sessionAt('s', 1)
     const elsewhere = makeGoal({ id: 'c', songId: 'other-song' })
-    const found = recentImprovements(
-      [session],
-      [elsewhere],
-      [attemptIn(session, 'c', 60)],
-      now,
-      { days: 30, limit: 10 },
-    )
+    const found = recentImprovements([session], [elsewhere], [attemptIn(session, 'c', 60)], now, {
+      days: 30,
+      limit: 10,
+    })
     expect(found).toEqual([])
   })
 })

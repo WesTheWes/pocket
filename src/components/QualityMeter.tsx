@@ -12,9 +12,18 @@ const fills: Record<QualityLevel, string> = {
 
 /**
  * Five segments filled up to `level`, in that level's colour. Decorative: always pair it with
- * the level's written name, so meaning never depends on colour alone.
+ * the level's written name, so meaning never depends on colour alone. `target` outlines the
+ * level being aimed for, while it is still out of reach.
  */
-export function QualityMeter({ level, className }: { level: QualityLevel; className?: string }) {
+export function QualityMeter({
+  level,
+  target,
+  className,
+}: {
+  level: QualityLevel
+  target?: QualityLevel
+  className?: string
+}) {
   return (
     <span aria-hidden="true" className={cn('flex w-full gap-[3px]', className)}>
       {QUALITY_LEVELS.map((segment) => (
@@ -23,6 +32,7 @@ export function QualityMeter({ level, className }: { level: QualityLevel; classN
           className={cn(
             'h-[5px] flex-1 rounded-sm',
             segment <= level ? fills[level] : 'bg-surface-2',
+            segment === target && segment > level && 'outline-solid outline-[1.5px] outline-yellow',
           )}
         />
       ))}

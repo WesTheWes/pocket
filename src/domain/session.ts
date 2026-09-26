@@ -75,7 +75,10 @@ export function sessionChanges(session: Session, goals: Goal[], attempts: Attemp
     const gotFaster = after !== null && (before === null || after > before)
     const lastBefore = earlier
       .filter((a) => a.goalId === goal.id)
-      .reduce<Attempt | null>((latest, a) => (latest === null || a.at > latest.at ? a : latest), null)
+      .reduce<Attempt | null>(
+        (latest, a) => (latest === null || a.at > latest.at ? a : latest),
+        null,
+      )
 
     return [
       {

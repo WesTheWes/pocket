@@ -1,62 +1,76 @@
 import { IconLink } from '../../components/IconButton'
 import { QualityMeter } from '../../components/QualityMeter'
-import { QUALITY_LABELS } from '../../domain/quality'
+import { SOLID } from '../../domain/quality'
 import type { GoalChange } from '../../domain/session'
 import { cn } from '../../lib/cn'
+import { formatTimeAgo } from '../../lib/formatDate'
 import { withReturn } from '../../lib/returnTo'
 import { paths } from '../../paths'
-import { beforeAfterText, changeTag } from './reviewText'
+import { changeTag, lastAttempt, qualityText, tempoText } from './reviewText'
 
-/** One goal from the session: where it moved, what you played, and whether it improved. */
+/** An earlier attempt older than this gets a note, so a big jump or dip reads in context. */
+const OLD_ATTEMPT_MS = 14 * 24 * 60 * 60 * 1000
+
+/**
+ * One goal from the session: its last attempt before the session against its last one in it
+ * (tempo and quality), and what changed.
+ */
 export function WorkedOnCard({
   change,
   sectionName,
   songId,
   returnTo,
+  now,
 }: {
   change: GoalChange
   sectionName: string
   songId: string
   /** Where the back arrow on the goal's progress screen should come back to. */
   returnTo: string
+  now: number
 }) {
-  const { goal, attempts, improved } = change
+  const { goal, lastBefore } = change
+  const tag = changeTag(change)
+  const level = lastAttempt(change).level
   return (
-    <li className="rounded-row bg-surface p-4">
+    <li className="rounded-row bg-surface p-5">
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="eyebrow">{sectionName}</div>
-          <h3 className="mt-1 text-base font-medium leading-[1.3]">{goal.title}</h3>
+          <h3 className="mt-1 text-[17px] font-medium leading-[1.3]">{goal.title}</h3>
         </div>
         <IconLink
           to={paths.goal(songId, goal.id)}
           state={withReturn(returnTo)}
           icon="edit"
           label={`Edit progress for ${goal.title}`}
-          className="text-muted"
+          className="-mr-2 -mt-2 text-muted"
         />
       </div>
 
-      <p className="mt-2.5 text-[15px] font-semibold tabular-nums">{beforeAfterText(change)}</p>
+      <dl className="mt-4 grid grid-cols-2 gap-4">
+        <div>
+          <dt className="text-[13px] text-muted">Tempo</dt>
+          <dd className="mt-1 text-[17px] font-semibold tabular-nums">{tempoText(change)}</dd>
+        </div>
+        <div>
+          <dt className="text-[13px] text-muted">Quality</dt>
+          <dd className="mt-1 text-[17px] font-semibold leading-[1.35]">{qualityText(change)}</dd>
+        </div>
+      </dl>
 
-      <ul className="mt-3 flex flex-col gap-2" aria-label={`Attempts on ${goal.title}`}>
-        {attempts.map((attempt) => (
-          <li key={attempt.id} className="flex items-center gap-3 text-sm">
-            <span className="w-[4.5rem] tabular-nums">
-              {attempt.bpm === null ? 'No tempo' : `${attempt.bpm} BPM`}
-            </span>
-            <span className="w-20 shrink-0">
-              <QualityMeter level={attempt.level} />
-            </span>
-            <span className="text-muted">{QUALITY_LABELS[attempt.level]}</span>
-          </li>
-        ))}
-      </ul>
+      <QualityMeter level={level} target={SOLID} className="mt-4 [&>span]:h-2" />
+
+      {lastBefore && now - lastBefore.at > OLD_ATTEMPT_MS && (
+        <p className="mt-3 text-[13px] text-muted">
+          Last time: {formatTimeAgo(lastBefore.at, now).toLowerCase()}
+        </p>
+      )}
 
       <div
-        className={cn('mt-3.5 text-[13px] font-semibold', improved ? 'text-yellow' : 'text-muted')}
+        className={cn('mt-3 text-[13px] font-semibold', tag.good ? 'text-yellow' : 'text-muted')}
       >
-        {changeTag(change)}
+        {tag.text}
       </div>
     </li>
   )

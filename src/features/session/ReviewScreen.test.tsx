@@ -13,9 +13,11 @@ async function loadSamples() {
 }
 
 // The sample session: 24 minutes of practice (plus 3 paused), with attempts on two goals.
+const DAY = 24 * 60 * 60 * 1000
 const REVIEW = '/practice/piano-man/review/piano-man-session'
 
-const card = (title: string) => screen.getByText(title).closest('li') as HTMLElement
+const workedOn = () => within(screen.getByRole('region', { name: 'Worked on' }))
+const card = (title: string) => workedOn().getByText(title).closest('li') as HTMLElement
 
 describe('ReviewScreen', () => {
   it('shows how long you practiced, excluding time paused', async () => {
@@ -34,27 +36,60 @@ describe('ReviewScreen', () => {
     expect(screen.getByText('Improved').previousElementSibling).toHaveTextContent('1')
   })
 
-  it('shows a goal that did not move as No change', async () => {
+  it('compares the last attempt before the session with the last one in it', async () => {
     await loadSamples()
     renderApp(REVIEW)
     await screen.findByText('Practice complete')
     const bars = card('First 4 bars with only bass and melody')
-    expect(within(bars).getByText('fastest Solid 64 BPM')).toBeInTheDocument()
-    expect(within(bars).getByText('No change')).toBeInTheDocument()
     expect(within(bars).getByText('Verse')).toBeInTheDocument()
+    expect(within(bars).getByText('64 → 76 BPM')).toBeInTheDocument()
+    expect(within(bars).getByText('Solid → Shaky')).toBeInTheDocument()
+    expect(within(bars).getByText('+12 BPM')).toBeInTheDocument()
+
+    const fill = card('Walk-up fill into bar 5')
+    expect(within(fill).getByText('Chorus')).toBeInTheDocument()
+    expect(within(fill).getByText('60 → 42 BPM')).toBeInTheDocument()
+    expect(within(fill).getByText('Rough → Solid')).toBeInTheDocument()
+    expect(within(fill).getByText('quality up')).toBeInTheDocument()
   })
 
-  it('shows a first Solid attempt, and lists what was played in order', async () => {
+  it('charts progress before and after for the whole song and each goal worked on', async () => {
     await loadSamples()
     renderApp(REVIEW)
     await screen.findByText('Practice complete')
-    const fill = card('Walk-up fill into bar 5')
-    expect(within(fill).getByText('no Solid attempt yet to 42 BPM')).toBeInTheDocument()
-    expect(within(fill).getByText('First Solid attempt at 42 BPM')).toBeInTheDocument()
-    expect(within(fill).getByText('Chorus')).toBeInTheDocument()
+    const chart = screen.getByRole('list', { name: 'Progress before and after this session' })
+    const rows = within(chart).getAllByRole('listitem')
+    expect(rows).toHaveLength(3)
+    expect(within(rows[0]).getByText('Overall progress · every goal')).toBeInTheDocument()
+    expect(within(rows[1]).getByText('First 4 bars with only bass and melody')).toBeInTheDocument()
+    expect(within(rows[1]).getByText('unchanged at 76%')).toBeInTheDocument()
+    expect(within(rows[2]).getByText('Walk-up fill into bar 5')).toBeInTheDocument()
+    expect(within(rows[2]).getByText('from 0% to 50%')).toBeInTheDocument()
+  })
 
-    const attempts = within(within(fill).getByRole('list')).getAllByRole('listitem')
-    expect(attempts.map((li) => li.textContent)).toEqual(['50 BPMRough', '42 BPMSolid'])
+  it('notes when the last attempt before the session was long ago', async () => {
+    // The sample data as it was a month ago, so every earlier attempt is at least that old.
+    await repos.backup.replaceAll(createSeedData(Date.now() - 30 * DAY))
+    const session = await repos.sessions.startOrResume('piano-man')
+    await repos.attempts.create({
+      goalId: 'piano-man-g5',
+      bpm: 48,
+      level: 4,
+      sessionId: session.id,
+    })
+    await repos.sessions.end(session.id)
+    renderApp(`/practice/piano-man/review/${session.id}`)
+    await screen.findByText('Practice complete')
+    expect(
+      within(card('Walk-up fill into bar 5')).getByText('Last time: 4 weeks ago'),
+    ).toBeVisible()
+  })
+
+  it('does not note a recent earlier attempt', async () => {
+    await loadSamples()
+    renderApp(REVIEW)
+    await screen.findByText('Practice complete')
+    expect(screen.queryByText(/Last time/)).not.toBeInTheDocument()
   })
 
   it('lists only goals that were worked on in this session', async () => {
@@ -86,9 +121,9 @@ describe('ReviewScreen', () => {
     await repos.sessions.end(session.id)
     renderApp(`/practice/piano-man/review/${session.id}`)
 
-    const bars = await screen.findByText('First 4 bars with only bass and melody')
-    const item = bars.closest('li') as HTMLElement
-    expect(within(item).getByText('fastest Solid 64 to 84 BPM')).toBeInTheDocument()
+    await screen.findByText('Practice complete')
+    const item = card('First 4 bars with only bass and melody')
+    expect(within(item).getByText('76 → 84 BPM')).toBeInTheDocument()
     expect(within(item).getByText('Done')).toBeInTheDocument()
     expect(screen.getByText('Improved').previousElementSibling).toHaveTextContent('1')
   })
@@ -104,7 +139,8 @@ describe('ReviewScreen', () => {
     })
     await repos.sessions.end(session.id)
     renderApp(`/practice/piano-man/review/${session.id}`)
-    const goal = (await screen.findByText('Play start to finish without stopping')).closest('li')!
+    await screen.findByText('Practice complete')
+    const goal = card('Play start to finish without stopping')
     expect(within(goal).getByText('Whole song')).toBeInTheDocument()
   })
 

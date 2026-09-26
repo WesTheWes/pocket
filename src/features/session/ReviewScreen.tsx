@@ -4,8 +4,13 @@ import { IconLink } from '../../components/IconButton'
 import { MissingPage } from '../../components/MissingPage'
 import { Page } from '../../components/Page'
 import { useGoals, useSections, useSession, useSong, useSongAttempts } from '../../data/hooks'
+import {
+  BeforeAfterLegend,
+  ProgressChange,
+  ProgressChangeList,
+} from '../../components/ProgressChange'
 import { orderGoals } from '../../domain/progress'
-import { sessionChanges } from '../../domain/session'
+import { sessionChanges, songProgressChange } from '../../domain/session'
 import { formatDuration } from '../../lib/formatDuration'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
@@ -31,6 +36,8 @@ export function ReviewScreen() {
   }
 
   const changes = sessionChanges(session, orderGoals(goals, sections), attempts)
+  const songChange = songProgressChange(session, goals, attempts)
+  const now = Date.now()
   const improved = changes.filter((change) => change.improved).length
   const sectionName = (sectionId: string | null) =>
     sections.find((section) => section.id === sectionId)?.name ?? 'Whole song'
@@ -63,7 +70,35 @@ export function ReviewScreen() {
         </div>
       </dl>
 
-      <section className="px-5 pt-5" aria-labelledby="worked-on-heading">
+      {changes.length > 0 && (
+        <section className="px-5 pt-7" aria-labelledby="progress-heading">
+          <div className="flex h-11 items-center justify-between">
+            <h2 id="progress-heading" className="eyebrow">
+              Progress
+            </h2>
+            <BeforeAfterLegend />
+          </div>
+          <ProgressChangeList label="Progress before and after this session">
+            <ProgressChange
+              eyebrow="Whole song"
+              title="Overall progress · every goal"
+              before={songChange.before}
+              after={songChange.after}
+            />
+            {changes.map((change) => (
+              <ProgressChange
+                key={change.goal.id}
+                eyebrow={sectionName(change.goal.sectionId)}
+                title={change.goal.title}
+                before={change.progressBefore}
+                after={change.progressAfter}
+              />
+            ))}
+          </ProgressChangeList>
+        </section>
+      )}
+
+      <section className="px-5 pt-7" aria-labelledby="worked-on-heading">
         <div className="flex h-11 items-center">
           <h2 id="worked-on-heading" className="eyebrow">
             Worked on
@@ -83,17 +118,18 @@ export function ReviewScreen() {
                 sectionName={sectionName(change.goal.sectionId)}
                 songId={song.id}
                 returnTo={paths.review(song.id, session.id)}
+                now={now}
               />
             ))}
           </ul>
         )}
       </section>
 
-      <div className="mt-auto flex flex-col gap-2.5 px-5 pb-10 pt-8">
-        <ButtonLink to={paths.practice(song.id)} icon="play">
+      <div className="mt-auto grid grid-cols-2 gap-2.5 px-5 pb-10 pt-8">
+        <ButtonLink to={paths.practice(song.id)} variant="secondary">
           Practice again
         </ButtonLink>
-        <ButtonLink to={paths.home} variant="secondary">
+        <ButtonLink to={paths.home} icon="check">
           Done
         </ButtonLink>
       </div>
