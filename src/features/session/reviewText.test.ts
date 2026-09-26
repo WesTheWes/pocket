@@ -47,13 +47,13 @@ describe('tempoText', () => {
 describe('qualityText', () => {
   it('shows the move from one level to another', () => {
     expect(qualityText(change({ lastBefore: attempt(54, 1), attempts: [attempt(60, 2)] }))).toBe(
-      "Can't yet → Rough",
+      "Can't play at all → Many mistakes",
     )
   })
 
   it('shows a single level when it did not change or there was nothing before', () => {
     expect(qualityText(change({ lastBefore: attempt(54, 3), attempts: [attempt(60, 3)] }))).toBe(
-      'Shaky',
+      'Few mistakes',
     )
     expect(qualityText(change({ attempts: [attempt(60, 4)] }))).toBe('Solid')
   })

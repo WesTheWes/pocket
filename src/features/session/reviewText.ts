@@ -17,7 +17,7 @@ export function tempoText(change: GoalChange): string {
   return `${bpmText(before)} → ${bpmText(now)}`
 }
 
-/** "Rough → Shaky", or a single level when it did not change or there was nothing before. */
+/** "Many mistakes → Few mistakes", or a single level when it did not change or there was nothing before. */
 export function qualityText(change: GoalChange): string {
   const now = lastAttempt(change).level
   const before = change.lastBefore?.level

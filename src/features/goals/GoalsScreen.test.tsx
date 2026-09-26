@@ -56,7 +56,7 @@ describe('GoalsScreen', () => {
     await loadSamples()
     renderApp('/songs/piano-man/goals')
     await screen.findByRole('heading', { name: 'Piano Man', level: 1 })
-    for (const label of ["Can't yet", 'Rough', 'Shaky', 'Mastered']) {
+    for (const label of ["Can't play at all", 'Many mistakes', 'Few mistakes', 'Perfection']) {
       expect(screen.queryByText(label)).not.toBeInTheDocument()
     }
   })

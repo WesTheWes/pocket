@@ -43,13 +43,13 @@ describe('ReviewScreen', () => {
     const bars = card('First 4 bars with only bass and melody')
     expect(within(bars).getByText('Verse')).toBeInTheDocument()
     expect(within(bars).getByText('64 → 76 BPM')).toBeInTheDocument()
-    expect(within(bars).getByText('Solid → Shaky')).toBeInTheDocument()
+    expect(within(bars).getByText('Solid → Few mistakes')).toBeInTheDocument()
     expect(within(bars).getByText('+12 BPM')).toBeInTheDocument()
 
     const fill = card('Walk-up fill into bar 5')
     expect(within(fill).getByText('Chorus')).toBeInTheDocument()
     expect(within(fill).getByText('60 → 42 BPM')).toBeInTheDocument()
-    expect(within(fill).getByText('Rough → Solid')).toBeInTheDocument()
+    expect(within(fill).getByText('Many mistakes → Solid')).toBeInTheDocument()
     expect(within(fill).getByText('quality up')).toBeInTheDocument()
   })
 

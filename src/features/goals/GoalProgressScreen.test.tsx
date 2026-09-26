@@ -64,9 +64,9 @@ describe('GoalProgressScreen', () => {
     const rows = historyText()
     expect(rows).toHaveLength(4)
     expect(rows[0]).toContain('76 BPM')
-    expect(rows[0]).toContain('Shaky')
+    expect(rows[0]).toContain('Few mistakes')
     expect(rows[1]).toContain('68 BPM')
-    expect(rows[1]).toContain('Rough')
+    expect(rows[1]).toContain('Many mistakes')
     expect(rows[2]).toContain('64 BPM')
     expect(rows[2]).toContain('Solid')
     expect(rows[3]).toContain('60 BPM')
@@ -155,22 +155,22 @@ describe('logging an attempt', () => {
     await user.clear(tempo())
     await user.type(tempo(), '120')
     await user.tab()
-    await user.click(screen.getByRole('radio', { name: 'Shaky' }))
+    await user.click(screen.getByRole('radio', { name: 'Few mistakes' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
     await screen.findByRole('status')
     expect(screen.getByText('fastest Solid 64 of 84 BPM')).toBeInTheDocument()
     expect(screen.queryByText('Done')).not.toBeInTheDocument()
   })
 
-  it("logs a Can't yet in the history without it counting as progress", async () => {
+  it("logs a Can't play at all in the history without it counting as progress", async () => {
     await loadSamples()
     const user = userEvent.setup()
     renderApp(URL_BARS)
     await screen.findByRole('textbox', { name: 'Tempo you played, in BPM' })
-    await user.click(screen.getByRole('radio', { name: "Can't yet" }))
+    await user.click(screen.getByRole('radio', { name: "Can't play at all" }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
     await screen.findByRole('status')
-    expect(historyText()[0]).toContain("Can't yet")
+    expect(historyText()[0]).toContain("Can't play at all")
     expect(screen.getByText('fastest Solid 64 of 84 BPM')).toBeInTheDocument()
   })
 
@@ -180,7 +180,7 @@ describe('logging an attempt', () => {
     renderApp(URL_BARS)
     await screen.findByRole('textbox', { name: 'Tempo you played, in BPM' })
     await user.click(screen.getByRole('checkbox', { name: 'No tempo' }))
-    await user.click(screen.getByRole('radio', { name: 'Mastered' }))
+    await user.click(screen.getByRole('radio', { name: 'Perfection' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
     await screen.findByRole('status')
     expect(historyText()[0]).toContain('No tempo')
@@ -236,7 +236,7 @@ describe('editing and deleting attempts', () => {
 
     expect(screen.getByRole('heading', { name: 'Edit attempt' })).toBeInTheDocument()
     expect(tempo()).toHaveValue('68') // the second-newest attempt
-    expect(screen.getByRole('radio', { name: 'Rough' })).toBeChecked()
+    expect(screen.getByRole('radio', { name: 'Many mistakes' })).toBeChecked()
 
     await user.click(screen.getByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
@@ -256,10 +256,10 @@ describe('editing and deleting attempts', () => {
     renderApp(URL_BARS)
     await screen.findByRole('region', { name: 'History' })
     await user.click(screen.getAllByRole('button', { name: /^Edit attempt from/ })[0])
-    await user.click(screen.getByRole('radio', { name: 'Mastered' }))
+    await user.click(screen.getByRole('radio', { name: 'Perfection' }))
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(screen.getByRole('heading', { name: 'Log attempt' })).toBeInTheDocument()
-    expect(historyText()[0]).toContain('Shaky')
+    expect(historyText()[0]).toContain('Few mistakes')
   })
 
   it('switches straight to another attempt if you tap a different edit', async () => {
@@ -284,7 +284,7 @@ describe('editing and deleting attempts', () => {
     expect(
       within(dialog).getByRole('heading', { name: 'Delete this attempt?' }),
     ).toBeInTheDocument()
-    expect(dialog).toHaveTextContent('76 BPM · Shaky from')
+    expect(dialog).toHaveTextContent('76 BPM · Few mistakes from')
     expect(dialog).toHaveTextContent('This can’t be undone.')
 
     await user.click(within(dialog).getByRole('button', { name: 'Cancel' }))

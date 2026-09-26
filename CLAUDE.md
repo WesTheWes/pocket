@@ -117,13 +117,13 @@ src/
 
 ## Progress model
 
-- Quality levels are stored as numbers 1-5: Can't yet, Rough, Shaky, Solid, Mastered. Labels live
-  in one constant in src/domain/quality.ts.
+- Quality levels are stored as numbers 1-5: Can't play at all, Many mistakes, Few mistakes, Solid,
+  Perfection. Labels live in one constant in src/domain/quality.ts.
 - Each attempt logs an optional BPM and a level, and may carry a sessionId.
 - A goal has an optional, always-editable target BPM. There is no per-goal target level: every goal
   is measured against Solid (4).
 - A goal is done when some attempt at Solid or better reaches the target BPM (with no target BPM,
-  any Solid or better attempt). Attempts rated Can't yet never count.
+  any Solid or better attempt). Attempts rated Can't play at all never count.
 - Goal progress = fastest BPM logged at Solid or better / target BPM, capped at 1. Section progress
   and song progress are the average of their goals' progress (whole-song goals count toward the
   song). All of this is derived in src/domain/progress.ts, never stored.

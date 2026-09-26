@@ -49,7 +49,7 @@ describe('goalDone', () => {
     expect(goalDone(goal, [attempt(100, 3)])).toBe(false)
   })
 
-  it("never counts Can't yet", () => {
+  it("never counts Can't play at all", () => {
     expect(goalDone(goal, [attempt(100, 1)])).toBe(false)
   })
 

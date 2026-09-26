@@ -21,11 +21,11 @@ describe('QualityPicker', () => {
     const group = screen.getByRole('radiogroup', { name: 'How it felt' })
     expect(group).toBeInTheDocument()
     expect(screen.getAllByRole('radio').map((r) => r.closest('label')?.textContent)).toEqual([
-      "Can't yet",
-      'Rough',
-      'Shaky',
+      "Can't play at all",
+      'Many mistakes',
+      'Few mistakes',
       'Solid',
-      'Mastered',
+      'Perfection',
     ])
   })
 
@@ -41,13 +41,13 @@ describe('QualityPicker', () => {
     expect(screen.getByTestId('level')).toHaveTextContent('4')
     expect(screen.getByRole('radio', { name: 'Solid' })).toBeChecked()
 
-    await user.click(screen.getByRole('radio', { name: "Can't yet" }))
+    await user.click(screen.getByRole('radio', { name: "Can't play at all" }))
     expect(screen.getByTestId('level')).toHaveTextContent('1')
     expect(screen.getByRole('radio', { name: 'Solid' })).not.toBeChecked()
   })
 
   it('shows the given level as selected', () => {
     render(<Harness initial={5} />)
-    expect(screen.getByRole('radio', { name: 'Mastered' })).toBeChecked()
+    expect(screen.getByRole('radio', { name: 'Perfection' })).toBeChecked()
   })
 })

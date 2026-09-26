@@ -18,7 +18,7 @@ The `.dc.html` files come from the design canvas. They use a canvas-specific for
 
 The screens were drawn before the progress model in `CLAUDE.md` was settled, so they differ from it in these ways. **`SCREENS.md` and `CLAUDE.md` win over the reference screens.**
 
-- **Quality labels.** The screens say "Can't play at all / Lots of mistakes / Some mistakes / Solid / Mastered". Use `QUALITY_LABELS` from `src/domain/quality.ts` (Can't yet / Rough / Shaky / Solid / Mastered).
+- **Quality labels.** The screens say "Can't play at all / Lots of mistakes / Some mistakes / Solid / Mastered". Use `QUALITY_LABELS` from `src/domain/quality.ts` (Can't play at all / Many mistakes / Few mistakes / Solid / Perfection).
 - **Goal cards show progress, not a rating.** The screens show a five-segment quality meter and a quality name on goal cards (Goals, Practice, Goal progress summary). Build a progress bar with "fastest Solid 72 of 84 BPM" instead. The quality meter appears only on individual attempts.
 - **Percentages.** The screens use a different formula (latest tempo and latest quality averaged). Use `src/domain/progress.ts`. The numbers in `src/data/seed.ts` are the ones the built app should show (Piano Man 68%, 3 of 8 goals done).
 - **"Mastered" filter on Home** is "Learned".

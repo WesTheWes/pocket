@@ -106,7 +106,7 @@ describe('Edit section', () => {
     await loadSamples()
     renderApp('/songs/piano-man/sections/piano-man-s1')
     const goals = await screen.findByRole('region', { name: 'Goals in this section' })
-    for (const label of ["Can't yet", 'Rough', 'Shaky', 'Mastered']) {
+    for (const label of ["Can't play at all", 'Many mistakes', 'Few mistakes', 'Perfection']) {
       expect(within(goals).queryByText(label)).not.toBeInTheDocument()
     }
   })

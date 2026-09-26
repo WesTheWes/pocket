@@ -17,7 +17,7 @@
   --color-yellow: #f3cf6b; /* "done", focus ring */
   --color-rose: #b8677a;
 
-  /* Quality scale: 1 = Can't yet ... 5 = Mastered */
+  /* Quality scale: 1 = Can't play at all ... 5 = Perfection */
   --color-q1: #b8677a;
   --color-q2: #f08ba0;
   --color-q3: #f49b62;
