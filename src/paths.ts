@@ -2,6 +2,7 @@
 export const paths = {
   home: '/',
   backup: '/backup',
+  stats: '/stats',
   newSong: '/songs/new',
   song: (songId: string) => `/songs/${songId}`,
   editSong: (songId: string) => `/songs/${songId}/edit`,

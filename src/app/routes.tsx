@@ -12,6 +12,7 @@ import { NewGoalScreen } from '../features/goals/NewGoalScreen'
 import { PracticeRoute } from '../features/session/PracticeScreen'
 import { ReviewScreen } from '../features/session/ReviewScreen'
 import { SongScreen } from '../features/songs/SongScreen'
+import { StatsScreen } from '../features/stats/StatsScreen'
 import { StructureScreen } from '../features/structure/StructureScreen'
 import { NotFoundScreen } from './NotFoundScreen'
 import { RootLayout } from './RootLayout'
@@ -20,6 +21,7 @@ import { RootLayout } from './RootLayout'
 const screens: RouteObject[] = [
   { path: '/', element: <HomeScreen /> },
   { path: '/backup', element: <BackupScreen /> },
+  { path: '/stats', element: <StatsScreen /> },
   { path: '/songs/new', element: <NewSongScreen /> },
   { path: '/songs/:songId', element: <SongScreen /> },
   { path: '/songs/:songId/edit', element: <EditSongScreen /> },

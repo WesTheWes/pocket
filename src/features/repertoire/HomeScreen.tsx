@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { Button, ButtonLink } from '../../components/Button'
 import { Chip } from '../../components/Chip'
 import { Icon } from '../../components/Icon'
+import { IconLink } from '../../components/IconButton'
 import { Page } from '../../components/Page'
 import { SongCard } from '../../components/SongCard'
 import { useAllAttempts, useAllGoals, useAllSections, useSongs } from '../../data/hooks'
@@ -53,9 +54,15 @@ export function HomeScreen() {
 
   return (
     <Page wide>
-      <header className="px-5 pt-7 desk:flex desk:items-center desk:justify-between desk:px-20 desk:pt-11">
-        <h1 className="font-display text-[40px] leading-none desk:text-5xl">Pocket</h1>
-        <div className="mt-5 desk:mt-0 desk:flex desk:items-center desk:gap-3">
+      <header className="grid grid-cols-[1fr_auto] items-center px-5 pt-7 desk:flex desk:gap-3 desk:px-20 desk:pt-11">
+        <h1 className="font-display text-[40px] leading-none desk:mr-auto desk:text-5xl">Pocket</h1>
+        <IconLink
+          to={paths.stats}
+          icon="chart"
+          label="Stats"
+          className="-mr-2 desk:order-last desk:mr-0"
+        />
+        <div className="col-span-2 mt-5 desk:mt-0 desk:flex desk:items-center desk:gap-3">
           <label className="flex h-[52px] items-center gap-2.5 rounded-full border border-line bg-surface px-4 text-muted desk:w-[360px]">
             <Icon name="search" size={20} />
             <input
@@ -151,7 +158,14 @@ export function HomeScreen() {
             </Link>
           </div>
         )}
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex justify-center gap-2">
+          <Link
+            to={paths.stats}
+            className="flex h-11 items-center gap-2 px-3 text-sm text-muted hover:text-cream"
+          >
+            <Icon name="chart" size={16} />
+            Stats
+          </Link>
           <Link
             to={paths.backup}
             className="flex h-11 items-center gap-2 px-3 text-sm text-muted hover:text-cream"
