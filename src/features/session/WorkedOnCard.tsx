@@ -20,14 +20,15 @@ export function WorkedOnCard({
   sectionName,
   songId,
   returnTo,
-  now,
+  sessionAt,
 }: {
   change: GoalChange
   sectionName: string
   songId: string
   /** Where the back arrow on the goal's progress screen should come back to. */
   returnTo: string
-  now: number
+  /** When the session started; the age of the earlier attempt is measured from here. */
+  sessionAt: number
 }) {
   const { goal, lastBefore } = change
   const tag = changeTag(change)
@@ -61,9 +62,9 @@ export function WorkedOnCard({
 
       <QualityMeter level={level} target={SOLID} className="mt-4 [&>span]:h-2" />
 
-      {lastBefore && now - lastBefore.at > OLD_ATTEMPT_MS && (
+      {lastBefore && sessionAt - lastBefore.at > OLD_ATTEMPT_MS && (
         <p className="mt-3 text-[13px] text-muted">
-          Last time: {formatTimeAgo(lastBefore.at, now).toLowerCase()}
+          Last time: {formatTimeAgo(lastBefore.at, sessionAt).toLowerCase()}
         </p>
       )}
 

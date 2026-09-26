@@ -37,7 +37,6 @@ export function ReviewScreen() {
 
   const changes = sessionChanges(session, orderGoals(goals, sections), attempts)
   const songChange = songProgressChange(session, goals, attempts)
-  const now = Date.now()
   const improved = changes.filter((change) => change.improved).length
   const sectionName = (sectionId: string | null) =>
     sections.find((section) => section.id === sectionId)?.name ?? 'Whole song'
@@ -118,7 +117,7 @@ export function ReviewScreen() {
                 sectionName={sectionName(change.goal.sectionId)}
                 songId={song.id}
                 returnTo={paths.review(song.id, session.id)}
-                now={now}
+                sessionAt={session.startedAt}
               />
             ))}
           </ul>
