@@ -37,7 +37,7 @@ Back and edit buttons, title, artist, overall progress bar with "3 of 8 goals do
 
 ## Edit song, New song
 
-Fields: Title, Artist, Chord notes (large monospace textarea). New shows "Create song". Edit shows "Save changes" and a pink outlined "Delete song" button that opens the confirm sheet.
+Fields: Title, Artist, Tempo (the tempo stepper, with a "No tempo set" toggle; new songs start with none), Chord notes (large monospace textarea). New goals for the song start their target tempo at the song's tempo (`newGoalTargetBpm`), or 80 without one. New shows "Create song". Edit shows "Save changes" and a pink outlined "Delete song" button that opens the confirm sheet.
 
 ## Edit section, New section
 

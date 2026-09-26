@@ -41,7 +41,7 @@ const backupText = (data = sampleData()) => serializeBackup(createBackup(data, 1
 describe('createBackup and serializeBackup', () => {
   it('wraps the data with a header saying what it is and when it was made', () => {
     const backup = createBackup(sampleData(), 123)
-    expect(backup).toMatchObject({ app: 'pocket', version: 1, exportedAt: 123 })
+    expect(backup).toMatchObject({ app: 'pocket', version: 2, exportedAt: 123 })
     expect(backup.data.songs).toHaveLength(2)
   })
 
@@ -81,7 +81,7 @@ describe('parseBackup', () => {
     const result = parseBackup(backupText(data))
     expect(result).toEqual({
       ok: true,
-      backup: { app: 'pocket', version: 1, exportedAt: 1_700_000_000_000, data },
+      backup: { app: 'pocket', version: 2, exportedAt: 1_700_000_000_000, data },
     })
   })
 
@@ -116,9 +116,27 @@ describe('parseBackup', () => {
   })
 
   it('refuses a backup from a newer version, saying so', () => {
-    const newer = JSON.stringify({ ...JSON.parse(backupText()), version: 2 })
+    const newer = JSON.stringify({ ...JSON.parse(backupText()), version: 3 })
     const result = parseBackup(newer)
     expect(!result.ok && result.error).toMatch(/newer version/)
+  })
+
+  it('upgrades a version 1 backup, whose songs have no tempo', () => {
+    const data = sampleData()
+    const old = JSON.parse(backupText(data))
+    old.version = 1
+    for (const song of old.data.songs) delete song.tempo
+    const result = parseBackup(JSON.stringify(old))
+    expect(result).toEqual({
+      ok: true,
+      backup: { app: 'pocket', version: 2, exportedAt: 1_700_000_000_000, data },
+    })
+  })
+
+  it('still refuses a current backup whose songs have no tempo', () => {
+    const current = JSON.parse(backupText())
+    delete current.data.songs[0].tempo
+    expect(parseBackup(JSON.stringify(current)).ok).toBe(false)
   })
 
   it('refuses a version that makes no sense', () => {

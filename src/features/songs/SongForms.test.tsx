@@ -21,6 +21,24 @@ describe('New song', () => {
     expect(screen.getByRole('textbox', { name: 'Chord notes' })).toHaveValue('')
     expect(screen.getByRole('button', { name: 'Create song' })).toBeInTheDocument()
     expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: 'No tempo set' })).toBeChecked()
+    expect(screen.getByRole('textbox', { name: 'Tempo, in BPM' })).toBeDisabled()
+  })
+
+  it('saves a tempo when you set one', async () => {
+    const user = userEvent.setup()
+    renderApp('/songs/new')
+    await user.type(await screen.findByRole('textbox', { name: 'Title' }), 'Sir Duke')
+    await user.click(screen.getByRole('checkbox', { name: 'No tempo set' }))
+    const tempo = screen.getByRole('textbox', { name: 'Tempo, in BPM' })
+    await user.clear(tempo)
+    await user.type(tempo, '104')
+    await user.tab()
+    await user.click(screen.getByRole('button', { name: 'Create song' }))
+
+    await screen.findByRole('heading', { name: 'Sir Duke', level: 1 })
+    const [song] = await repos.songs.list()
+    expect(song.tempo).toBe(104)
   })
 
   it('asks for a title and saves nothing without one', async () => {
@@ -59,6 +77,7 @@ describe('New song', () => {
       title: 'Blue in Green',
       artist: 'Miles Davis',
       chordNotes: 'Bbmaj7#11 A7alt',
+      tempo: null,
       learnedOverride: false,
     })
     expect(router.state.location.pathname).toBe(`/songs/${song.id}`)
@@ -99,6 +118,19 @@ describe('Edit song', () => {
     ).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/songs/piano-man')
     expect((await repos.songs.get('piano-man'))?.title).toBe('Piano Man (live)')
+  })
+
+  it('changes the tempo, and can clear it again', async () => {
+    await loadSamples()
+    await repos.songs.update('piano-man', { tempo: 90 })
+    const user = userEvent.setup()
+    renderApp('/songs/piano-man/edit')
+    const tempo = await screen.findByRole('textbox', { name: 'Tempo, in BPM' })
+    expect(tempo).toHaveValue('90')
+    await user.click(screen.getByRole('button', { name: 'Increase tempo' }))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+    await screen.findByRole('heading', { name: 'Piano Man', level: 1 })
+    expect((await repos.songs.get('piano-man'))?.tempo).toBe(91)
   })
 
   it('refuses a blank title and leaves the song alone', async () => {

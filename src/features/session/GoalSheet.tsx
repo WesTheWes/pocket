@@ -1,7 +1,8 @@
 import { BottomSheet } from '../../components/BottomSheet'
 import { Button } from '../../components/Button'
 import { repos } from '../../data'
-import type { Goal, Section } from '../../domain/schemas'
+import { newGoalTargetBpm } from '../../domain/progress'
+import type { Goal, Section, Song } from '../../domain/schemas'
 import { GoalForm } from '../goals/GoalForm'
 
 /** What the sheet is for: adding a goal to a section (or the whole song), or editing one. */
@@ -11,7 +12,7 @@ export type GoalSheetTarget =
 interface Props {
   /** Null keeps the sheet closed. */
   target: GoalSheetTarget | null
-  songId: string
+  song: Song
   sections: Section[]
   onClose: () => void
   /** Called with the saved goal, after it has been written. */
@@ -22,7 +23,7 @@ interface Props {
  * Add or edit a goal without leaving Practice, so the metronome keeps playing and the timer keeps
  * running. It is the same form as the New goal and Edit goal screens.
  */
-export function GoalSheet({ target, songId, sections, onClose, onSaved }: Props) {
+export function GoalSheet({ target, song, sections, onClose, onSaved }: Props) {
   const editing = target?.mode === 'edit'
 
   return (
@@ -45,14 +46,19 @@ export function GoalSheet({ target, songId, sections, onClose, onSaved }: Props)
                   description: target.goal.description,
                   targetBpm: target.goal.targetBpm,
                 }
-              : { sectionId: target.sectionId, title: '', description: '', targetBpm: 80 }
+              : {
+                  sectionId: target.sectionId,
+                  title: '',
+                  description: '',
+                  targetBpm: newGoalTargetBpm(song),
+                }
           }
           submitLabel={target.mode === 'edit' ? 'Save changes' : 'Add goal'}
           onSubmit={async (values) => {
             const saved =
               target.mode === 'edit'
                 ? await repos.goals.update(target.goal.id, values)
-                : await repos.goals.create({ songId, ...values })
+                : await repos.goals.create({ songId: song.id, ...values })
             onSaved(saved)
           }}
           footer={

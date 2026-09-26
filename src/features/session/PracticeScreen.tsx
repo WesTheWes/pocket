@@ -462,7 +462,7 @@ function PracticeView({
 
       <GoalSheet
         target={goalSheet}
-        songId={song.id}
+        song={song}
         sections={sections}
         onClose={() => setGoalSheet(null)}
         onSaved={(saved) => {

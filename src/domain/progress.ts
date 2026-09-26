@@ -79,6 +79,11 @@ export function startingBpm(goal: Goal, attempts: Attempt[]): number {
   return latest?.bpm ?? goal.targetBpm ?? DEFAULT_STARTING_BPM
 }
 
+/** A new goal's target tempo: the song's tempo when it has one, else 80. */
+export function newGoalTargetBpm(song: Song): number {
+  return song.tempo ?? DEFAULT_STARTING_BPM
+}
+
 export interface GoalStats {
   goalCount: number
   doneCount: number

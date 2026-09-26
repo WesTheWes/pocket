@@ -71,6 +71,7 @@ export function SongSheet({
           title: song.title,
           artist: song.artist,
           chordNotes: song.chordNotes,
+          tempo: song.tempo,
           learnedOverride: song.learnedOverride,
         }}
         submitLabel="Save changes"

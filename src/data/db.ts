@@ -19,5 +19,14 @@ export function createDb(name = 'pocket'): PocketDb {
     attempts: 'id, goalId, sessionId, at',
     sessions: 'id, songId, startedAt',
   })
+  // Version 2 gave songs a tempo. Songs saved before then have none.
+  db.version(2).upgrade((tx) =>
+    tx
+      .table('songs')
+      .toCollection()
+      .modify((song: Partial<Song>) => {
+        if (song.tempo === undefined) song.tempo = null
+      }),
+  )
   return db
 }

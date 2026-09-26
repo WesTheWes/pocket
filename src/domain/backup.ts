@@ -4,7 +4,7 @@ import { pocketDataSchema, type PocketData } from './schemas'
  * The backup file format. Bump `BACKUP_VERSION` when the shape of `data` changes, and teach
  * `parseBackup` to upgrade older versions.
  */
-export const BACKUP_VERSION = 1
+export const BACKUP_VERSION = 2
 
 export interface BackupFile {
   app: 'pocket'
@@ -160,6 +160,24 @@ const describePath = (path: ReadonlyArray<PropertyKey>) =>
   )
 
 /**
+ * Brings the data of an older backup up to the current shape. Anything unexpected is passed
+ * through untouched, for the schema check to reject with a clear reason.
+ */
+function upgradeData(version: number, data: unknown): unknown {
+  let upgraded = data
+  // Version 2 gave songs a tempo. Older songs have none.
+  if (version < 2 && isRecord(upgraded) && Array.isArray(upgraded.songs)) {
+    upgraded = {
+      ...upgraded,
+      songs: upgraded.songs.map((song: unknown) =>
+        isRecord(song) && !('tempo' in song) ? { ...song, tempo: null } : song,
+      ),
+    }
+  }
+  return upgraded
+}
+
+/**
  * Reads the text of a backup file. Never throws: a file that cannot be used comes back with a
  * plain-language reason that can be shown to the person who chose it.
  */
@@ -188,7 +206,7 @@ export function parseBackup(text: string): ParseResult {
     return fail('The backup is damaged (exportedAt: it has no valid date).')
   }
 
-  const parsed = pocketDataSchema.safeParse(value.data)
+  const parsed = pocketDataSchema.safeParse(upgradeData(version, value.data))
   if (!parsed.success) {
     const issue = parsed.error.issues[0]
     return fail(`The backup is damaged (${describePath(issue.path)}: ${issue.message}).`)
@@ -201,7 +219,11 @@ export function parseBackup(text: string): ParseResult {
     return fail(`The backup is inconsistent. ${shown}${more}`)
   }
 
-  return { ok: true, backup: { app: 'pocket', version, exportedAt, data: parsed.data } }
+  // Upgraded above, so the data is now in the current version's shape.
+  return {
+    ok: true,
+    backup: { app: 'pocket', version: BACKUP_VERSION, exportedAt, data: parsed.data },
+  }
 }
 
 export interface MergeResult {

@@ -12,11 +12,20 @@ describe('songs', () => {
       title: 'Piano Man',
       artist: '',
       chordNotes: '',
+      tempo: null,
       structure: [],
       learnedOverride: false,
       createdAt: 5_000,
     })
     expect(await repos.songs.get('id-1')).toEqual(song)
+  })
+
+  it('stores a tempo, and refuses one outside 30 to 240 BPM', async () => {
+    const { repos } = makeTestRepos()
+    const song = await repos.songs.create({ title: 'Sir Duke', tempo: 104 })
+    expect(song.tempo).toBe(104)
+    await expect(repos.songs.update(song.id, { tempo: 400 })).rejects.toThrow()
+    expect((await repos.songs.get(song.id))?.tempo).toBe(104)
   })
 
   it('rejects a blank title and stores nothing', async () => {

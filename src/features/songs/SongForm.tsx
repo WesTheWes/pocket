@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { ReactNode } from 'react'
-import { useForm } from 'react-hook-form'
+import { useController, useForm } from 'react-hook-form'
 import { Button } from '../../components/Button'
 import { TextAreaField, TextField } from '../../components/Field'
+import { Stepper } from '../../components/Stepper'
 import { Switch } from '../../components/Switch'
 import { songFormSchema, type SongFormValues } from '../../domain/schemas'
 
@@ -19,6 +20,9 @@ interface Props {
   className?: string
 }
 
+/** Where the tempo starts when it is switched on for a song that had none. */
+const DEFAULT_SONG_BPM = 100
+
 /** The fields shared by New song and Edit song. */
 export function SongForm({
   defaultValues,
@@ -32,8 +36,10 @@ export function SongForm({
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<SongFormValues>({ resolver: zodResolver(songFormSchema), defaultValues })
+  const { field: tempoField } = useController({ control, name: 'tempo' })
 
   const submit = handleSubmit(async (values) => {
     try {
@@ -59,6 +65,16 @@ export function SongForm({
         error={errors.artist?.message}
         {...register('artist')}
       />
+      <div>
+        <Stepper
+          label="Tempo"
+          value={tempoField.value}
+          onChange={tempoField.onChange}
+          noneLabel="No tempo set"
+          fallback={DEFAULT_SONG_BPM}
+        />
+        <p className="mt-2 text-[13px] text-muted">New goals start with this as their target.</p>
+      </div>
       <TextAreaField
         label="Chord notes"
         placeholder="Chords, feel, anything you want to remember"

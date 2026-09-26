@@ -3,6 +3,7 @@ import { Page } from '../../components/Page'
 import { TopBar } from '../../components/TopBar'
 import { repos } from '../../data'
 import { useSections, useSong } from '../../data/hooks'
+import { newGoalTargetBpm } from '../../domain/progress'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
 import { GoalForm } from './GoalForm'
@@ -26,7 +27,12 @@ export function NewGoalScreen() {
       <TopBar backTo={paths.goals(song.id)} title="New goal" />
       <GoalForm
         sections={sections}
-        defaultValues={{ sectionId, title: '', description: '', targetBpm: 80 }}
+        defaultValues={{
+          sectionId,
+          title: '',
+          description: '',
+          targetBpm: newGoalTargetBpm(song),
+        }}
         submitLabel="Add goal"
         onSubmit={async (values) => {
           await repos.goals.create({ songId: song.id, ...values })

@@ -88,6 +88,7 @@ src/
   StrictMode's doubled effects cannot create two sessions.
 - `repos.backup` has `exportAll`, `replaceAll` (validates first, then swaps in one transaction) and
   `clear`. Sample data comes from `createSeedData(now)` in `src/data/seed.ts`.
+- The Dexie schema is at version 2 (songs gained `tempo`; its `upgrade` fills in null). When a record shape changes, add a Dexie version with an upgrade and bump `BACKUP_VERSION` together, so stored data and old backup files both keep working.
 - Never name an error `NotFoundError`: Dexie turns any error with that name thrown inside a
   transaction into its own `DexieError`. Ours is `RecordNotFoundError`.
 
@@ -120,6 +121,7 @@ src/
 - Quality levels are stored as numbers 1-5: Can't play at all, Many mistakes, Few mistakes, Solid,
   Perfection. Labels live in one constant in src/domain/quality.ts.
 - Each attempt logs an optional BPM and a level, and may carry a sessionId.
+- A song has an optional tempo (`Song.tempo`, null when not set). New goals, from New goal or Practice's goal sheet, start their target BPM at it (`newGoalTargetBpm`), else 80.
 - A goal has an optional, always-editable target BPM. There is no per-goal target level: every goal
   is measured against Solid (4).
 - A goal is done when some attempt at Solid or better reaches the target BPM (with no target BPM,

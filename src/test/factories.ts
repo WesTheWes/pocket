@@ -10,6 +10,7 @@ export function makeSong(overrides: Partial<Song> = {}): Song {
     artist: 'Billy Joel',
     chordNotes: '',
     structure: [],
+    tempo: null,
     learnedOverride: false,
     createdAt: 0,
     ...overrides,

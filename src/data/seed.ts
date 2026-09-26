@@ -238,6 +238,7 @@ export function createSeedData(now: number): PocketData {
       artist: seed.artist,
       chordNotes: seed.chordNotes ?? '',
       structure: seed.structure.map((name) => sectionIds.get(name)!),
+      tempo: null,
       learnedOverride: false,
       createdAt: now - seed.createdDaysAgo * DAY,
     }

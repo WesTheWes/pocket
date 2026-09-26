@@ -21,6 +21,8 @@ export const songSchema = z.object({
   title: z.string().trim().min(1),
   artist: z.string(),
   chordNotes: z.string(),
+  /** The song's tempo in BPM, or null when not set. New goals start their target tempo here. */
+  tempo: bpmSchema.nullable(),
   /** Ordered section IDs. A section may appear more than once. */
   structure: z.array(id),
   /** True when the user has manually marked the song as learned. */
@@ -90,6 +92,7 @@ export const songFormSchema = z.object({
   title: z.string().trim().min(1, 'Enter a title'),
   artist: z.string().trim(),
   chordNotes: z.string(),
+  tempo: bpmSchema.nullable(),
   learnedOverride: z.boolean(),
 })
 

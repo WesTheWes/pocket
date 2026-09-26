@@ -12,10 +12,16 @@ export function NewSongScreen() {
     <Page>
       <TopBar backTo={paths.home} title="New song" />
       <SongForm
-        defaultValues={{ title: '', artist: '', chordNotes: '', learnedOverride: false }}
+        defaultValues={{
+          title: '',
+          artist: '',
+          chordNotes: '',
+          tempo: null,
+          learnedOverride: false,
+        }}
         submitLabel="Create song"
-        onSubmit={async ({ title, artist, chordNotes }) => {
-          const song = await repos.songs.create({ title, artist, chordNotes })
+        onSubmit={async ({ title, artist, chordNotes, tempo }) => {
+          const song = await repos.songs.create({ title, artist, chordNotes, tempo })
           navigate(paths.song(song.id))
         }}
       />

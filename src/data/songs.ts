@@ -5,9 +5,12 @@ export interface NewSong {
   title: string
   artist?: string
   chordNotes?: string
+  tempo?: number | null
 }
 
-export type SongPatch = Partial<Pick<Song, 'title' | 'artist' | 'chordNotes' | 'learnedOverride'>>
+export type SongPatch = Partial<
+  Pick<Song, 'title' | 'artist' | 'chordNotes' | 'tempo' | 'learnedOverride'>
+>
 
 export function createSongsRepo({ db, now, newId }: RepoContext) {
   return {
@@ -21,6 +24,7 @@ export function createSongsRepo({ db, now, newId }: RepoContext) {
         title: input.title,
         artist: input.artist ?? '',
         chordNotes: input.chordNotes ?? '',
+        tempo: input.tempo ?? null,
         structure: [],
         learnedOverride: false,
         createdAt: now(),

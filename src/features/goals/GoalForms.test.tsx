@@ -81,6 +81,22 @@ describe('New goal', () => {
     expect(await screen.findByText('Play it through')).toBeInTheDocument()
   })
 
+  it("starts the target tempo at the song's tempo", async () => {
+    await loadSamples()
+    await repos.songs.update('rocket-man', { tempo: 136 })
+    renderApp('/songs/rocket-man/goals/new')
+    await waitFor(() => expect(tempo()).toHaveValue('136'))
+  })
+
+  it("starts the target tempo at the song's tempo when adding a goal from Practice too", async () => {
+    await loadSamples()
+    await repos.songs.update('rocket-man', { tempo: 136 })
+    const user = userEvent.setup()
+    renderApp('/practice/rocket-man')
+    await user.click(await screen.findByRole('button', { name: 'Add a goal' }))
+    expect(await screen.findByRole('textbox', { name: 'Target tempo, in BPM' })).toHaveValue('136')
+  })
+
   it('creates a section goal with a chosen tempo and description', async () => {
     await loadSamples()
     const user = userEvent.setup()

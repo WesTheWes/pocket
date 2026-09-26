@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { makeAttempt, makeGoal, makeSection, makeSong } from '../test/factories'
 import {
+  newGoalTargetBpm,
   averageProgress,
   doneCount,
   fastestSolidBpm,
@@ -165,6 +166,16 @@ describe('firstUnfinishedGoal', () => {
 
   it('returns undefined with no goals', () => {
     expect(firstUnfinishedGoal([], [])).toBeUndefined()
+  })
+})
+
+describe('newGoalTargetBpm', () => {
+  it("starts a new goal at the song's tempo", () => {
+    expect(newGoalTargetBpm(makeSong({ tempo: 132 }))).toBe(132)
+  })
+
+  it('falls back to 80 for a song with no tempo', () => {
+    expect(newGoalTargetBpm(makeSong({ tempo: null }))).toBe(80)
   })
 })
 
