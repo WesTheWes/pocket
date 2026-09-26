@@ -38,7 +38,7 @@ only (canvas-format HTML that does not run): match their spacing, sizes and copy
 - Mobile first (designs are 390px wide). Home, Song and Practice get desktop layouts at `desk:`
   (900px). Every other screen stays a centered ~480px column.
 - Routes are in SCREENS.md and defined in src/app/routes.tsx; build links with `paths` from src/paths.ts. Screens live in their feature folder; shared UI in src/components.
-- Every screen in the design is built: Home (features/repertoire); Song, New/Edit song, New/Edit section (features/songs); Structure editor (features/structure); Goals, New/Edit goal, Goal progress (features/goals); Practice and Review (features/session). Unknown addresses show the NotFoundScreen in src/app.
+- Every screen in the design is built: Home (features/repertoire); Song, New/Edit song, New/Edit section (features/songs); Structure editor (features/structure); Goals, New/Edit goal, Goal progress (features/goals); Practice and Review (features/session); Stats (features/stats, not in the original design). Unknown addresses show the NotFoundScreen in src/app.
 - After UI changes, look at the running app (phone 390px and desktop 1280px) against docs/design/reference, not just the tests. jsdom applies no CSS, so it cannot catch layout bugs such as a `hidden` class losing to a component's own `inline-flex`. Wrap in a `hidden desk:block` container instead of passing `hidden` to a component.
 - Drag and drop uses dnd-kit (handle-only pointer drag, plus keyboard: Space to lift, arrows, Space to drop). jsdom cannot drag, so test the pure logic in unit tests and verify dragging in a real browser.
 - "Back" returns to where you came from. A screen that links to a page reachable from several places (Goal progress is opened from Goals, Practice and Review) passes `state={withReturn(path)}` on the link, and the target page uses `returnTarget(location.state, fallback)` for its back arrow and passes the state on to Edit goal. Opened directly, it falls back to its usual parent (`src/lib/returnTo.ts`). The same state can carry a tempo (`withReturn(path, { bpm })`, read with `tempoFrom`): Practice hands its metronome tempo to Goal progress, which starts the log form there instead of at the last logged tempo.
@@ -54,7 +54,7 @@ only (canvas-format HTML that does not run): match their spacing, sizes and copy
 src/
   domain/      pure types + functions. No React, no Dexie.
   data/        Dexie schema + repositories. The ONLY code that imports Dexie.
-  features/    songs, structure, goals, session, repertoire (one folder each)
+  features/    songs, structure, goals, session, repertoire, backup, stats (one folder each)
   components/  shared UI primitives
   app/         router, layout, providers
 ```
@@ -131,7 +131,13 @@ src/
 - A song is "Learned" when every goal is done, with a manual override. The Home filter the design
   calls "Mastered" is "Learned".
 - Practice review compares each goal's progress before the session with progress after it, using
-  the attempts tagged with that sessionId.
+  the attempts tagged with that sessionId (`sessionChanges`, `songProgressChange`), and charts it
+  with `ProgressChange` rows. Its Worked-on cards instead compare the goal's last attempt before
+  the session with its last one in it (tempo and quality), noting the earlier one's age when it is
+  over 14 days older than the session.
+- Stats (`/stats`) derives everything with src/domain/stats.ts: `recentImprovements` (goals whose
+  progress rose in a session in the last 30 days, at most 10) and `practiceTimeSince` (last 7
+  days). Attempts logged outside a session never appear under "Improved lately".
 
 ## Conventions
 

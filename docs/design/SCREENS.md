@@ -19,6 +19,7 @@ Each row maps a design screen to a route and a feature folder. The reference fil
 | Goal progress   | `/songs/:songId/goals/:goalId`        | `goals`      | `GoalProgress.dc.html`                        |
 | Practice        | `/practice/:songId`                   | `session`    | `Practice.dc.html`, `DesktopPractice.dc.html` |
 | Practice review | `/practice/:songId/review/:sessionId` | `session`    | `Review.dc.html`                              |
+| Stats           | `/stats`                              | `stats`      | (no reference screen; mockup in the PR)       |
 
 Delete confirmations (`DeleteSong`, `DeleteSection`, `DeleteGoal`) are not routes. Build one `ConfirmSheet` (a bottom sheet over the edit screen, with a scrim) and open it from the Delete button on the edit screens. On desktop, center it instead of anchoring it to the bottom.
 
@@ -68,7 +69,17 @@ Desktop: left panel with the back link, song picker, timer, the full goal list (
 
 ## Practice review
 
-Shown after Finish. Total time (large serif, `sessionElapsedMs`), song, and two counts: goals worked and goals improved (`sessionChanges`). "Worked on" cards, one per goal with attempts in this session: section, title, the goal's progress before and after as "fastest Solid 72 to 76 BPM" (or "no Solid attempt yet" to "60 BPM"), a small list of this session's attempts (tempo and quality label, with the meter), and a change tag: "+4 BPM", "Done" when `becameDone`, or "No change". An edit button opens Goal progress. Buttons: "Practice again" and "Done" (back to Home).
+Shown after Finish. Total time (large serif, `sessionElapsedMs`), song, and two counts: goals worked and goals improved (`sessionChanges`).
+
+**Progress**: a card of before/after rows (`ProgressChange`, with a Before/After legend): first "Whole song · Overall progress · every goal" (`songProgressChange`), then one row per goal worked on (`progressBefore` / `progressAfter`). Each row: "45% → 61%" and a track with a hollow dot (before), a filled orange dot (after) and a line between; one muted dot when unchanged.
+
+**Worked on**: one card per goal with attempts in this session: section, title, edit button (opens Goal progress), then Tempo and Quality comparing the goal's last attempt before the session with its last attempt in it ("54 → 60 BPM", "Rough → Shaky"; just the session value when there was nothing before), a quality meter of the last attempt with the Solid segment outlined, "Last time: 3 months ago" when the earlier attempt is over 14 days older than the session, and a change tag (`changeTag` in `reviewText.ts`): "Done", what went up ("+6 BPM · quality up"), "Fastest Solid now 76 BPM", what went down (muted), or "No change".
+
+Buttons side by side: "Practice again" (secondary) and "Done" (primary, back to Home).
+
+## Stats
+
+Opened from the chart icon in the Home header and the "Stats" link beside "Back up & restore". Back arrow, "Stats" (serif) and "Your practice, at a glance". Three figures: Songs, Goals done (`doneCount` over every goal), This week (practice time in sessions started in the last 7 days, `practiceTimeSince`). **Improved lately**: `ProgressChange` rows for each goal whose progress rose in a session in the last 30 days (`recentImprovements`, at most 10, newest first), with "SONG · SECTION" and "4 days ago". **Your songs**: every song, recently practiced first, with percent, status (Learned, In progress, or Not started when no attempts) and a progress bar; each row opens Song.
 
 ## Component list
 
