@@ -221,3 +221,30 @@ describe('Deleting a song', () => {
     expect(screen.queryByText('Song not found')).not.toBeInTheDocument()
   })
 })
+
+describe('links', () => {
+  it('adds a link to a song and refuses one without a web address', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/songs/sir-duke/edit')
+    await screen.findByRole('textbox', { name: 'Title' })
+    await user.click(screen.getByRole('button', { name: 'Add link' }))
+    await user.type(screen.getByRole('textbox', { name: 'Link 1 label' }), 'Horn line lesson')
+    await user.type(screen.getByRole('textbox', { name: 'Link 1 address' }), 'not a url')
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Link 1 kind' }), 'lesson')
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/web address/)
+
+    await user.clear(screen.getByRole('textbox', { name: 'Link 1 address' }))
+    await user.type(
+      screen.getByRole('textbox', { name: 'Link 1 address' }),
+      'https://example.com/horns',
+    )
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+    await screen.findByRole('heading', { name: 'Sir Duke', level: 1 })
+    expect((await repos.songs.get('sir-duke'))?.resources).toEqual([
+      { label: 'Horn line lesson', url: 'https://example.com/horns', kind: 'lesson' },
+    ])
+    expect(screen.getByRole('link', { name: /Horn line lesson/ })).toBeInTheDocument()
+  })
+})

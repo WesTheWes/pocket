@@ -69,6 +69,7 @@ export function EditGoalScreen() {
           description: goal.description,
           targetBpm: goal.targetBpm,
           requires: goal.requires,
+          resources: goal.resources,
         }}
         submitLabel="Save changes"
         onSubmit={async (values) => {

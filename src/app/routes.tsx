@@ -3,6 +3,7 @@ import { BackupScreen } from '../features/backup/BackupScreen'
 import { HomeScreen } from '../features/repertoire/HomeScreen'
 import { EditSongScreen } from '../features/songs/EditSongScreen'
 import { NewSongScreen } from '../features/songs/NewSongScreen'
+import { PlanSongScreen } from '../features/songs/PlanSongScreen'
 import { EditSectionScreen } from '../features/songs/EditSectionScreen'
 import { NewSectionScreen } from '../features/songs/NewSectionScreen'
 import { EditGoalScreen } from '../features/goals/EditGoalScreen'
@@ -23,6 +24,7 @@ const screens: RouteObject[] = [
   { path: '/backup', element: <BackupScreen /> },
   { path: '/stats', element: <StatsScreen /> },
   { path: '/songs/new', element: <NewSongScreen /> },
+  { path: '/songs/plan', element: <PlanSongScreen /> },
   { path: '/songs/:songId', element: <SongScreen /> },
   { path: '/songs/:songId/edit', element: <EditSongScreen /> },
   { path: '/songs/:songId/sections/new', element: <NewSectionScreen /> },

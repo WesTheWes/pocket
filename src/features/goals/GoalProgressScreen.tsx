@@ -7,6 +7,7 @@ import { Icon } from '../../components/Icon'
 import { IconLink } from '../../components/IconButton'
 import { Page } from '../../components/Page'
 import { ProgressBar } from '../../components/ProgressBar'
+import { ResourceLinks } from '../../components/ResourceLinks'
 import { useToast } from '../../components/toastContext'
 import { TopBar } from '../../components/TopBar'
 import { repos } from '../../data'
@@ -118,6 +119,11 @@ export function GoalProgressScreen() {
                   first
                 </span>
               </p>
+            )}
+            {goal.resources.length > 0 && (
+              <div className="mt-3">
+                <ResourceLinks resources={goal.resources} label="Goal links" />
+              </div>
             )}
           </div>
 

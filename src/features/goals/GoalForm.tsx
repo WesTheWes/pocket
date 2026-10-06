@@ -4,6 +4,7 @@ import { useController, useForm } from 'react-hook-form'
 import { Button } from '../../components/Button'
 import { Chip } from '../../components/Chip'
 import { TextAreaField, TextField } from '../../components/Field'
+import { LinksField, type LinkErrors } from '../../components/LinksField'
 import { Stepper } from '../../components/Stepper'
 import { wouldCycle } from '../../domain/prerequisites'
 import { orderGoals } from '../../domain/progress'
@@ -52,6 +53,7 @@ export function GoalForm({
   const { field: sectionField } = useController({ control, name: 'sectionId' })
   const { field: tempoField } = useController({ control, name: 'targetBpm' })
   const { field: requiresField } = useController({ control, name: 'requires' })
+  const { field: linksField } = useController({ control, name: 'resources' })
   const required = new Set<string>(requiresField.value)
   const toggleRequired = (id: string) =>
     requiresField.onChange(
@@ -130,7 +132,7 @@ export function GoalForm({
           role="group"
           aria-labelledby="finish-first-label"
           aria-describedby="finish-first-help"
-          className={cn(wide && 'desk:col-start-2 desk:row-span-3 desk:row-start-2')}
+          className={cn(wide && 'desk:col-start-2 desk:row-span-4 desk:row-start-2')}
         >
           <div id="finish-first-label" className="eyebrow">
             Finish first
@@ -163,6 +165,12 @@ export function GoalForm({
           </div>
         </div>
       )}
+
+      <LinksField
+        value={linksField.value}
+        onChange={linksField.onChange}
+        errors={errors.resources as ReadonlyArray<LinkErrors | undefined> | undefined}
+      />
 
       <div className="mt-1 flex flex-col gap-2.5">
         {errors.root && (

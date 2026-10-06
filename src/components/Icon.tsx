@@ -21,6 +21,7 @@ export type IconName =
   | 'download'
   | 'chart'
   | 'lock'
+  | 'sparkle'
 
 const glyphs: Record<IconName, ReactNode> = {
   back: <path d="M15 5l-7 7 7 7" />,
@@ -64,6 +65,12 @@ const glyphs: Record<IconName, ReactNode> = {
   up: <path d="M6 15l6-6 6 6" />,
   download: <path d="M12 4v11M7 11l5 5 5-5M5 20h14" />,
   chart: <path d="M5 4v15h15M9 15v-3M13 15V8M17 15v-5" />,
+  sparkle: (
+    <>
+      <path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z" />
+      <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" />
+    </>
+  ),
   lock: (
     <>
       <rect x="5" y="11" width="14" height="10" rx="2" />

@@ -1,4 +1,5 @@
-import { songSchema, type Song } from '../domain/schemas'
+import { songSchema, type Resource, type Song } from '../domain/schemas'
+import { planToRecords, type SongPlan } from '../domain/songPlan'
 import { updateRecord, type RepoContext } from './context'
 
 export interface NewSong {
@@ -6,10 +7,11 @@ export interface NewSong {
   artist?: string
   chordNotes?: string
   tempo?: number | null
+  resources?: Resource[]
 }
 
 export type SongPatch = Partial<
-  Pick<Song, 'title' | 'artist' | 'chordNotes' | 'tempo' | 'learnedOverride'>
+  Pick<Song, 'title' | 'artist' | 'chordNotes' | 'tempo' | 'learnedOverride' | 'resources'>
 >
 
 export function createSongsRepo({ db, now, newId }: RepoContext) {
@@ -27,10 +29,22 @@ export function createSongsRepo({ db, now, newId }: RepoContext) {
         tempo: input.tempo ?? null,
         structure: [],
         learnedOverride: false,
+        resources: input.resources ?? [],
         createdAt: now(),
       })
       await db.songs.add(song)
       return song
+    },
+
+    /** Writes a whole plan (song, sections, goals) at once: all of it or none of it. */
+    async createFromPlan(plan: SongPlan): Promise<Song> {
+      const { song, sections, goals } = planToRecords(plan, { now: now(), newId })
+      return db.transaction('rw', [db.songs, db.sections, db.goals], async () => {
+        await db.songs.add(song)
+        await db.sections.bulkAdd(sections)
+        await db.goals.bulkAdd(goals)
+        return song
+      })
     },
 
     update: (id: string, patch: SongPatch) => updateRecord(db.songs, songSchema, 'song', id, patch),

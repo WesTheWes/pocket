@@ -50,6 +50,7 @@ export function GoalSheet({ target, song, sections, goals, onClose, onSaved }: P
                   description: target.goal.description,
                   targetBpm: target.goal.targetBpm,
                   requires: target.goal.requires,
+                  resources: target.goal.resources,
                 }
               : {
                   sectionId: target.sectionId,
@@ -57,6 +58,7 @@ export function GoalSheet({ target, song, sections, goals, onClose, onSaved }: P
                   description: '',
                   targetBpm: newGoalTargetBpm(song),
                   requires: [],
+                  resources: [],
                 }
           }
           submitLabel={target.mode === 'edit' ? 'Save changes' : 'Add goal'}

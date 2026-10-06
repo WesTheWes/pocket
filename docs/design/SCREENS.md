@@ -8,6 +8,7 @@ Each row maps a design screen to a route and a feature folder. The reference fil
 | --------------- | ------------------------------------- | ------------ | --------------------------------------------- |
 | Home            | `/`                                   | `repertoire` | `Main.dc.html`, `DesktopHome.dc.html`         |
 | New song        | `/songs/new`                          | `songs`      | `NewSong.dc.html`                             |
+| Plan a song     | `/songs/plan`                         | `songs`      | (no reference screen)                         |
 | Song            | `/songs/:songId`                      | `songs`      | `Song.dc.html`, `DesktopSong.dc.html`         |
 | Edit song       | `/songs/:songId/edit`                 | `songs`      | `EditSong.dc.html`                            |
 | New section     | `/songs/:songId/sections/new`         | `songs`      | `NewSection.dc.html`                          |
@@ -31,13 +32,17 @@ Forms use React Hook Form with the Zod schemas from `src/domain/schemas.ts`. Scr
 
 Wordmark "Pocket", search field, filter chips (All, In progress, Learned), a count with a sort control, then song cards. Each card: title (serif), artist, a progress bar with a percentage (`averageProgress` over the song's goals), and a round play button (quick practice, see "Not designed yet" in the README). Tapping the card opens Song. A full-width "New song" button is pinned to the bottom on mobile. A Learned song shows a yellow "Learned" tag in place of the percentage.
 
+## Plan a song
+
+Opened from "Plan a song" at the bottom of Home and the line under the New song form. Four numbered steps, two columns on desktop: (1) Describe the song: Title, Artist, "What are you learning it for?", level chips (Beginner, Intermediate, Advanced). (2) Ask an assistant: a "Copy prompt" button (disabled until there is a title; toast "Prompt copied") and a collapsed "Show the prompt" with the prompt in a read-only monospace box. (3) Paste the reply: a monospace box; a bad reply shows the reason under it. (4) Check the plan: a preview card (title, artist, tempo; sections with goal counts; play order tags; every goal with its target and "after …"; chord chart and link counts), then "Create song", which saves everything and opens the song.
+
 ## Song
 
-Back and edit buttons, title, artist, overall progress bar with "3 of 8 goals done" (`doneCount`), then two buttons: Practice (primary) and Goals. Below: Sections (each row: name, goal count and done count, progress bar and percentage, chevron, and a round play button that starts Practice at the section's first unfinished goal, hidden when the section has no goals; an "Add" link), Structure (the ordered section names as small chips, with an "Edit" link), and Chord notes (monospace card, tapping opens Edit song).
+Back and edit buttons, title, artist, overall progress bar with "3 of 8 goals done" (`doneCount`), then two buttons: Practice (primary) and Goals. Below: Sections (each row: name, goal count and done count, progress bar and percentage, chevron, and a round play button that starts Practice at the section's first unfinished goal, hidden when the section has no goals; an "Add" link), Structure (the ordered section names as small chips, with an "Edit" link), Chord notes (monospace card, tapping opens Edit song), and Links (the song's resources, each a row with its kind, label and chevron, opening in a new tab; an invitation when there are none).
 
 ## Edit song, New song
 
-Fields: Title, Artist, Tempo (the tempo stepper, with a "No tempo set" toggle; new songs start with none), Chord notes (large monospace textarea). New goals for the song start their target tempo at the song's tempo (`newGoalTargetBpm`), or 80 without one. New shows "Create song". Edit shows "Save changes" and a pink outlined "Delete song" button that opens the confirm sheet.
+Fields: Title, Artist, Tempo (the tempo stepper, with a "No tempo set" toggle; new songs start with none), Chord notes (large monospace textarea), Links (rows of label, address and kind, with remove and "Add link"). New goals for the song start their target tempo at the song's tempo (`newGoalTargetBpm`), or 80 without one. New shows "Create song". Edit shows "Save changes" and a pink outlined "Delete song" button that opens the confirm sheet.
 
 ## Edit section, New section
 
@@ -55,11 +60,11 @@ Each goal card: the title, an orange progress bar (`goalProgress`), and one line
 
 ## New goal, Edit goal
 
-"Applies to" chips (Whole song and each section), Title, Description, Target tempo (a stepper with minus and plus around a big number, 30 to 240, with a "No target tempo" toggle that clears it), "Finish first" (chips for every other goal of the song, in goal order; picked ones are the goals to finish before this one, with a note that it only sets the order; a chip that would make a circle is disabled; hidden when the song has no other goals), and Save. Edit adds Delete goal. There is no target-level field: every goal is measured against Solid.
+"Applies to" chips (Whole song and each section), Title, Description, Target tempo (a stepper with minus and plus around a big number, 30 to 240, with a "No target tempo" toggle that clears it), Links (as on the song form), "Finish first" (chips for every other goal of the song, in goal order; picked ones are the goals to finish before this one, with a note that it only sets the order; a chip that would make a circle is disabled; hidden when the song has no other goals), and Save. Edit adds Delete goal. There is no target-level field: every goal is measured against Solid.
 
 ## Goal progress
 
-Section label, goal title, description, and while the goal is locked a lock icon with "Finish X and Y first", each a link to that goal's progress (its back arrow returns here). A summary card: the progress bar with "fastest Solid 72 of 84 BPM" and a "Done" state. Under it, a "Practice this goal" button that starts Practice at this goal (hidden when you came here from Practice). A "Log attempt" card: tempo stepper (with a "No tempo" toggle), five quality options as selectable rows (each with a mini meter, the label, and a check on the selected one), a short Note box ("What went wrong, what to try next"), and "Save attempt". Below, History: newest first, each row with date, BPM (or "no tempo") and quality (meter, color and label), the note under them when there is one, and edit and delete icon buttons. An edit button in the top bar opens Edit goal.
+Section label, goal title, description, and while the goal is locked a lock icon with "Finish X and Y first", each a link to that goal's progress (its back arrow returns here), then the goal's links. A summary card: the progress bar with "fastest Solid 72 of 84 BPM" and a "Done" state. Under it, a "Practice this goal" button that starts Practice at this goal (hidden when you came here from Practice). A "Log attempt" card: tempo stepper (with a "No tempo" toggle), five quality options as selectable rows (each with a mini meter, the label, and a check on the selected one), a short Note box ("What went wrong, what to try next"), and "Save attempt". Below, History: newest first, each row with date, BPM (or "no tempo") and quality (meter, color and label), the note under them when there is one, and edit and delete icon buttons. An edit button in the top bar opens Edit goal.
 
 ## Practice
 

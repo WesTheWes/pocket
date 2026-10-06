@@ -94,7 +94,7 @@ src/
   StrictMode's doubled effects cannot create two sessions.
 - `repos.backup` has `exportAll`, `replaceAll` (validates first, then swaps in one transaction) and
   `clear`. Sample data comes from `createSeedData(now)` in `src/data/seed.ts`.
-- The Dexie schema is at version 4 (v2: songs gained `tempo`, v3: attempts gained `note`, v4: goals gained `requires`; each `upgrade` fills in the default). When a record shape changes, add a Dexie version with an upgrade and bump `BACKUP_VERSION` together, so stored data and old backup files both keep working.
+- The Dexie schema is at version 5 (v2: songs gained `tempo`, v3: attempts gained `note`, v4: goals gained `requires`, v5: songs and goals gained `resources`; each `upgrade` fills in the default). When a record shape changes, add a Dexie version with an upgrade and bump `BACKUP_VERSION` together, so stored data and old backup files both keep working.
 - Never name an error `NotFoundError`: Dexie turns any error with that name thrown inside a
   transaction into its own `DexieError`. Ours is `RecordNotFoundError`.
 
@@ -113,6 +113,23 @@ src/
 - Practice remembers the tempo you set for each goal for the rest of the session (`tempoMemory.ts`, in sessionStorage so it survives a trip to Log attempt and a reload). A tempo logged after you set it wins (`chooseTempo`).
 - The current goal lives in the URL (`?goal=`) so a reload keeps your place. Landing on a goal resets the tempo to `startingBpm`.
 - Practice is one DOM that adapts with `desk:` classes (CSS `order` moves Finish and the timer), so each control exists once.
+
+## Song plans (src/domain/songPlan.ts, src/features/songs/PlanSongScreen.tsx)
+
+- "Plan a song" (`/songs/plan`, linked from Home and New song) creates a whole song from a plan an
+  assistant wrote, without the app talking to one: describe the song, what it is for and your level;
+  `buildPlanPrompt` makes the prompt to copy into any assistant; paste the reply; check the preview;
+  Create. The prompt asks for exactly what `parseSongPlan` reads.
+- A plan (`songPlanSchema`) is plain JSON in words a person could write: the song, sections with
+  notes and goals, the play order by section name, whole-song goals, and goals' "finish first" by
+  goal **title** (unique within the plan), plus links. `parseSongPlan` never throws, tolerates
+  fences and chatter around the JSON, and checks the pieces fit (play order names real sections,
+  no circular requirements). `planToRecords` is pure; `repos.songs.createFromPlan` writes the song,
+  sections and goals in one transaction.
+- Songs and goals carry `resources` (label, http(s) URL, kind: video, lesson, exercise, other),
+  edited with `LinksField` in the song and goal forms and shown by `ResourceLinks` on Song and
+  Goal progress (new tab, `rel="noreferrer"`).
+- Nothing calls a model yet. The next step (an API key or a proxy) is deliberately not built.
 
 ## Backup (src/features/backup, src/domain/backup.ts)
 

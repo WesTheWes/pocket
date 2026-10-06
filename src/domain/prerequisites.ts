@@ -1,5 +1,11 @@
 import type { Goal } from './schemas'
 
+/** Anything with an id and the ids it requires: a goal, or a plan's goal keyed by title. */
+export interface Linked {
+  id: string
+  requires: string[]
+}
+
 /*
  * A goal can ask for other goals of its song to be finished first. It is a soft lock: a way to
  * give a long list of goals a shape, like levels, not a rule. You can always practise and log
@@ -8,7 +14,7 @@ import type { Goal } from './schemas'
  */
 
 /** True if making `goalId` require `requires` would lead round in a circle back to itself. */
-export function wouldCycle(goalId: string, requires: string[], goals: Goal[]): boolean {
+export function wouldCycle(goalId: string, requires: string[], goals: Linked[]): boolean {
   const byId = new Map(goals.map((goal) => [goal.id, goal]))
   const seen = new Set<string>()
   const stack = [...requires]
@@ -24,7 +30,7 @@ export function wouldCycle(goalId: string, requires: string[], goals: Goal[]): b
 }
 
 /** The ids of goals whose requirements lead back to themselves. */
-export function requirementCycles(goals: Goal[]): string[] {
+export function requirementCycles(goals: Linked[]): string[] {
   return goals.filter((goal) => wouldCycle(goal.id, goal.requires, goals)).map((goal) => goal.id)
 }
 

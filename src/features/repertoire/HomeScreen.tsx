@@ -158,7 +158,14 @@ export function HomeScreen() {
             </Link>
           </div>
         )}
-        <div className="mt-8 flex justify-center gap-2">
+        <div className="mt-8 flex flex-wrap justify-center gap-2">
+          <Link
+            to={paths.planSong}
+            className="flex h-11 items-center gap-2 px-3 text-sm text-muted hover:text-cream"
+          >
+            <Icon name="sparkle" size={16} />
+            Plan a song
+          </Link>
           <Link
             to={paths.stats}
             className="flex h-11 items-center gap-2 px-3 text-sm text-muted hover:text-cream"

@@ -36,6 +36,7 @@ export function NewGoalScreen() {
           description: '',
           targetBpm: newGoalTargetBpm(song),
           requires: [],
+          resources: [],
         }}
         submitLabel="Add goal"
         onSubmit={async (values) => {

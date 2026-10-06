@@ -85,4 +85,43 @@ describe('createDb', () => {
     db.close()
     await Dexie.delete(name)
   })
+
+  it('gives songs and goals saved before version 5 no links', async () => {
+    const name = 'upgrade-test-5'
+    const old = new Dexie(name)
+    old.version(4).stores({
+      songs: 'id, createdAt',
+      sections: 'id, songId',
+      goals: 'id, songId, sectionId',
+      attempts: 'id, goalId, sessionId, at',
+      sessions: 'id, songId, startedAt',
+    })
+    await old.table('songs').add({
+      id: 's1',
+      title: 'S',
+      artist: '',
+      chordNotes: '',
+      tempo: null,
+      structure: [],
+      learnedOverride: false,
+      createdAt: 0,
+    })
+    await old.table('goals').add({
+      id: 'g1',
+      songId: 's1',
+      sectionId: null,
+      title: 'G',
+      description: '',
+      targetBpm: null,
+      requires: [],
+      createdAt: 0,
+    })
+    old.close()
+
+    const db = createDb(name)
+    expect(await db.songs.get('s1')).toMatchObject({ resources: [] })
+    expect(await db.goals.get('g1')).toMatchObject({ resources: [] })
+    db.close()
+    await Dexie.delete(name)
+  })
 })

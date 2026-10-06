@@ -46,5 +46,13 @@ export function createDb(name = 'pocket'): PocketDb {
         if (goal.requires === undefined) goal.requires = []
       }),
   )
+  // Version 5 gave songs and goals links (resources). Older records have none.
+  db.version(5).upgrade(async (tx) => {
+    const fill = (record: { resources?: unknown }) => {
+      if (record.resources === undefined) record.resources = []
+    }
+    await tx.table('songs').toCollection().modify(fill)
+    await tx.table('goals').toCollection().modify(fill)
+  })
   return db
 }

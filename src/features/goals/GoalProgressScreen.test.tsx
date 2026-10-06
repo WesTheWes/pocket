@@ -378,3 +378,20 @@ describe('locked goals', () => {
     expect(screen.queryByText(/^Finish/)).not.toBeInTheDocument()
   })
 })
+
+describe('links', () => {
+  it('shows a goal’s links under its description', async () => {
+    await loadSamples()
+    await repos.goals.update('piano-man-g3', {
+      resources: [
+        { label: 'Bass and melody tutorial', url: 'https://example.com/t', kind: 'lesson' },
+      ],
+    })
+    renderApp(URL_BARS)
+    const links = within(await screen.findByRole('list', { name: 'Goal links' }))
+    expect(links.getByRole('link', { name: /Bass and melody tutorial/ })).toHaveAttribute(
+      'href',
+      'https://example.com/t',
+    )
+  })
+})

@@ -1,5 +1,5 @@
 import type { QualityLevel } from '../domain/quality'
-import type { Attempt, Goal, PocketData, Section, Session, Song } from '../domain/schemas'
+import type { Attempt, Goal, PocketData, Resource, Section, Session, Song } from '../domain/schemas'
 
 const MINUTE = 60_000
 const DAY = 24 * 60 * MINUTE
@@ -34,6 +34,7 @@ interface SongSeed {
   sectionNotes?: Record<string, string>
   /** Section names in play order. */
   structure: string[]
+  resources?: Resource[]
   goals: GoalSeed[]
   createdDaysAgo: number
   session?: { daysAgo: number; minutes: number; pausedMinutes: number }
@@ -57,6 +58,13 @@ const pianoMan: SongSeed = {
       'Block chords in the right hand with an octave in the bass. Save the big dynamics for the last chorus.',
   },
   structure: ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Outro'],
+  resources: [
+    {
+      label: 'Piano Man (official video)',
+      url: 'https://www.youtube.com/watch?v=gxEPV4kolz0',
+      kind: 'video',
+    },
+  ],
   createdDaysAgo: 20,
   session: { daysAgo: 2, minutes: 24, pausedMinutes: 3 },
   goals: [
@@ -248,6 +256,7 @@ export function createSeedData(now: number): PocketData {
       artist: seed.artist,
       chordNotes: seed.chordNotes ?? '',
       structure: seed.structure.map((name) => sectionIds.get(name)!),
+      resources: seed.resources ?? [],
       tempo: null,
       learnedOverride: false,
       createdAt: now - seed.createdDaysAgo * DAY,
@@ -279,6 +288,7 @@ export function createSeedData(now: number): PocketData {
         description: goalSeed.description ?? '',
         targetBpm: goalSeed.targetBpm,
         requires: (goalSeed.requires ?? []).map((index) => `${seed.id}-g${index}`),
+        resources: [],
         createdAt: song.createdAt + goalIndex * MINUTE,
       }
       data.goals.push(goal)

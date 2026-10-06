@@ -1,5 +1,5 @@
 import { wouldCycle } from '../domain/prerequisites'
-import { goalSchema, type Goal } from '../domain/schemas'
+import { goalSchema, type Goal, type Resource } from '../domain/schemas'
 import { RecordNotFoundError, updateRecord, type RepoContext } from './context'
 
 /** Thrown when a goal's requirements would lead round in a circle back to itself. */
@@ -19,10 +19,11 @@ export interface NewGoal {
   targetBpm?: number | null
   /** Goals of the same song to finish first. */
   requires?: string[]
+  resources?: Resource[]
 }
 
 export type GoalPatch = Partial<
-  Pick<Goal, 'sectionId' | 'title' | 'description' | 'targetBpm' | 'requires'>
+  Pick<Goal, 'sectionId' | 'title' | 'description' | 'targetBpm' | 'requires' | 'resources'>
 >
 
 export function createGoalsRepo({ db, now, newId }: RepoContext) {
@@ -69,6 +70,7 @@ export function createGoalsRepo({ db, now, newId }: RepoContext) {
           description: input.description ?? '',
           targetBpm: input.targetBpm ?? null,
           requires,
+          resources: input.resources ?? [],
           createdAt: now(),
         })
         await db.goals.add(goal)

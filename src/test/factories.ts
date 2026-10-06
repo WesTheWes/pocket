@@ -12,6 +12,7 @@ export function makeSong(overrides: Partial<Song> = {}): Song {
     structure: [],
     tempo: null,
     learnedOverride: false,
+    resources: [],
     createdAt: 0,
     ...overrides,
   }
@@ -37,6 +38,7 @@ export function makeGoal(overrides: Partial<Goal> = {}): Goal {
     description: '',
     targetBpm: 84,
     requires: [],
+    resources: [],
     createdAt: 0,
     ...overrides,
   }

@@ -73,6 +73,7 @@ export function SongSheet({
           chordNotes: song.chordNotes,
           tempo: song.tempo,
           learnedOverride: song.learnedOverride,
+          resources: song.resources,
         }}
         submitLabel="Save changes"
         showLearned

@@ -4,6 +4,7 @@ export const paths = {
   backup: '/backup',
   stats: '/stats',
   newSong: '/songs/new',
+  planSong: '/songs/plan',
   song: (songId: string) => `/songs/${songId}`,
   editSong: (songId: string) => `/songs/${songId}/edit`,
   newSection: (songId: string) => `/songs/${songId}/sections/new`,

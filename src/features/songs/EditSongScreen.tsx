@@ -55,6 +55,7 @@ export function EditSongScreen() {
           chordNotes: song.chordNotes,
           tempo: song.tempo,
           learnedOverride: song.learnedOverride,
+          resources: song.resources,
         }}
         submitLabel="Save changes"
         showLearned

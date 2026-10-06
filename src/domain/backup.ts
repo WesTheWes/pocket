@@ -5,7 +5,7 @@ import { pocketDataSchema, type PocketData } from './schemas'
  * The backup file format. Bump `BACKUP_VERSION` when the shape of `data` changes, and teach
  * `parseBackup` to upgrade older versions.
  */
-export const BACKUP_VERSION = 4
+export const BACKUP_VERSION = 5
 
 export interface BackupFile {
   app: 'pocket'
@@ -210,6 +210,16 @@ function upgradeData(version: number, data: unknown): unknown {
         isRecord(goal) && !('requires' in goal) ? { ...goal, requires: [] } : goal,
       ),
     }
+  }
+  // Version 5 gave songs and goals links. Older records have none.
+  if (version < 5 && isRecord(upgraded)) {
+    const fill = (records: unknown) =>
+      Array.isArray(records)
+        ? records.map((record: unknown) =>
+            isRecord(record) && !('resources' in record) ? { ...record, resources: [] } : record,
+          )
+        : records
+    upgraded = { ...upgraded, songs: fill(upgraded.songs), goals: fill(upgraded.goals) }
   }
   return upgraded
 }

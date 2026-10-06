@@ -124,3 +124,23 @@ describe('SongScreen', () => {
     expect(screen.queryByRole('link', { name: 'Practice Coda' })).not.toBeInTheDocument()
   })
 })
+
+describe('links', () => {
+  it('lists the song’s links, opening in a new tab', async () => {
+    await loadSamples()
+    renderApp('/songs/piano-man')
+    const links = within(await screen.findByRole('list', { name: 'Song links' }))
+    const link = links.getByRole('link', { name: /Piano Man \(official video\)/ })
+    expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=gxEPV4kolz0')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(links.getByText('Video')).toBeInTheDocument()
+  })
+
+  it('invites you to add links when there are none', async () => {
+    await loadSamples()
+    renderApp('/songs/sir-duke')
+    await screen.findByRole('heading', { name: 'Sir Duke', level: 1 })
+    expect(screen.getByText(/Keep the recording/)).toBeInTheDocument()
+    expect(screen.queryByRole('list', { name: 'Song links' })).not.toBeInTheDocument()
+  })
+})

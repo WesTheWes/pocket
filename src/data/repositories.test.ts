@@ -16,6 +16,7 @@ describe('songs', () => {
       tempo: null,
       structure: [],
       learnedOverride: false,
+      resources: [],
       createdAt: 5_000,
     })
     expect(await repos.songs.get('id-1')).toEqual(song)
@@ -33,6 +34,57 @@ describe('songs', () => {
     const { repos } = makeTestRepos()
     await expect(repos.songs.create({ title: '   ' })).rejects.toThrow()
     expect(await repos.songs.list()).toEqual([])
+  })
+
+  it('creates a whole plan at once, or nothing', async () => {
+    const { repos } = makeTestRepos(1_000)
+    const plan = {
+      title: 'Blue Bossa',
+      artist: 'Kenny Dorham',
+      tempo: 140,
+      chordNotes: 'Cm7 Fm7 Dm7b5 G7',
+      sections: [
+        {
+          name: 'A',
+          notes: '',
+          goals: [
+            { title: 'A, shells', description: '', targetBpm: 90, requires: [], resources: [] },
+          ],
+        },
+      ],
+      structure: ['A', 'A'],
+      goals: [
+        {
+          title: 'Play it through',
+          description: '',
+          targetBpm: 140,
+          requires: ['A, shells'],
+          resources: [
+            { label: 'Lesson', url: 'https://example.com/lesson', kind: 'lesson' as const },
+          ],
+        },
+      ],
+      resources: [],
+    }
+    const song = await repos.songs.createFromPlan(plan)
+    expect(song).toMatchObject({ title: 'Blue Bossa', tempo: 140, createdAt: 1_000 })
+    const sections = await repos.sections.listBySong(song.id)
+    expect(sections.map((s) => s.name)).toEqual(['A'])
+    expect(song.structure).toEqual([sections[0].id, sections[0].id])
+    const goals = await repos.goals.listBySong(song.id)
+    const through = goals.find((g) => g.title === 'Play it through')!
+    expect(through.requires).toEqual([goals.find((g) => g.title === 'A, shells')!.id])
+    expect(through.resources[0].kind).toBe('lesson')
+
+    // A broken plan (a goal requiring a title that is not there) writes nothing at all.
+    await expect(
+      repos.songs.createFromPlan({
+        ...plan,
+        title: 'Broken',
+        goals: [{ ...plan.goals[0], requires: ['Nope'] }],
+      }),
+    ).rejects.toThrow()
+    expect((await repos.songs.list()).map((s) => s.title)).toEqual(['Blue Bossa'])
   })
 
   it('updates fields and keeps the id', async () => {

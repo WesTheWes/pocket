@@ -16,6 +16,20 @@ export const qualitySchema = z.union([
   z.literal(5),
 ])
 
+export const resourceKindSchema = z.union([
+  z.literal('video'),
+  z.literal('lesson'),
+  z.literal('exercise'),
+  z.literal('other'),
+])
+
+/** A link worth having at hand: the recording, a lesson, an exercise. */
+export const resourceSchema = z.object({
+  label: z.string().trim().min(1, 'Give the link a label'),
+  url: z.url({ protocol: /^https?$/, error: 'Enter a full web address (https://…)' }),
+  kind: resourceKindSchema,
+})
+
 export const songSchema = z.object({
   id,
   title: z.string().trim().min(1),
@@ -27,6 +41,7 @@ export const songSchema = z.object({
   structure: z.array(id),
   /** True when the user has manually marked the song as learned. */
   learnedOverride: z.boolean(),
+  resources: z.array(resourceSchema),
   createdAt: timestamp,
 })
 
@@ -50,6 +65,7 @@ export const goalSchema = z.object({
   targetBpm: bpmSchema.nullable(),
   /** Goals (of the same song) to finish before this one. A suggested order, never a hard block. */
   requires: z.array(id),
+  resources: z.array(resourceSchema),
   createdAt: timestamp,
 })
 
@@ -84,6 +100,8 @@ export const pocketDataSchema = z.object({
   sessions: z.array(sessionSchema),
 })
 
+export type ResourceKind = z.infer<typeof resourceKindSchema>
+export type Resource = z.infer<typeof resourceSchema>
 export type Song = z.infer<typeof songSchema>
 export type Section = z.infer<typeof sectionSchema>
 export type Goal = z.infer<typeof goalSchema>
@@ -98,6 +116,7 @@ export const songFormSchema = z.object({
   chordNotes: z.string(),
   tempo: bpmSchema.nullable(),
   learnedOverride: z.boolean(),
+  resources: z.array(resourceSchema),
 })
 
 export type SongFormValues = z.infer<typeof songFormSchema>
@@ -117,6 +136,7 @@ export const goalFormSchema = z.object({
   description: z.string(),
   targetBpm: bpmSchema.nullable(),
   requires: z.array(id),
+  resources: z.array(resourceSchema),
 })
 
 export type GoalFormValues = z.infer<typeof goalFormSchema>

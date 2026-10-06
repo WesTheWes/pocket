@@ -5,6 +5,7 @@ import { Icon } from '../../components/Icon'
 import { IconLink } from '../../components/IconButton'
 import { Page } from '../../components/Page'
 import { ProgressBar } from '../../components/ProgressBar'
+import { ResourceLinks } from '../../components/ResourceLinks'
 import { SectionRow } from '../../components/SectionRow'
 import { TopBar } from '../../components/TopBar'
 import { useGoals, useSections, useSong, useSongAttempts } from '../../data/hooks'
@@ -165,6 +166,22 @@ export function SongScreen() {
                 <span className="font-sans text-muted">Add chords and notes</span>
               )}
             </Link>
+          </section>
+
+          <section className="px-5 pt-6 desk:px-0" aria-labelledby="links-heading">
+            <div className="flex h-11 items-center justify-between">
+              <h2 id="links-heading" className="eyebrow">
+                Links
+              </h2>
+              <EditLink to={paths.editSong(song.id)} label="Edit links" />
+            </div>
+            {song.resources.length === 0 ? (
+              <p className="text-sm text-muted">
+                Keep the recording, a lesson or a backing track one tap away.
+              </p>
+            ) : (
+              <ResourceLinks resources={song.resources} label="Song links" />
+            )}
           </section>
         </div>
       </div>

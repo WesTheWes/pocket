@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useController, useForm } from 'react-hook-form'
 import { Button } from '../../components/Button'
 import { TextAreaField, TextField } from '../../components/Field'
+import { LinksField, type LinkErrors } from '../../components/LinksField'
 import { Stepper } from '../../components/Stepper'
 import { Switch } from '../../components/Switch'
 import { songFormSchema, type SongFormValues } from '../../domain/schemas'
@@ -44,6 +45,7 @@ export function SongForm({
     formState: { errors, isSubmitting },
   } = useForm<SongFormValues>({ resolver: zodResolver(songFormSchema), defaultValues })
   const { field: tempoField } = useController({ control, name: 'tempo' })
+  const { field: linksField } = useController({ control, name: 'resources' })
 
   const submit = handleSubmit(async (values) => {
     try {
@@ -88,7 +90,7 @@ export function SongForm({
         <p className="mt-2 text-[13px] text-muted">New goals start with this as their target.</p>
       </div>
       {/* On desktop the chart stands tall on the right, beside everything else. */}
-      <div className={cn(wide && 'desk:col-start-2 desk:row-span-5 desk:row-start-1')}>
+      <div className={cn(wide && 'desk:col-start-2 desk:row-span-6 desk:row-start-1')}>
         <TextAreaField
           label="Chord notes"
           placeholder="Chords, feel, anything you want to remember"
@@ -98,6 +100,11 @@ export function SongForm({
           {...register('chordNotes')}
         />
       </div>
+      <LinksField
+        value={linksField.value}
+        onChange={linksField.onChange}
+        errors={errors.resources as ReadonlyArray<LinkErrors | undefined> | undefined}
+      />
       {showLearned && (
         <Switch
           label="Mark as learned"
