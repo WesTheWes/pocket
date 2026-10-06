@@ -1305,3 +1305,19 @@ describe('momentum', () => {
     expect(goalTitle()).toBe('First 4 bars with only bass and melody')
   })
 })
+
+describe('volume', () => {
+  it('starts at full volume and remembers what you set', async () => {
+    await loadSamples()
+    const { unmount } = renderApp('/practice/piano-man')
+    const slider = await screen.findByRole('slider', { name: 'Volume' })
+    expect(slider).toHaveValue('100')
+    fireEvent.change(slider, { target: { value: '40' } })
+    expect(slider).toHaveAttribute('aria-valuetext', '40%')
+    expect(localStorage.getItem('pocket:metronome:volume')).toBe('0.4')
+    unmount()
+    renderApp('/practice/piano-man')
+    expect(await screen.findByRole('slider', { name: 'Volume' })).toHaveValue('40')
+    localStorage.removeItem('pocket:metronome:volume')
+  })
+})

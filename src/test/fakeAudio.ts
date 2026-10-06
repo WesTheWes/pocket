@@ -7,6 +7,8 @@ export class FakeAudioContext {
   state = 'suspended'
   destination = {}
   oscillators = 0
+  /** Every gain node made, with the values set on it, in order. The first is the master volume. */
+  gains: Array<{ values: number[] }> = []
   resumed = 0
   closed = 0
   constructor() {
@@ -23,8 +25,15 @@ export class FakeAudioContext {
     }
   }
   createGain() {
+    const record = { values: [] as number[] }
+    this.gains.push(record)
     return {
-      gain: { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} },
+      gain: {
+        setValueAtTime: (value: number) => {
+          record.values.push(value)
+        },
+        exponentialRampToValueAtTime: () => {},
+      },
       connect: (node: unknown) => node,
     }
   }

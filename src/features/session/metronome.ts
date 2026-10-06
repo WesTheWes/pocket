@@ -48,8 +48,11 @@ const SOUNDS: Record<ClickKind, { hz: number; volume: number; seconds: number }>
   sub: { hz: SUB_HZ, volume: 0.15, seconds: 0.035 },
 }
 
+/** The slider's 0 to 1 as a gain: squared, so the middle of the slider sounds about half as loud. */
+export const volumeToGain = (volume: number) => Math.min(1, Math.max(0, volume)) ** 2
+
 /** A short percussive blip at `time`: loudest and highest on the downbeat, softest between beats. */
-function playClick(context: AudioContextLike, time: number, kind: ClickKind) {
+function playClick(context: AudioContextLike, time: number, kind: ClickKind, output: GainLike) {
   const { hz, volume, seconds } = SOUNDS[kind]
   const oscillator = context.createOscillator()
   const gain = context.createGain()
@@ -59,7 +62,7 @@ function playClick(context: AudioContextLike, time: number, kind: ClickKind) {
   gain.gain.exponentialRampToValueAtTime(volume, time + 0.002)
   gain.gain.exponentialRampToValueAtTime(0.0001, time + seconds)
   oscillator.connect(gain)
-  gain.connect(context.destination)
+  gain.connect(output)
   oscillator.start(time)
   oscillator.stop(time + seconds + 0.01)
 }
@@ -74,6 +77,8 @@ export interface Metronome {
   setBpm(bpm: number): void
   /** Click on every beat, or on eighths, triplets or sixteenths. Takes effect on the next beat. */
   setSubdivision(subdivision: Subdivision): void
+  /** How loud, 0 (silent) to 1. Takes effect at once, also while running. */
+  setVolume(volume: number): void
   isRunning(): boolean
   /** The beat (0 to 3) sounding right now, for the beat dots. */
   beatAt(): number | null
@@ -100,6 +105,9 @@ export function createMetronome(deps: MetronomeDeps = {}): Metronome {
   let scheduler: Scheduler | null = null
   let disposed = false
   let subdivision: Subdivision = 'quarter'
+  let volume = 1
+  // Every click goes through this one gain, so the volume is one knob.
+  let master: GainLike | null = null
 
   // The context is created on first start, which is inside the user's tap.
   function ensure(): Scheduler | null {
@@ -108,9 +116,13 @@ export function createMetronome(deps: MetronomeDeps = {}): Metronome {
     const created = createContext()
     if (!created) return null
     context = created
+    const output = created.createGain()
+    output.gain.setValueAtTime(volumeToGain(volume), created.currentTime)
+    output.connect(created.destination)
+    master = output
     scheduler = createScheduler({
       now: () => created.currentTime,
-      click: (time, kind) => playClick(created, time, kind),
+      click: (time, kind) => playClick(created, time, kind, output),
       setTimer,
       clearTimer,
     })
@@ -135,6 +147,10 @@ export function createMetronome(deps: MetronomeDeps = {}): Metronome {
     setSubdivision(next) {
       subdivision = next
       scheduler?.setSubdivision(next)
+    },
+    setVolume(next) {
+      volume = next
+      if (master && context) master.gain.setValueAtTime(volumeToGain(next), context.currentTime)
     },
     isRunning: () => scheduler?.isRunning() ?? false,
     beatAt: () => (scheduler && context ? scheduler.beatAt(context.currentTime) : null),

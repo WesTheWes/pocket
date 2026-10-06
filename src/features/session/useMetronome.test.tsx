@@ -51,4 +51,17 @@ describe('useMetronome', () => {
     expect(result.current.playing).toBe(false)
     expect(result.current.supported).toBe(false)
   })
+
+  it('sets the volume on the master gain, squared, before and while playing', () => {
+    const { result, rerender } = renderHook(({ volume }) => useMetronome(90, 'quarter', volume), {
+      initialProps: { volume: 0.5 },
+    })
+    act(() => result.current.toggle())
+    const [master] = FakeAudioContext.instances[0].gains
+    expect(master.values).toEqual([0.25])
+    rerender({ volume: 0 })
+    expect(master.values).toEqual([0.25, 0])
+    rerender({ volume: 1 })
+    expect(master.values).toEqual([0.25, 0, 1])
+  })
 })

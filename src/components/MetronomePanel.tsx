@@ -29,6 +29,9 @@ interface Props {
   onSubdivisionChange: (subdivision: Subdivision) => void
   /** A word beside "BPM", e.g. "PB 76". */
   note?: string
+  /** 0 (silent) to 1. */
+  volume: number
+  onVolumeChange: (volume: number) => void
 }
 
 const round =
@@ -45,6 +48,8 @@ export function MetronomePanel({
   subdivision,
   onSubdivisionChange,
   note,
+  volume,
+  onVolumeChange,
 }: Props) {
   const set = (next: number) => onBpmChange(Math.min(MAX_BPM, Math.max(MIN_BPM, next)))
 
@@ -106,6 +111,19 @@ export function MetronomePanel({
             </Chip>
           ))}
         </div>
+        <label className="mx-auto flex w-full max-w-[260px] items-center gap-3 text-muted">
+          <Icon name="volume" size={18} />
+          <input
+            type="range"
+            aria-label="Volume"
+            aria-valuetext={`${Math.round(volume * 100)}%`}
+            min={0}
+            max={100}
+            value={Math.round(volume * 100)}
+            onChange={(event) => onVolumeChange(Number(event.target.value) / 100)}
+            className="block h-11 min-w-0 flex-1 accent-orange"
+          />
+        </label>
       </div>
 
       <div className="flex flex-col items-center gap-2">

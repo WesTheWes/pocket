@@ -29,6 +29,7 @@ import { formatTimeAgo } from '../../lib/formatDate'
 import { formatDuration } from '../../lib/formatDuration'
 import { celebrationFrom, tempoFrom, withReturn } from '../../lib/returnTo'
 import { useStoredChoice } from '../../lib/useStoredChoice'
+import { useStoredNumber } from '../../lib/useStoredNumber'
 import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
 import { SongNotFound } from '../songs/SongNotFound'
@@ -184,7 +185,8 @@ function PracticeView({
     SUBDIVISIONS,
     'quarter',
   )
-  const metronome = useMetronome(bpm, subdivision)
+  const [volume, setVolume] = useStoredNumber('pocket:metronome:volume', 1, { min: 0, max: 1 })
+  const metronome = useMetronome(bpm, subdivision, volume)
 
   const currentSection = goal ? sections.find((s) => s.id === goal.sectionId) : undefined
   // What you wrote last time about this goal, so it is in front of you when you come back.
@@ -530,6 +532,8 @@ function PracticeView({
             subdivision={subdivision}
             onSubdivisionChange={setSubdivision}
             note={fastest !== null ? `PB ${fastest}` : undefined}
+            volume={volume}
+            onVolumeChange={setVolume}
           />
         </div>
 

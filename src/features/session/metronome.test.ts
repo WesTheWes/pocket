@@ -43,6 +43,7 @@ class FakeContext implements AudioContextLike {
   state = 'suspended'
   destination = { name: 'speakers' }
   oscillators: FakeOscillator[] = []
+  gains: FakeGain[] = []
   resumed = 0
   closed = 0
   createOscillator() {
@@ -51,7 +52,9 @@ class FakeContext implements AudioContextLike {
     return oscillator
   }
   createGain() {
-    return new FakeGain()
+    const gain = new FakeGain()
+    this.gains.push(gain)
+    return gain
   }
   resume() {
     this.resumed++
@@ -123,6 +126,21 @@ describe('createMetronome', () => {
     t.metronome.start(120)
     const [click] = t.context.oscillators
     expect(click.connectedTo).toHaveLength(1)
+  })
+
+  it('sends every click through one master volume, squared, set before or while playing', () => {
+    const t = setup()
+    t.metronome.setVolume(0.5)
+    t.metronome.start(120)
+    const [master, clickGain] = t.context.gains
+    expect(master.connectedTo).toEqual([t.context.destination])
+    expect(master.gain.calls).toEqual([['set', 0.25, 0]])
+    expect(clickGain.connectedTo).toEqual([master])
+    t.context.currentTime = 2
+    t.metronome.setVolume(1)
+    expect(master.gain.calls[1]).toEqual(['set', 1, 2])
+    t.metronome.setVolume(0)
+    expect(master.gain.calls[2]).toEqual(['set', 0, 2])
   })
 
   it('uses a lower pitch for the other beats of the bar', () => {

@@ -7,7 +7,7 @@ import type { Subdivision } from './scheduler'
  * during render, so React StrictMode's extra mount/unmount cannot leave us holding a disposed
  * one, and it is disposed on unmount so audio never outlives the screen.
  */
-export function useMetronome(bpm: number, subdivision: Subdivision = 'quarter') {
+export function useMetronome(bpm: number, subdivision: Subdivision = 'quarter', volume = 1) {
   const metronome = useRef<Metronome | null>(null)
   const [playing, setPlaying] = useState(false)
   const [beat, setBeat] = useState<number | null>(null)
@@ -29,6 +29,10 @@ export function useMetronome(bpm: number, subdivision: Subdivision = 'quarter') 
   useEffect(() => {
     metronome.current?.setSubdivision(subdivision)
   }, [subdivision])
+
+  useEffect(() => {
+    metronome.current?.setVolume(volume)
+  }, [volume])
 
   // Follow the audio clock so the beat dots pulse with the click, not with React's timing.
   useEffect(() => {
