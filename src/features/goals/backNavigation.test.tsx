@@ -92,6 +92,15 @@ describe('back from Goal progress returns to where you came from', () => {
     expect(await screen.findByText('Practice complete')).toBeInTheDocument()
   })
 
+  it('does not offer to start practice when you are already practicing', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g4')
+    await user.click(await screen.findByRole('link', { name: 'Log attempt' }))
+    await screen.findByRole('heading', { name: 'Full chorus with block chords', level: 1 })
+    expect(screen.queryByRole('link', { name: 'Practice this goal' })).not.toBeInTheDocument()
+  })
+
   it('keeps the way back through Edit goal', async () => {
     await loadSamples()
     const user = userEvent.setup()

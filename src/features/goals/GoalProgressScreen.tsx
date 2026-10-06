@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { AttemptRow } from '../../components/AttemptRow'
 import { ConfirmSheet } from '../../components/BottomSheet'
+import { ButtonLink } from '../../components/Button'
 import { Icon } from '../../components/Icon'
 import { IconLink } from '../../components/IconButton'
 import { Page } from '../../components/Page'
@@ -43,6 +44,8 @@ export function GoalProgressScreen() {
 
   const sectionName = sections.find((section) => section.id === goal.sectionId)?.name
   const done = goalDone(goal, attempts)
+  // Came from Practice: you are already practicing, so no button to start.
+  const fromPractice = practiceReturn(location.state) !== undefined
 
   async function confirmRemove() {
     if (!removing) return
@@ -89,6 +92,17 @@ export function GoalProgressScreen() {
         </div>
         <ProgressBar value={goalProgress(goal, attempts)} label="Goal progress" size="lg" />
       </div>
+
+      {!fromPractice && (
+        <ButtonLink
+          to={paths.practice(song.id, goal.id)}
+          variant="secondary"
+          icon="play"
+          className="mx-5 mt-3"
+        >
+          Practice this goal
+        </ButtonLink>
+      )}
 
       <div className="mx-5 mt-6">
         <AttemptForm

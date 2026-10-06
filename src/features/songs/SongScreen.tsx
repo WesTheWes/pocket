@@ -8,7 +8,7 @@ import { ProgressBar } from '../../components/ProgressBar'
 import { SectionRow } from '../../components/SectionRow'
 import { TopBar } from '../../components/TopBar'
 import { useGoals, useSections, useSong, useSongAttempts } from '../../data/hooks'
-import { goalStats, toPercent } from '../../domain/progress'
+import { firstUnfinishedGoal, goalStats, orderGoals, toPercent } from '../../domain/progress'
 import { paths } from '../../paths'
 import { SongNotFound } from './SongNotFound'
 
@@ -108,6 +108,8 @@ export function SongScreen() {
                 {sections.map((section) => {
                   const sectionGoals = goals.filter((goal) => goal.sectionId === section.id)
                   const stats = goalStats(sectionGoals, attempts)
+                  // Play starts at the section's first unfinished goal.
+                  const start = firstUnfinishedGoal(orderGoals(sectionGoals, sections), attempts)
                   return (
                     <SectionRow
                       key={section.id}
@@ -116,6 +118,7 @@ export function SongScreen() {
                       goalCount={stats.goalCount}
                       doneCount={stats.doneCount}
                       progress={stats.progress}
+                      practiceTo={start && paths.practice(song.id, start.id)}
                     />
                   )
                 })}

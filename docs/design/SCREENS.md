@@ -33,7 +33,7 @@ Wordmark "Pocket", search field, filter chips (All, In progress, Learned), a cou
 
 ## Song
 
-Back and edit buttons, title, artist, overall progress bar with "3 of 8 goals done" (`doneCount`), then two buttons: Practice (primary) and Goals. Below: Sections (each row: name, goal count and done count, progress bar and percentage, chevron; an "Add" link), Structure (the ordered section names as small chips, with an "Edit" link), and Chord notes (monospace card, tapping opens Edit song).
+Back and edit buttons, title, artist, overall progress bar with "3 of 8 goals done" (`doneCount`), then two buttons: Practice (primary) and Goals. Below: Sections (each row: name, goal count and done count, progress bar and percentage, chevron, and a round play button that starts Practice at the section's first unfinished goal, hidden when the section has no goals; an "Add" link), Structure (the ordered section names as small chips, with an "Edit" link), and Chord notes (monospace card, tapping opens Edit song).
 
 ## Edit song, New song
 
@@ -51,7 +51,7 @@ The ordered list of slots: drag handle, position number, section name, remove bu
 
 Title area with the song name, filter chips (All, To do, Done, with counts), then goals grouped under Whole song and then each section in song order. Group headers have a count and a plus button that starts a new goal in that group.
 
-Each goal card: the title, an orange progress bar (`goalProgress`), and one line of text under it: "fastest Solid 72 of 84 BPM", or "No Solid attempt yet" when there is none, or "Solid attempt logged" for a goal with no target tempo. A yellow "Done" check appears on done goals. **There is no quality meter or quality name on the card.** Tapping a goal opens Goal progress.
+Each goal card: the title, an orange progress bar (`goalProgress`), and one line of text under it: "fastest Solid 72 of 84 BPM", or "No Solid attempt yet" when there is none, or "Solid attempt logged" for a goal with no target tempo. A yellow "Done" check appears on done goals. **There is no quality meter or quality name on the card.** Tapping a goal opens Goal progress; the round play button on its right starts Practice at that goal.
 
 ## New goal, Edit goal
 
@@ -59,7 +59,7 @@ Each goal card: the title, an orange progress bar (`goalProgress`), and one line
 
 ## Goal progress
 
-Section label, goal title, description. A summary card: the progress bar with "fastest Solid 72 of 84 BPM" and a "Done" state. A "Log attempt" card: tempo stepper (with a "No tempo" toggle), five quality options as selectable rows (each with a mini meter, the label, and a check on the selected one), and "Save attempt". Below, History: newest first, each row with date, BPM (or "no tempo") and quality (meter, color and label), and edit and delete icon buttons. An edit button in the top bar opens Edit goal.
+Section label, goal title, description. A summary card: the progress bar with "fastest Solid 72 of 84 BPM" and a "Done" state. Under it, a "Practice this goal" button that starts Practice at this goal (hidden when you came here from Practice). A "Log attempt" card: tempo stepper (with a "No tempo" toggle), five quality options as selectable rows (each with a mini meter, the label, and a check on the selected one), and "Save attempt". Below, History: newest first, each row with date, BPM (or "no tempo") and quality (meter, color and label), and edit and delete icon buttons. An edit button in the top bar opens Edit goal.
 
 ## Practice
 

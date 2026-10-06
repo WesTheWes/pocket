@@ -89,6 +89,15 @@ describe('GoalProgressScreen', () => {
     )
   })
 
+  it('offers to practice the goal, starting the session on it', async () => {
+    await loadSamples()
+    renderApp(URL_BARS)
+    expect(await screen.findByRole('link', { name: 'Practice this goal' })).toHaveAttribute(
+      'href',
+      '/practice/piano-man?goal=piano-man-g3',
+    )
+  })
+
   it('says so for a goal that does not exist or belongs to another song', async () => {
     await loadSamples()
     const { unmount } = renderApp('/songs/piano-man/goals/nope')

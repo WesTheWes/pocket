@@ -99,4 +99,28 @@ describe('SongScreen', () => {
     expect(await screen.findByText('Page not found')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Back' })).toHaveAttribute('href', '/')
   })
+
+  it("practices a section from its first unfinished goal, or its first when it's all done", async () => {
+    await loadSamples()
+    renderApp('/songs/piano-man')
+    await screen.findByText('3 of 8 goals done')
+
+    // Verse: the waltz pattern (g2) is done, so it starts at the first 4 bars (g3).
+    expect(screen.getByRole('link', { name: 'Practice Verse' })).toHaveAttribute(
+      'href',
+      '/practice/piano-man?goal=piano-man-g3',
+    )
+    expect(screen.getByRole('link', { name: 'Practice Outro' })).toHaveAttribute(
+      'href',
+      '/practice/piano-man?goal=piano-man-g7',
+    )
+  })
+
+  it('has no practice button for a section without goals', async () => {
+    await loadSamples()
+    const section = await repos.sections.create('piano-man', { name: 'Coda', notes: '' })
+    renderApp('/songs/piano-man')
+    await screen.findByText(section.name)
+    expect(screen.queryByRole('link', { name: 'Practice Coda' })).not.toBeInTheDocument()
+  })
 })

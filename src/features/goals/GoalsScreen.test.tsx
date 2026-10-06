@@ -130,4 +130,16 @@ describe('GoalsScreen', () => {
     expect(await screen.findByRole('button', { name: 'All 9' })).toBeInTheDocument()
     expect(screen.getByText('Play it from memory')).toBeInTheDocument()
   })
+
+  it('starts practice at a goal from its card', async () => {
+    await loadSamples()
+    renderApp('/songs/piano-man/goals')
+    await userEvent.click(
+      await screen.findByRole('link', { name: 'Practice Walk-up fill into bar 5' }),
+    )
+    expect(
+      await screen.findByRole('heading', { name: 'Walk-up fill into bar 5' }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByText('Chorus').length).toBeGreaterThan(0)
+  })
 })

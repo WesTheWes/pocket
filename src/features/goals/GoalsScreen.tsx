@@ -86,6 +86,7 @@ export function GoalsScreen() {
                       progress={goalProgress(goal, attempts)}
                       done={goalDone(goal, attempts)}
                       summary={goalSummary(goal, attempts)}
+                      practiceTo={paths.practice(song.id, goal.id)}
                     />
                   ))}
                 </div>
