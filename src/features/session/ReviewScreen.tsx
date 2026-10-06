@@ -3,15 +3,25 @@ import { ButtonLink } from '../../components/Button'
 import { IconLink } from '../../components/IconButton'
 import { MissingPage } from '../../components/MissingPage'
 import { Page } from '../../components/Page'
-import { useGoals, useSections, useSession, useSong, useSongAttempts } from '../../data/hooks'
+import { ProgressHistoryChart } from '../../components/ProgressHistoryChart'
+import {
+  useGoals,
+  useSections,
+  useSession,
+  useSessions,
+  useSong,
+  useSongAttempts,
+} from '../../data/hooks'
 import {
   BeforeAfterLegend,
   ProgressChange,
   ProgressChangeList,
 } from '../../components/ProgressChange'
+import { progressHistory } from '../../domain/history'
 import { orderGoals } from '../../domain/progress'
 import { sessionChanges, songProgressChange } from '../../domain/session'
 import { formatDuration } from '../../lib/formatDuration'
+import { plural } from '../../lib/plural'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
 import { useSessionTimer } from './useSessionTimer'
@@ -24,10 +34,18 @@ export function ReviewScreen() {
   const goals = useGoals(songId)
   const attempts = useSongAttempts(songId)
   const session = useSession(sessionId)
+  const sessions = useSessions(songId)
   const elapsed = useSessionTimer(session)
 
   // Still loading from IndexedDB.
-  if (song === undefined || !sections || !goals || !attempts || session === undefined) {
+  if (
+    song === undefined ||
+    !sections ||
+    !goals ||
+    !attempts ||
+    session === undefined ||
+    !sessions
+  ) {
     return <Page />
   }
   if (song === null) return <SongNotFound />
@@ -38,6 +56,8 @@ export function ReviewScreen() {
   const changes = sessionChanges(session, orderGoals(goals, sections), attempts)
   const songChange = songProgressChange(session, goals, attempts)
   const improved = changes.filter((change) => change.improved).length
+  const history = progressHistory(goals, attempts, sessions)
+  const sessionCount = history.length - 1
   const sectionName = (sectionId: string | null) =>
     sections.find((section) => section.id === sectionId)?.name ?? 'Whole song'
 
@@ -68,6 +88,24 @@ export function ReviewScreen() {
           <dt className="mt-0.5 text-xs text-muted">Improved</dt>
         </div>
       </dl>
+
+      {history.length > 1 && (
+        <section className="px-5 pt-7" aria-labelledby="over-time-heading">
+          <div className="flex h-11 items-center justify-between">
+            <h2 id="over-time-heading" className="eyebrow">
+              Over time
+            </h2>
+            <span className="text-xs text-muted">{plural(sessionCount, 'session')}</span>
+          </div>
+          <div className="rounded-card bg-surface px-4 pb-2 pt-4">
+            <ProgressHistoryChart
+              points={history}
+              highlightId={session.id}
+              now={session.startedAt}
+            />
+          </div>
+        </section>
+      )}
 
       {changes.length > 0 && (
         <section className="px-5 pt-7" aria-labelledby="progress-heading">

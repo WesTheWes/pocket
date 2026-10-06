@@ -40,6 +40,9 @@ export const useGoalAttempts = (goalId: string) =>
 export const useSession = (id: string) =>
   useLiveQuery(async () => (await repos.sessions.get(id)) ?? null, [id])
 
+export const useSessions = (songId: string) =>
+  useLiveQuery(() => repos.sessions.listBySong(songId), [songId])
+
 export const useAllSessions = () => useLiveQuery(() => repos.sessions.list())
 
 export const useActiveSession = (songId: string) =>

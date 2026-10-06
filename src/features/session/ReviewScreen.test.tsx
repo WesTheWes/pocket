@@ -208,3 +208,56 @@ describe('attempt notes', () => {
     ).not.toBeInTheDocument()
   })
 })
+
+describe('charts', () => {
+  it('charts the song’s progress over its sessions, ringing this one', async () => {
+    await loadSamples()
+    renderApp(REVIEW)
+    await screen.findByText('Practice complete')
+    const chart = screen.getByRole('img', {
+      name: 'Song progress over 1 session: 62% before the first, 68% after the latest.',
+    })
+    expect(chart).toBeInTheDocument()
+    expect(screen.getByText('1 session')).toBeInTheDocument()
+    const items = within(chart.parentElement!)
+      .getAllByRole('listitem')
+      .map((li) => li.textContent)
+    expect(items).toEqual(['Before: 62%', 'This session: 68%'])
+  })
+
+  it('adds a point for every finished session, oldest first', async () => {
+    await loadSamples()
+    const later = await repos.sessions.startOrResume('piano-man')
+    await repos.attempts.create({ goalId: 'piano-man-g6', bpm: 100, level: 4, sessionId: later.id })
+    await repos.sessions.end(later.id)
+    renderApp(`/practice/piano-man/review/${later.id}`)
+    await screen.findByText('Practice complete')
+    expect(screen.getByText('2 sessions')).toBeInTheDocument()
+    const items = within(screen.getByRole('img', { name: /^Song progress/ }).parentElement!)
+      .getAllByRole('listitem')
+      .map((li) => li.textContent)
+    expect(items).toEqual(['Before: 62%', '2 days ago: 68%', 'This session: 80%'])
+  })
+
+  it('charts each goal’s tempos this session against its target', async () => {
+    await loadSamples()
+    renderApp(REVIEW)
+    await screen.findByText('Practice complete')
+    expect(
+      within(card('First 4 bars with only bass and melody')).getByRole('img', {
+        name: 'Tempos this session for First 4 bars with only bass and melody: 68 BPM (Many mistakes), 76 BPM (Few mistakes). Target 84 BPM.',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('draws no tempo chart when none of the session’s attempts had a tempo', async () => {
+    await loadSamples()
+    await repos.attempts.update('piano-man-g5-a1', { bpm: null })
+    await repos.attempts.update('piano-man-g5-a2', { bpm: null })
+    renderApp(REVIEW)
+    await screen.findByText('Practice complete')
+    expect(
+      within(card('Walk-up fill into bar 5')).queryByRole('img', { name: /^Tempos/ }),
+    ).not.toBeInTheDocument()
+  })
+})

@@ -138,6 +138,11 @@ src/
   with `ProgressChange` rows. Its Worked-on cards instead compare the goal's last attempt before
   the session with its last one in it (tempo and quality), noting the earlier one's age when it is
   over 14 days older than the session.
+- Review also charts the song's progress over every finished session (`progressHistory` in
+  src/domain/history.ts: a point before the first session, then one after each; practice outside
+  sessions folds into the next point) and each worked-on goal's tempos within the session. Both
+  charts are hand-drawn SVG in src/components (no chart library), labelled in words and backed by a
+  hidden list, so nothing depends on colour or the picture.
 - Stats (`/stats`) derives everything with src/domain/stats.ts: `recentImprovements` (goals whose
   progress rose in a session in the last 30 days, at most 10) and `practiceTimeSince` (last 7
   days). Attempts logged outside a session never appear under "Improved lately".

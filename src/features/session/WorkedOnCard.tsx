@@ -1,5 +1,6 @@
 import { IconLink } from '../../components/IconButton'
 import { QualityMeter } from '../../components/QualityMeter'
+import { SessionTempoChart } from '../../components/SessionTempoChart'
 import { SOLID } from '../../domain/quality'
 import type { GoalChange } from '../../domain/session'
 import { cn } from '../../lib/cn'
@@ -60,6 +61,14 @@ export function WorkedOnCard({
           <dd className="mt-1 text-[17px] font-semibold leading-[1.35]">{qualityText(change)}</dd>
         </div>
       </dl>
+
+      <div className="mt-3">
+        <SessionTempoChart
+          attempts={change.attempts}
+          targetBpm={goal.targetBpm}
+          goalTitle={goal.title}
+        />
+      </div>
 
       <QualityMeter level={level} target={SOLID} className="mt-4 [&>span]:h-2" />
 
