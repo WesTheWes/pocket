@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen } from '@testing-library/react'
+import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { repos } from '../../data'
@@ -155,7 +155,14 @@ describe('Practice remembers the tempo you set for each goal', () => {
     await user.tab()
     await user.click(screen.getByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
-    await screen.findByRole('status') // saving takes you straight back to Practice
+    // Saving takes you straight back to Practice; Solid at 90 finished the goal, so the unlock
+    // sheet is up, covering the toast and the page until it is dismissed.
+    await screen.findByRole('status', { hidden: true })
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: /Keep going|Stay on this one/,
+      }),
+    )
 
     await screen.findByRole('timer', { name: 'Practice time' })
     expect(metronome()).toHaveAttribute('aria-valuetext', '90 BPM')

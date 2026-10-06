@@ -139,7 +139,13 @@ describe('logging an attempt', () => {
     await user.click(screen.getByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Attempt saved')
+    // The toast sits behind the unlock sheet that a finished goal opens; dismiss the sheet.
+    expect(await screen.findByRole('status', { hidden: true })).toHaveTextContent('Attempt saved')
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', {
+        name: /Keep going|Stay on this one/,
+      }),
+    )
     // It became the goal's fastest Solid tempo, which meets the target.
     expect(await screen.findByText('fastest Solid 84 of 84 BPM')).toBeInTheDocument()
     expect(screen.getByText('Done')).toBeInTheDocument()
@@ -205,7 +211,8 @@ describe('logging an attempt', () => {
     renderApp(`/songs/rocket-man/goals/${goal.id}`)
     await user.click(await screen.findByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
-    await screen.findByRole('status')
+    // Solid at the target finishes the goal, so the unlock sheet covers the toast.
+    await screen.findByRole('status', { hidden: true })
     const [attempt] = await repos.attempts.listByGoal(goal.id)
     expect(attempt.sessionId).toBe(session.id)
   })
@@ -219,7 +226,8 @@ describe('logging an attempt', () => {
     renderApp(`/songs/rocket-man/goals/${goal.id}`)
     await user.click(await screen.findByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
-    await screen.findByRole('status')
+    // Solid at the target finishes the goal, so the unlock sheet covers the toast.
+    await screen.findByRole('status', { hidden: true })
     const [attempt] = await repos.attempts.listByGoal(goal.id)
     expect(attempt.sessionId).toBeNull()
   })

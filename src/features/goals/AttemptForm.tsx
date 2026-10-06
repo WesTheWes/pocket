@@ -19,8 +19,8 @@ interface Props {
   editing?: Attempt
   /** Called after an edit is saved or cancelled. */
   onDone: () => void
-  /** Called after a new attempt has been saved (e.g. to go back to Practice). */
-  onLogged?: () => void
+  /** Called with a new attempt once it is saved (e.g. to go back to Practice). */
+  onLogged?: (attempt: Attempt) => void
 }
 
 /**
@@ -57,7 +57,7 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLog
         onDone()
       } else {
         const session = await repos.sessions.getActive(goal.songId)
-        await repos.attempts.create({
+        const saved = await repos.attempts.create({
           goalId: goal.id,
           bpm,
           level,
@@ -67,7 +67,7 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLog
         setLevel(null)
         setNote('')
         notify('Attempt saved')
-        onLogged?.()
+        onLogged?.(saved)
       }
     } catch {
       setError('Couldn’t save the attempt. Please try again.')

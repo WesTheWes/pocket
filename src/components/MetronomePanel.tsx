@@ -27,6 +27,8 @@ interface Props {
   /** Click on every beat, or also between beats. */
   subdivision: Subdivision
   onSubdivisionChange: (subdivision: Subdivision) => void
+  /** A word beside "BPM", e.g. "PB 76". */
+  note?: string
 }
 
 const round =
@@ -42,6 +44,7 @@ export function MetronomePanel({
   supported,
   subdivision,
   onSubdivisionChange,
+  note,
 }: Props) {
   const set = (next: number) => onBpmChange(Math.min(MAX_BPM, Math.max(MIN_BPM, next)))
 
@@ -65,7 +68,7 @@ export function MetronomePanel({
           <div className="font-display text-[92px] leading-[0.95] tabular-nums desk:text-[84px]">
             {bpm}
           </div>
-          <div className="eyebrow mt-1">BPM</div>
+          <div className="eyebrow mt-1">BPM{note && ` · ${note}`}</div>
         </div>
         <button
           type="button"

@@ -7,6 +7,8 @@ interface SheetProps {
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
+  /** Shown above the title, e.g. a celebration mark. */
+  before?: ReactNode
   children?: ReactNode
 }
 
@@ -14,7 +16,14 @@ interface SheetProps {
  * A modal sheet anchored to the bottom on phones and centred on desktop. Radix provides the
  * focus trap, Escape to close, scroll lock and the dialog semantics.
  */
-export function BottomSheet({ open, onOpenChange, title, description, children }: SheetProps) {
+export function BottomSheet({
+  open,
+  onOpenChange,
+  title,
+  description,
+  before,
+  children,
+}: SheetProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -24,6 +33,7 @@ export function BottomSheet({ open, onOpenChange, title, description, children }
             aria-hidden="true"
             className="mx-auto mb-5 h-1 w-10 rounded-full bg-line desk:hidden"
           />
+          {before}
           <Dialog.Title className="font-display text-[30px] leading-[1.1]">{title}</Dialog.Title>
           {description ? (
             <Dialog.Description className="mt-2.5 text-[15px] text-muted">

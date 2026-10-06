@@ -8,11 +8,15 @@ import { Page } from '../../components/Page'
 import { ProgressBar } from '../../components/ProgressBar'
 import { repos } from '../../data'
 import { useActiveSession, useGoals, useSections, useSong, useSongAttempts } from '../../data/hooks'
+import { solidRun } from '../../domain/celebrate'
 import { goalSummary } from '../../domain/goalSummary'
 import { latestNote } from '../../domain/notes'
+import { nextStep, unlockedBy } from '../../domain/suggest'
 import {
   averageProgress,
+  fastestSolidBpm,
   firstUnfinishedGoal,
+  goalDone,
   goalProgress,
   lockReason,
   orderGoals,
@@ -23,7 +27,7 @@ import { SUBDIVISIONS } from '../../domain/subdivision'
 import { cn } from '../../lib/cn'
 import { formatTimeAgo } from '../../lib/formatDate'
 import { formatDuration } from '../../lib/formatDuration'
-import { tempoFrom, withReturn } from '../../lib/returnTo'
+import { celebrationFrom, tempoFrom, withReturn } from '../../lib/returnTo'
 import { useStoredChoice } from '../../lib/useStoredChoice'
 import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
@@ -39,6 +43,7 @@ import { GoalSheet, type GoalSheetTarget } from './GoalSheet'
 import { GoalStatus } from './GoalStatus'
 import { PracticeNotes } from './PracticeNotes'
 import { SongPickerSheet } from './SongPickerSheet'
+import { UnlockSheet } from './UnlockSheet'
 import { chooseTempo, recallTempo, rememberTempo } from './tempoMemory'
 import { useMetronome } from './useMetronome'
 import { useSessionTimer } from './useSessionTimer'
@@ -163,6 +168,7 @@ function PracticeView({
       : (recallTempo(session.id, null)?.bpm ?? FREE_PLAY_BPM)
   // Arriving with a tempo (Home's "Start at 80 BPM") lands on it; later goals start as usual.
   const location = useLocation()
+  const navigate = useNavigate()
   const [tempo, setTempo] = useState(() => ({
     goalKey,
     bpm: tempoFrom(location.state) ?? startBpm(),
@@ -185,6 +191,23 @@ function PracticeView({
   // `now` only dates that note; session time never comes from here.
   const lastNote = goal ? latestNote(goal.id, attempts) : null
   const [now] = useState(() => Date.now())
+  // What is in reach and what it earns: the next step, the run of Solid attempts, what it opens.
+  const done = goal ? goalDone(goal, attempts) : false
+  const step = goal && !done ? nextStep(goal, attempts) : null
+  const run = goal ? solidRun(goal, attempts, session.id) : 0
+  const unlocks = goal && !done ? unlockedBy(goal, goals, attempts) : []
+  const fastest = goal ? fastestSolidBpm(goal, attempts) : null
+  const toGo =
+    goal && !done && goal.targetBpm !== null && fastest !== null ? goal.targetBpm - fastest : null
+  // An attempt that just finished a goal (handed over by Log attempt) is celebrated once.
+  const [celebrating, setCelebrating] = useState<string | null>(
+    () => celebrationFrom(location.state) ?? null,
+  )
+  const celebrated = celebrating ? goals.find((g) => g.id === celebrating) : undefined
+  const stopCelebrating = () => {
+    setCelebrating(null)
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null })
+  }
   const sectionName = currentSection?.name
   const sectionLabel = (g: Goal) => sections.find((s) => s.id === g.sectionId)?.name ?? 'Whole song'
 
@@ -242,6 +265,12 @@ function PracticeView({
               {formatDuration(elapsed)}
             </div>
           </div>
+          {run >= 2 && (
+            <span className="flex h-8 items-center gap-1.5 rounded-full bg-surface px-3 text-[13px] font-semibold text-yellow desk:bg-surface-2">
+              <Icon name="check" size={14} />
+              {run} Solid in a row
+            </span>
+          )}
           <button
             type="button"
             aria-label={paused ? 'Resume timer' : 'Pause timer'}
@@ -403,7 +432,10 @@ function PracticeView({
                 <ProgressBar value={goalProgress(goal, attempts)} label="Goal progress" size="lg" />
                 <div className="mt-2 flex items-center justify-between gap-3">
                   <div className="min-w-0 truncate text-[13px] text-muted desk:text-sm">
-                    {goalSummary(goal, attempts)}
+                    <span>{goalSummary(goal, attempts)}</span>
+                    {toGo !== null && toGo > 0 && (
+                      <span className="ml-1.5 font-semibold text-yellow">· {toGo} to go</span>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -422,6 +454,46 @@ function PracticeView({
                   </span>{' '}
                   {lastNote.note}
                 </p>
+              )}
+              {step && (
+                <div
+                  aria-label="Next step"
+                  className="mt-3 flex items-center gap-3 rounded-row bg-surface-2 py-3 pl-3.5 pr-3 desk:mt-4"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-semibold uppercase tracking-[0.08em] text-orange">
+                      Next step
+                    </div>
+                    <div className="mt-0.5 text-sm leading-[1.4] desk:text-[15px]">{step.text}</div>
+                  </div>
+                  {step.bpm !== bpm && (
+                    <button
+                      type="button"
+                      onClick={() => changeBpm(step.bpm)}
+                      className="h-11 shrink-0 rounded-full bg-cream px-4 text-sm font-semibold text-ink hover:brightness-95"
+                    >
+                      Set {step.bpm}
+                    </button>
+                  )}
+                </div>
+              )}
+              {unlocks.length > 0 && (
+                <div className="mt-3 desk:mt-4">
+                  <div className="eyebrow flex items-center gap-1.5">
+                    <Icon name="lock" size={12} />
+                    Finishing this opens
+                  </div>
+                  <ul aria-label="Goals this would open" className="mt-1.5 flex flex-wrap gap-1.5">
+                    {unlocks.map((other) => (
+                      <li
+                        key={other.id}
+                        className="flex h-[30px] items-center rounded-full border border-line px-3 text-[13px]"
+                      >
+                        {other.title}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </>
           ) : (
@@ -457,6 +529,7 @@ function PracticeView({
             supported={metronome.supported}
             subdivision={subdivision}
             onSubdivisionChange={setSubdivision}
+            note={fastest !== null ? `PB ${fastest}` : undefined}
           />
         </div>
 
@@ -486,6 +559,21 @@ function PracticeView({
         )}
       </div>
 
+      {celebrated && (
+        <UnlockSheet
+          open
+          goal={celebrated}
+          goals={goals}
+          sections={sections}
+          attempts={attempts}
+          now={now}
+          onNext={(other) => {
+            stopCelebrating()
+            select(other.id)
+          }}
+          onStay={stopCelebrating}
+        />
+      )}
       <GoalSheet
         target={goalSheet}
         song={song}

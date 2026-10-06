@@ -133,3 +133,54 @@ describe('saving an attempt anywhere else', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Attempt deleted')
   })
 })
+
+describe('finishing a goal', () => {
+  it('hands the celebration to Practice when the attempt was logged from there', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g6')
+    await user.click(await screen.findByRole('link', { name: 'Log attempt' }))
+    await screen.findByRole('heading', { name: /stride piano/, level: 1 })
+    const tempo = screen.getByRole('textbox', { name: 'Tempo you played, in BPM' })
+    await user.clear(tempo)
+    await user.type(tempo, '100')
+    await user.click(screen.getByRole('radio', { name: 'Solid' }))
+    await user.click(screen.getByRole('button', { name: 'Save attempt' }))
+    const sheet = within(await screen.findByRole('dialog', { name: /stride piano/ }))
+    expect(sheet.getByText('Goal done')).toBeInTheDocument()
+    expect(
+      sheet.getByText('Solid at 100 BPM, on your 2nd attempt. Up from 60 3 days ago.'),
+    ).toBeInTheDocument()
+    // Practice is behind the sheet (hidden from assistive tech while it is open).
+    expect(screen.getByRole('timer', { name: 'Practice time', hidden: true })).toBeInTheDocument()
+  })
+
+  it('celebrates on Goal progress itself otherwise, offering to practise what opened', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    const { router } = renderApp('/songs/piano-man/goals/piano-man-g4')
+    await screen.findByRole('heading', { name: 'Full chorus with block chords', level: 1 })
+    const tempo = screen.getByRole('textbox', { name: 'Tempo you played, in BPM' })
+    await user.clear(tempo)
+    await user.type(tempo, '90')
+    await user.click(screen.getByRole('radio', { name: 'Solid' }))
+    await user.click(screen.getByRole('button', { name: 'Save attempt' }))
+    const sheet = within(
+      await screen.findByRole('dialog', { name: 'Full chorus with block chords' }),
+    )
+    await user.click(sheet.getByRole('button', { name: /^Next: Play the entire section/ }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/practice/piano-man'))
+    expect(router.state.location.search).toBe('?goal=piano-man-g6')
+  })
+
+  it('does not celebrate an attempt that leaves the goal unfinished', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/songs/piano-man/goals/piano-man-g4')
+    await screen.findByRole('heading', { name: 'Full chorus with block chords', level: 1 })
+    await user.click(screen.getByRole('radio', { name: 'Solid' }))
+    await user.click(screen.getByRole('button', { name: 'Save attempt' }))
+    await screen.findByText('Attempt saved')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+})

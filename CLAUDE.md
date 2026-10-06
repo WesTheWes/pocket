@@ -126,6 +126,12 @@ src/
 - Home shows `WeekStrip`, `StartHere` (links to Practice with `withReturn(home, { bpm })`;
   Practice lands on `tempoFrom(location.state)`) and `OpenGoals`. Celebration is understated:
   yellow, rings, serif; no confetti, emoji or points.
+- Practice's goal card adds "N to go", a Next step box (`nextStep`, with a one-tap Set), "Finishing
+  this opens" chips (`unlockedBy`), a "N Solid in a row" chip (`solidRun`, src/domain/celebrate.ts)
+  and "PB" beside BPM. `UnlockSheet` (src/features/session) celebrates a goal an attempt just
+  finished: `AttemptForm.onLogged(attempt)` lets Goal progress tell; from Practice it navigates back
+  with `{ celebrate: goalId }` (read by `celebrationFrom`) and Practice shows the sheet, clearing the
+  state on close; elsewhere Goal progress shows it.
 
 ## Song plans (src/domain/songPlan.ts, src/features/songs/PlanSongScreen.tsx)
 

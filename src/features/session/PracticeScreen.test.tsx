@@ -1225,3 +1225,83 @@ describe('locked goals', () => {
     }
   })
 })
+
+describe('momentum', () => {
+  it('suggests the next step and sets the metronome to it', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    const step = within(await screen.findByLabelText('Next step'))
+    expect(step.getByText('Not Solid at 76. Drop to 72 and build back up.')).toBeInTheDocument()
+    await user.click(step.getByRole('button', { name: 'Set 72' }))
+    expect(tempo()).toHaveValue('72')
+    expect(step.queryByRole('button', { name: 'Set 72' })).not.toBeInTheDocument()
+  })
+
+  it('shows what is left to the target, the personal best, and what finishing would open', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g4')
+    await screen.findByRole('heading', { level: 1, name: 'Full chorus with block chords' })
+    expect(screen.getByText('· 45 to go')).toBeInTheDocument()
+    expect(screen.getByText('BPM · PB 45')).toBeInTheDocument()
+    const opens = within(screen.getByRole('list', { name: 'Goals this would open' }))
+    expect(opens.getByText('Play the entire section in a stride piano style')).toBeInTheDocument()
+  })
+
+  it('counts Solid attempts in a row during the session', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    await screen.findByRole('heading', { level: 1, name: 'First 4 bars with only bass and melody' })
+    expect(screen.queryByText(/Solid in a row/)).not.toBeInTheDocument()
+    await waitFor(async () => expect(await openSessions('piano-man')).toHaveLength(1))
+    const [session] = await openSessions('piano-man')
+    await repos.attempts.create({
+      goalId: 'piano-man-g3',
+      bpm: 72,
+      level: 4,
+      sessionId: session.id,
+    })
+    await repos.attempts.create({
+      goalId: 'piano-man-g3',
+      bpm: 72,
+      level: 4,
+      sessionId: session.id,
+    })
+    expect(await screen.findByText('2 Solid in a row')).toBeInTheDocument()
+    expect(screen.getByText('Two Solid at 72. Try 76.')).toBeInTheDocument()
+  })
+
+  it('celebrates a goal that an attempt just finished, and moves on to what it opened', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    // Block chords done: the stride goal, which needed it, is now open.
+    await repos.attempts.create({ goalId: 'piano-man-g4', bpm: 90, level: 4 })
+    const { router } = renderApp('/practice/piano-man?goal=piano-man-g4', {
+      state: { celebrate: 'piano-man-g4' },
+    })
+    const sheet = within(
+      await screen.findByRole('dialog', { name: 'Full chorus with block chords' }),
+    )
+    expect(sheet.getByText('Goal done')).toBeInTheDocument()
+    expect(sheet.getByText(/Solid at 90 BPM, on your 4th attempt\. Up from 45/)).toBeInTheDocument()
+    expect(sheet.getByText('+45')).toBeInTheDocument()
+    expect(sheet.getByText('4 of 8')).toBeInTheDocument()
+    expect(sheet.getByText('Play the entire section in a stride piano style')).toBeInTheDocument()
+    await user.click(sheet.getByRole('button', { name: /^Next: Play the entire section/ }))
+    await waitFor(() => expect(router.state.location.search).toBe('?goal=piano-man-g6'))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(router.state.location.state).toBeNull()
+  })
+
+  it('can stay on the goal instead', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    await repos.attempts.create({ goalId: 'piano-man-g3', bpm: 84, level: 4 })
+    renderApp('/practice/piano-man?goal=piano-man-g3', { state: { celebrate: 'piano-man-g3' } })
+    const sheet = within(await screen.findByRole('dialog'))
+    // Nothing needed this goal, so there is no "Next": the one button keeps you here.
+    await user.click(sheet.getByRole('button', { name: 'Keep going' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(goalTitle()).toBe('First 4 bars with only bass and melody')
+  })
+})

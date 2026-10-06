@@ -26,6 +26,7 @@ import type { Attempt } from '../../domain/schemas'
 import { formatAttemptDate } from '../../lib/formatDate'
 import { practiceReturn, returnTarget, tempoFrom, withReturn } from '../../lib/returnTo'
 import { paths } from '../../paths'
+import { UnlockSheet } from '../session/UnlockSheet'
 import { SongNotFound } from '../songs/SongNotFound'
 import { AttemptForm } from './AttemptForm'
 import { GoalNotFound } from './GoalNotFound'
@@ -45,6 +46,7 @@ export function GoalProgressScreen() {
   const [editing, setEditing] = useState<Attempt>()
   const [removing, setRemoving] = useState<Attempt>()
   const [removeError, setRemoveError] = useState<string>()
+  const [celebrating, setCelebrating] = useState(false)
   const [now] = useState(() => Date.now())
 
   // Still loading from IndexedDB.
@@ -159,10 +161,14 @@ export function GoalProgressScreen() {
               attempts={attempts}
               // From Practice, start at the metronome's tempo instead of the last logged one.
               initialBpm={tempoFrom(location.state)}
-              // Logging from Practice: once it is saved, go straight back to the session.
-              onLogged={() => {
+              // Logging from Practice: once it is saved, go straight back to the session. An
+              // attempt that finishes the goal is celebrated there, or here otherwise.
+              onLogged={(saved) => {
+                const finished = !done && goalDone(goal, [...attempts, saved])
                 const practice = practiceReturn(location.state)
-                if (practice) navigate(practice)
+                if (practice)
+                  navigate(practice, { state: finished ? { celebrate: goal.id } : null })
+                else if (finished) setCelebrating(true)
               }}
               editing={editing}
               onDone={() => setEditing(undefined)}
@@ -196,6 +202,16 @@ export function GoalProgressScreen() {
         </section>
       </div>
 
+      <UnlockSheet
+        open={celebrating}
+        goal={goal}
+        goals={goals}
+        sections={sections}
+        attempts={songAttempts}
+        now={now}
+        onNext={(other) => navigate(paths.practice(song.id, other.id))}
+        onStay={() => setCelebrating(false)}
+      />
       <ConfirmSheet
         open={removing !== undefined}
         onOpenChange={(open) => !open && setRemoving(undefined)}

@@ -36,6 +36,12 @@ export function returnTarget(state: unknown, fallback: string): string {
   return insideApp ? returnTo : fallback
 }
 
+/** The goal an attempt just finished, handed to Practice to celebrate (`{ celebrate: goalId }`). */
+export function celebrationFrom(state: unknown): string | undefined {
+  const id = (state as { celebrate?: unknown } | null | undefined)?.celebrate
+  return typeof id === 'string' && id !== '' ? id : undefined
+}
+
 const PRACTICE_SESSION = /^\/practice\/[^/?]+(\?.*)?$/
 
 /** The practice session to go back to, if that is where you came from (not the review). */
