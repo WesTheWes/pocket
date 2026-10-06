@@ -18,7 +18,7 @@ async function loadSamples(now = Date.now()) {
   return data
 }
 
-const figure = (label: string) => screen.getByText(label).nextElementSibling
+const figure = (label: string) => screen.getByText(label, { selector: 'dt' }).nextElementSibling
 
 describe('StatsScreen', () => {
   it('shows songs, goals done and practice time this week', async () => {

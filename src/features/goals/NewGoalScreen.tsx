@@ -24,9 +24,10 @@ export function NewGoalScreen() {
   const sectionId = sections.some((section) => section.id === requested) ? requested : null
 
   return (
-    <Page>
-      <TopBar backTo={paths.goals(song.id)} title="New goal" />
+    <Page wide>
+      <TopBar backTo={paths.goals(song.id)} backLabel="Goals" title="New goal" />
       <GoalForm
+        wide
         sections={sections}
         goals={goals}
         defaultValues={{

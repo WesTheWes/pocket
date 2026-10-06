@@ -43,9 +43,10 @@ export function EditSongScreen() {
   }
 
   return (
-    <Page>
-      <TopBar backTo={paths.song(song.id)} title="Edit song" />
+    <Page wide>
+      <TopBar backTo={paths.song(song.id)} backLabel={song.title} title="Edit song" />
       <SongForm
+        wide
         // Defaults are read once, so live updates never overwrite what is being typed.
         key={song.id}
         defaultValues={{

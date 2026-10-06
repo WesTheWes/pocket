@@ -55,7 +55,9 @@ Build mobile first (the mockups are 390px wide), then add the desktop layouts at
 - Home: 3-column grid of song cards, plus a dashed "New song" tile. Search sits in the header next to the New song button.
 - Song: two columns. Title, progress, actions and sections on the left; structure and chord notes on the right.
 - Practice: a fixed left panel (song picker, timer, full goal list, Finish) and a main area (section chips, goal card, metronome panel, previous and next).
-- Other screens keep the mobile layout, centered in a column of about 480px.
+- Goals: the groups in two columns. Goal progress: title, summary, log form on the left; history on the right. Review: time, counts, the over-time chart and the buttons on the left; progress rows and worked-on cards on the right. Stats: figures in a row, then Improved lately beside Your songs.
+- Forms (song, section, goal) and Structure: two columns, with the long part on the right (the chord chart; a section's notes; a goal's description and "Finish first"; the "Add to structure" chips). The same forms inside a Practice sheet stay one column. Backup: one wider centred column.
+- The top bar becomes the Song screen's header row at desktop: a back link with the parent's name, the action on the right, and the screen title as a large serif heading below.
 
 ## Suggested build order
 

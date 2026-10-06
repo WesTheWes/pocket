@@ -34,15 +34,19 @@ export function GoalsScreen() {
   ]
 
   return (
-    <Page>
-      <TopBar backTo={paths.song(song.id)} />
-      <div className="px-5 pt-2">
-        <h1 className="font-display text-[38px] leading-[1.05]">{song.title}</h1>
-        <p className="mt-1 text-sm text-muted">Goals across the whole song and each section</p>
+    <Page wide>
+      <TopBar backTo={paths.song(song.id)} backLabel={song.title} />
+      <div className="px-5 pt-2 desk:px-20 desk:pt-5">
+        <h1 className="font-display text-[38px] leading-[1.05] desk:text-[56px] desk:leading-[1.02]">
+          {song.title}
+        </h1>
+        <p className="mt-1 text-sm text-muted desk:mt-2 desk:text-base">
+          Goals across the whole song and each section
+        </p>
       </div>
 
       {goals.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 px-5 pt-8">
+        <div className="flex flex-col items-start gap-3 px-5 pt-8 desk:px-20">
           <p className="text-muted">
             No goals yet. A goal is something to work toward, like “Left hand alone at 80 BPM”.
           </p>
@@ -52,7 +56,7 @@ export function GoalsScreen() {
         </div>
       ) : (
         <>
-          <div className="flex gap-2 px-5 pt-3">
+          <div className="flex gap-2 px-5 pt-3 desk:px-20 desk:pt-6">
             {filters.map(({ value, label, count }) => (
               <Chip key={value} selected={filter === value} onClick={() => setFilter(value)}>
                 {label} {count}
@@ -60,9 +64,13 @@ export function GoalsScreen() {
             ))}
           </div>
 
-          <div className="px-5 pb-10">
+          <div className="px-5 pb-10 desk:grid desk:grid-cols-2 desk:items-start desk:gap-x-12 desk:px-20 desk:pb-16">
             {groups.map((group) => (
-              <section key={group.key} aria-labelledby={`group-${group.key}`} className="mt-3">
+              <section
+                key={group.key}
+                aria-labelledby={`group-${group.key}`}
+                className="mt-3 desk:mt-5"
+              >
                 <div className="flex h-11 items-center justify-between">
                   <div className="flex items-baseline gap-2">
                     <h2 id={`group-${group.key}`} className="eyebrow">

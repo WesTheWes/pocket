@@ -17,11 +17,12 @@ export function StructureScreen() {
   if (song === null) return <SongNotFound />
 
   return (
-    <Page>
-      <TopBar backTo={paths.song(song.id)} title="Structure" />
+    <Page wide>
+      <TopBar backTo={paths.song(song.id)} backLabel={song.title} title="Structure" />
       {/* Keyed by song so the draft starts fresh, and is not reset by later live updates. */}
       <StructureEditor
         key={song.id}
+        wide
         song={song}
         sections={sections}
         onSaved={() => navigate(paths.song(song.id))}

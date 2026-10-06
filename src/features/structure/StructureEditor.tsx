@@ -37,13 +37,15 @@ interface Props {
   onAddSection?: () => void
   /** Use a lighter row colour, for when the editor sits on a surface (a sheet), not the page. */
   raised?: boolean
+  /** On a wide page: the order on the left and "Add to structure" on the right at `desk:`. */
+  wide?: boolean
 }
 
 /**
  * Arranges a song's play order. It edits a draft that is only written on Save. It renders no page
  * chrome, so a screen or a sheet can host it.
  */
-export function StructureEditor({ song, sections, onSaved, onAddSection, raised }: Props) {
+export function StructureEditor({ song, sections, onSaved, onAddSection, raised, wide }: Props) {
   const [slots, setSlots] = useState<Slot[]>(() => toSlots(song.structure, newKey))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string>()
@@ -98,7 +100,12 @@ export function StructureEditor({ song, sections, onSaved, onAddSection, raised 
   }
 
   return (
-    <>
+    <div
+      className={cn(
+        wide &&
+          'desk:grid desk:grid-cols-[7fr_5fr] desk:items-start desk:gap-x-12 desk:px-15 desk:pb-16 desk:pt-4',
+      )}
+    >
       <p className="px-5 pt-1 text-[15px] text-muted">
         The order the sections are played in. Drag to reorder, and reuse a section as often as you
         need.
@@ -150,7 +157,10 @@ export function StructureEditor({ song, sections, onSaved, onAddSection, raised 
             </DndContext>
           )}
 
-          <section className="px-5 pt-5" aria-labelledby="add-heading">
+          <section
+            className={cn('px-5 pt-5', wide && 'desk:col-start-2 desk:row-span-3 desk:row-start-1')}
+            aria-labelledby="add-heading"
+          >
             <div className="flex h-11 items-center">
               <h2 id="add-heading" className="eyebrow">
                 Add to structure
@@ -181,7 +191,7 @@ export function StructureEditor({ song, sections, onSaved, onAddSection, raised 
           </div>
         </>
       )}
-    </>
+    </div>
   )
 }
 

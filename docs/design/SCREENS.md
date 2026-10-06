@@ -1,6 +1,6 @@
 # Screens
 
-Each row maps a design screen to a route and a feature folder. The reference file is in `reference/screens/` (see the README for what is out of date in them). Mobile is the base layout; desktop notes are called out where they differ. All screens are dark and use the tokens in `src/index.css`.
+Each row maps a design screen to a route and a feature folder. The reference file is in `reference/screens/` (see the README for what is out of date in them). Mobile is the base layout; desktop notes are called out where they differ (and the README's "Responsive layout" lists every desktop layout). All screens are dark and use the tokens in `src/index.css`.
 
 ## Routes
 

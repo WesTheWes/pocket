@@ -62,113 +62,124 @@ export function ReviewScreen() {
     sections.find((section) => section.id === sectionId)?.name ?? 'Whole song'
 
   return (
-    <Page>
-      <div className="flex h-[60px] items-center px-2 pt-2">
-        <IconLink to={paths.home} icon="close" label="Close" />
+    <Page wide>
+      <div className="flex h-[60px] items-center px-2 pt-2 desk:h-auto desk:px-[68px] desk:pt-7">
+        <IconLink
+          to={paths.home}
+          icon="close"
+          label="Close"
+          className="desk:border desk:border-line"
+        />
       </div>
 
-      <div className="px-5 pt-2">
-        <div className="eyebrow">Practice complete</div>
-        <div className="mt-2.5 font-display text-[64px] leading-none tabular-nums">
-          {formatDuration(elapsed)}
-        </div>
-        <p className="mt-1.5 text-[15px] text-muted">
-          {song.title}
-          {song.artist && ` · ${song.artist}`}
-        </p>
-      </div>
-
-      <dl className="flex gap-8 px-5 pt-[22px]">
+      <div className="flex flex-1 flex-col desk:grid desk:grid-cols-[5fr_7fr] desk:items-start desk:gap-x-16 desk:px-15 desk:pb-16 desk:pt-3">
         <div>
-          <dd className="text-[26px] font-semibold leading-[1.1]">{changes.length}</dd>
-          <dt className="mt-0.5 text-xs text-muted">Goals worked</dt>
-        </div>
-        <div>
-          <dd className="text-[26px] font-semibold leading-[1.1]">{improved}</dd>
-          <dt className="mt-0.5 text-xs text-muted">Improved</dt>
-        </div>
-      </dl>
-
-      {history.length > 1 && (
-        <section className="px-5 pt-7" aria-labelledby="over-time-heading">
-          <div className="flex h-11 items-center justify-between">
-            <h2 id="over-time-heading" className="eyebrow">
-              Over time
-            </h2>
-            <span className="text-xs text-muted">{plural(sessionCount, 'session')}</span>
+          <div className="px-5 pt-2">
+            <div className="eyebrow">Practice complete</div>
+            <div className="mt-2.5 font-display text-[64px] leading-none tabular-nums desk:text-[96px]">
+              {formatDuration(elapsed)}
+            </div>
+            <p className="mt-1.5 text-[15px] text-muted">
+              {song.title}
+              {song.artist && ` · ${song.artist}`}
+            </p>
           </div>
-          <div className="rounded-card bg-surface px-4 pb-2 pt-4">
-            <ProgressHistoryChart
-              points={history}
-              highlightId={session.id}
-              now={session.startedAt}
-            />
-          </div>
-        </section>
-      )}
 
-      {changes.length > 0 && (
-        <section className="px-5 pt-7" aria-labelledby="progress-heading">
-          <div className="flex h-11 items-center justify-between">
-            <h2 id="progress-heading" className="eyebrow">
-              Progress
-            </h2>
-            <BeforeAfterLegend />
-          </div>
-          <ProgressChangeList label="Progress before and after this session">
-            <ProgressChange
-              eyebrow="Whole song"
-              title="Overall progress · every goal"
-              before={songChange.before}
-              after={songChange.after}
-            />
-            {changes.map((change) => (
-              <ProgressChange
-                key={change.goal.id}
-                eyebrow={sectionName(change.goal.sectionId)}
-                title={change.goal.title}
-                before={change.progressBefore}
-                after={change.progressAfter}
-              />
-            ))}
-          </ProgressChangeList>
-        </section>
-      )}
+          <dl className="flex gap-8 px-5 pt-[22px]">
+            <div>
+              <dd className="text-[26px] font-semibold leading-[1.1]">{changes.length}</dd>
+              <dt className="mt-0.5 text-xs text-muted">Goals worked</dt>
+            </div>
+            <div>
+              <dd className="text-[26px] font-semibold leading-[1.1]">{improved}</dd>
+              <dt className="mt-0.5 text-xs text-muted">Improved</dt>
+            </div>
+          </dl>
 
-      <section className="px-5 pt-7" aria-labelledby="worked-on-heading">
-        <div className="flex h-11 items-center">
-          <h2 id="worked-on-heading" className="eyebrow">
-            Worked on
-          </h2>
+          {history.length > 1 && (
+            <section className="px-5 pt-7" aria-labelledby="over-time-heading">
+              <div className="flex h-11 items-center justify-between">
+                <h2 id="over-time-heading" className="eyebrow">
+                  Over time
+                </h2>
+                <span className="text-xs text-muted">{plural(sessionCount, 'session')}</span>
+              </div>
+              <div className="rounded-card bg-surface px-4 pb-2 pt-4">
+                <ProgressHistoryChart
+                  points={history}
+                  highlightId={session.id}
+                  now={session.startedAt}
+                />
+              </div>
+            </section>
+          )}
         </div>
-        {changes.length === 0 ? (
-          <p className="text-sm text-muted">
-            No attempts were logged in this session. Log attempts on a goal while you practice to
-            see how you improved.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2.5">
-            {changes.map((change) => (
-              <WorkedOnCard
-                key={change.goal.id}
-                change={change}
-                sectionName={sectionName(change.goal.sectionId)}
-                songId={song.id}
-                returnTo={paths.review(song.id, session.id)}
-                sessionAt={session.startedAt}
-              />
-            ))}
-          </ul>
-        )}
-      </section>
 
-      <div className="mt-auto grid grid-cols-2 gap-2.5 px-5 pb-10 pt-8">
-        <ButtonLink to={paths.practice(song.id)} variant="secondary">
-          Practice again
-        </ButtonLink>
-        <ButtonLink to={paths.home} icon="check">
-          Done
-        </ButtonLink>
+        <div className="desk:row-span-2">
+          {changes.length > 0 && (
+            <section className="px-5 pt-7" aria-labelledby="progress-heading">
+              <div className="flex h-11 items-center justify-between">
+                <h2 id="progress-heading" className="eyebrow">
+                  Progress
+                </h2>
+                <BeforeAfterLegend />
+              </div>
+              <ProgressChangeList label="Progress before and after this session">
+                <ProgressChange
+                  eyebrow="Whole song"
+                  title="Overall progress · every goal"
+                  before={songChange.before}
+                  after={songChange.after}
+                />
+                {changes.map((change) => (
+                  <ProgressChange
+                    key={change.goal.id}
+                    eyebrow={sectionName(change.goal.sectionId)}
+                    title={change.goal.title}
+                    before={change.progressBefore}
+                    after={change.progressAfter}
+                  />
+                ))}
+              </ProgressChangeList>
+            </section>
+          )}
+
+          <section className="px-5 pt-7" aria-labelledby="worked-on-heading">
+            <div className="flex h-11 items-center">
+              <h2 id="worked-on-heading" className="eyebrow">
+                Worked on
+              </h2>
+            </div>
+            {changes.length === 0 ? (
+              <p className="text-sm text-muted">
+                No attempts were logged in this session. Log attempts on a goal while you practice
+                to see how you improved.
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2.5">
+                {changes.map((change) => (
+                  <WorkedOnCard
+                    key={change.goal.id}
+                    change={change}
+                    sectionName={sectionName(change.goal.sectionId)}
+                    songId={song.id}
+                    returnTo={paths.review(song.id, session.id)}
+                    sessionAt={session.startedAt}
+                  />
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        <div className="mt-auto grid grid-cols-2 gap-2.5 px-5 pb-10 pt-8 desk:col-start-1 desk:pb-0">
+          <ButtonLink to={paths.practice(song.id)} variant="secondary">
+            Practice again
+          </ButtonLink>
+          <ButtonLink to={paths.home} icon="check">
+            Done
+          </ButtonLink>
+        </div>
       </div>
     </Page>
   )

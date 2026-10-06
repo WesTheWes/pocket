@@ -6,6 +6,7 @@ import { Chip } from '../../components/Chip'
 import { TextAreaField, TextField } from '../../components/Field'
 import { SECTION_PRESETS } from '../../domain/sections'
 import { sectionFormSchema, type SectionFormValues } from '../../domain/schemas'
+import { cn } from '../../lib/cn'
 
 interface Props {
   defaultValues: SectionFormValues
@@ -18,6 +19,8 @@ interface Props {
   footer?: ReactNode
   /** Replaces the default page padding, e.g. when the form sits inside a sheet. */
   className?: string
+  /** On a wide page: two columns at `desk:`, with the notes tall on the right. Not for sheets. */
+  wide?: boolean
 }
 
 /** The fields shared by New section and Edit section. */
@@ -28,6 +31,7 @@ export function SectionForm({
   extra,
   footer,
   className = 'px-5 pb-10 pt-2',
+  wide = false,
 }: Props) {
   const {
     register,
@@ -49,7 +53,15 @@ export function SectionForm({
   })
 
   return (
-    <form onSubmit={submit} noValidate className={`flex flex-col gap-5 ${className}`}>
+    <form
+      onSubmit={submit}
+      noValidate
+      className={cn(
+        'flex flex-col gap-5',
+        className,
+        wide && 'desk:grid desk:grid-cols-2 desk:gap-x-16 desk:px-20 desk:pb-16 desk:pt-6',
+      )}
+    >
       <div>
         <TextField
           label="Name"
@@ -72,13 +84,15 @@ export function SectionForm({
           ))}
         </div>
       </div>
-      <TextAreaField
-        label="Notes"
-        placeholder="Fingering, feel, tricky spots"
-        className="min-h-[130px] font-sans text-base"
-        error={errors.notes?.message}
-        {...register('notes')}
-      />
+      <div className={cn(wide && 'desk:col-start-2 desk:row-span-3 desk:row-start-1')}>
+        <TextAreaField
+          label="Notes"
+          placeholder="Fingering, feel, tricky spots"
+          className={cn('min-h-[130px] font-sans text-base', wide && 'desk:min-h-[360px]')}
+          error={errors.notes?.message}
+          {...register('notes')}
+        />
+      </div>
       {extra}
 
       <div className="mt-1 flex flex-col gap-2.5">

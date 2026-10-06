@@ -35,8 +35,12 @@ only (canvas-format HTML that does not run): match their spacing, sizes and copy
 
 - Tokens (colors, fonts, radii, the `desk` breakpoint) live in the `@theme` block in
   src/index.css. Use the generated utilities; never hard-code colors.
-- Mobile first (designs are 390px wide). Home, Song and Practice get desktop layouts at `desk:`
-  (900px). Every other screen stays a centered ~480px column.
+- Mobile first (designs are 390px wide). Every screen has a desktop layout at `desk:` (900px):
+  Home, Song and Practice from the design; the rest follow the Song screen's conventions (`Page
+wide`, 80px gutters, `TopBar` with a `backLabel`, which turns into the Song-style header row with
+  the title as a big serif heading, two columns where it helps: forms put their long text on the
+  right). Forms take a `wide` prop that only the screens pass, so the same form inside a sheet
+  stays one column.
 - Routes are in SCREENS.md and defined in src/app/routes.tsx; build links with `paths` from src/paths.ts. Screens live in their feature folder; shared UI in src/components.
 - Every screen in the design is built: Home (features/repertoire); Song, New/Edit song, New/Edit section (features/songs); Structure editor (features/structure); Goals, New/Edit goal, Goal progress (features/goals); Practice and Review (features/session); Stats (features/stats, not in the original design). Unknown addresses show the NotFoundScreen in src/app.
 - After UI changes, look at the running app (phone 390px and desktop 1280px) against docs/design/reference, not just the tests. jsdom applies no CSS, so it cannot catch layout bugs such as a `hidden` class losing to a component's own `inline-flex`. Wrap in a `hidden desk:block` container instead of passing `hidden` to a component.

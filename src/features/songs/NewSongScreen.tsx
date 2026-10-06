@@ -9,9 +9,10 @@ export function NewSongScreen() {
   const navigate = useNavigate()
 
   return (
-    <Page>
-      <TopBar backTo={paths.home} title="New song" />
+    <Page wide>
+      <TopBar backTo={paths.home} backLabel="Songs" title="New song" />
       <SongForm
+        wide
         defaultValues={{
           title: '',
           artist: '',

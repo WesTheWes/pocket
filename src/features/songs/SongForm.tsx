@@ -6,6 +6,7 @@ import { TextAreaField, TextField } from '../../components/Field'
 import { Stepper } from '../../components/Stepper'
 import { Switch } from '../../components/Switch'
 import { songFormSchema, type SongFormValues } from '../../domain/schemas'
+import { cn } from '../../lib/cn'
 
 interface Props {
   defaultValues: SongFormValues
@@ -18,6 +19,8 @@ interface Props {
   footer?: ReactNode
   /** Replaces the default page padding, e.g. when the form sits inside a sheet. */
   className?: string
+  /** On a wide page: two columns at `desk:`, with the chord chart tall on the right. Not for sheets. */
+  wide?: boolean
 }
 
 /** Where the tempo starts when it is switched on for a song that had none. */
@@ -31,6 +34,7 @@ export function SongForm({
   showLearned,
   footer,
   className = 'px-5 pb-10 pt-2',
+  wide = false,
 }: Props) {
   const {
     register,
@@ -50,7 +54,15 @@ export function SongForm({
   })
 
   return (
-    <form onSubmit={submit} noValidate className={`flex flex-col gap-5 ${className}`}>
+    <form
+      onSubmit={submit}
+      noValidate
+      className={cn(
+        'flex flex-col gap-5',
+        className,
+        wide && 'desk:grid desk:grid-cols-[5fr_7fr] desk:gap-x-16 desk:px-20 desk:pb-16 desk:pt-6',
+      )}
+    >
       <TextField
         label="Title"
         placeholder="Song title"
@@ -75,13 +87,17 @@ export function SongForm({
         />
         <p className="mt-2 text-[13px] text-muted">New goals start with this as their target.</p>
       </div>
-      <TextAreaField
-        label="Chord notes"
-        placeholder="Chords, feel, anything you want to remember"
-        spellCheck={false}
-        error={errors.chordNotes?.message}
-        {...register('chordNotes')}
-      />
+      {/* On desktop the chart stands tall on the right, beside everything else. */}
+      <div className={cn(wide && 'desk:col-start-2 desk:row-span-5 desk:row-start-1')}>
+        <TextAreaField
+          label="Chord notes"
+          placeholder="Chords, feel, anything you want to remember"
+          spellCheck={false}
+          className={cn('min-h-[230px] font-mono text-sm', wide && 'desk:min-h-[560px]')}
+          error={errors.chordNotes?.message}
+          {...register('chordNotes')}
+        />
+      </div>
       {showLearned && (
         <Switch
           label="Mark as learned"

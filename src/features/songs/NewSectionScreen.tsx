@@ -16,9 +16,10 @@ export function NewSectionScreen() {
   if (song === null) return <SongNotFound />
 
   return (
-    <Page>
-      <TopBar backTo={paths.song(song.id)} title="New section" />
+    <Page wide>
+      <TopBar backTo={paths.song(song.id)} backLabel={song.title} title="New section" />
       <SectionForm
+        wide
         defaultValues={{ name: '', notes: '' }}
         submitLabel="Add section"
         onSubmit={async (values) => {

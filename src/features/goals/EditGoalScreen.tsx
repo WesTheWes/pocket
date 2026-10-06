@@ -49,9 +49,15 @@ export function EditGoalScreen() {
   }
 
   return (
-    <Page>
-      <TopBar backTo={paths.goal(song.id, goal.id)} backState={location.state} title="Edit goal" />
+    <Page wide>
+      <TopBar
+        backTo={paths.goal(song.id, goal.id)}
+        backState={location.state}
+        backLabel={goal.title}
+        title="Edit goal"
+      />
       <GoalForm
+        wide
         // Defaults are read once, so live updates never overwrite what is being typed.
         key={goal.id}
         sections={sections}

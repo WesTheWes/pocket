@@ -54,9 +54,10 @@ export function EditSectionScreen() {
   }
 
   return (
-    <Page>
-      <TopBar backTo={paths.song(song.id)} title="Edit section" />
+    <Page wide>
+      <TopBar backTo={paths.song(song.id)} backLabel={song.title} title="Edit section" />
       <SectionForm
+        wide
         // Defaults are read once, so live updates never overwrite what is being typed.
         key={section.id}
         defaultValues={{ name: section.name, notes: section.notes }}

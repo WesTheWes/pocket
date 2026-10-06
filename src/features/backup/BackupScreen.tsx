@@ -27,15 +27,18 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024
 
 export function BackupScreen() {
   return (
-    <Page>
-      <TopBar backTo={paths.home} title="Backup" />
-      <p className="px-5 pt-2 text-[15px] text-muted">
-        Your songs and progress are stored only in this browser. Download a backup to keep them
-        safe, or to move them to another device.
-      </p>
-      <div className="flex flex-col gap-4 px-5 pb-12 pt-5">
-        <ExportCard />
-        <RestoreCard />
+    <Page wide>
+      <TopBar backTo={paths.home} backLabel="Songs" title="Backup" />
+      {/* Desktop: one wider column under the title, not two. */}
+      <div className="desk:max-w-[800px] desk:px-20">
+        <p className="px-5 pt-2 text-[15px] text-muted desk:px-0 desk:pt-4">
+          Your songs and progress are stored only in this browser. Download a backup to keep them
+          safe, or to move them to another device.
+        </p>
+        <div className="flex flex-col gap-4 px-5 pb-12 pt-5 desk:px-0 desk:pb-16">
+          <ExportCard />
+          <RestoreCard />
+        </div>
       </div>
     </Page>
   )

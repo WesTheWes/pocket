@@ -55,71 +55,73 @@ export function StatsScreen() {
     sections.find((section) => section.id === sectionId)?.name ?? 'Whole song'
 
   return (
-    <Page>
-      <TopBar backTo={paths.home} />
+    <Page wide>
+      <TopBar backTo={paths.home} backLabel="Songs" />
 
-      <div className="px-5 pt-2">
-        <h1 className="font-display text-[44px] leading-none">Stats</h1>
-        <p className="mt-2 text-[17px] text-muted">Your practice, at a glance</p>
+      <div className="px-5 pt-2 desk:px-20 desk:pt-5">
+        <h1 className="font-display text-[44px] leading-none desk:text-[68px]">Stats</h1>
+        <p className="mt-2 text-[17px] text-muted desk:text-lg">Your practice, at a glance</p>
       </div>
 
-      <dl className="flex gap-10 px-5 pt-7">
+      <dl className="flex gap-10 px-5 pt-7 desk:gap-16 desk:px-20 desk:pt-9">
         <Figure value={String(songs.length)} label={songs.length === 1 ? 'Song' : 'Songs'} />
         <Figure value={String(stats.goalsDone)} label="Goals done" />
         <Figure value={formatDuration(stats.weekMs)} label="This week" />
       </dl>
 
-      <section className="px-5 pt-9" aria-labelledby="improved-heading">
-        <div className="flex h-11 items-center justify-between">
-          <h2 id="improved-heading" className="eyebrow">
-            Improved lately
-          </h2>
-          {stats.improvements.length > 0 && <BeforeAfterLegend />}
-        </div>
-        {stats.improvements.length === 0 ? (
-          <p className="text-sm text-muted">
-            Nothing yet in the last {LATELY.days} days. Log attempts while you practice and the
-            goals you move forward will show up here.
-          </p>
-        ) : (
-          <ProgressChangeList label="Goals improved lately">
-            {stats.improvements.map((improvement) => (
-              <ProgressChange
-                key={`${improvement.session.id}-${improvement.goal.id}`}
-                eyebrow={`${songTitle(improvement.goal.songId)} · ${sectionName(improvement.goal.sectionId)}`}
-                title={improvement.goal.title}
-                before={improvement.progressBefore}
-                after={improvement.progressAfter}
-                aside={formatTimeAgo(improvement.at, now)}
-              />
-            ))}
-          </ProgressChangeList>
-        )}
-      </section>
+      <div className="desk:grid desk:grid-cols-2 desk:items-start desk:gap-x-16 desk:px-15 desk:pb-16">
+        <section className="px-5 pt-9" aria-labelledby="improved-heading">
+          <div className="flex h-11 items-center justify-between">
+            <h2 id="improved-heading" className="eyebrow">
+              Improved lately
+            </h2>
+            {stats.improvements.length > 0 && <BeforeAfterLegend />}
+          </div>
+          {stats.improvements.length === 0 ? (
+            <p className="text-sm text-muted">
+              Nothing yet in the last {LATELY.days} days. Log attempts while you practice and the
+              goals you move forward will show up here.
+            </p>
+          ) : (
+            <ProgressChangeList label="Goals improved lately">
+              {stats.improvements.map((improvement) => (
+                <ProgressChange
+                  key={`${improvement.session.id}-${improvement.goal.id}`}
+                  eyebrow={`${songTitle(improvement.goal.songId)} · ${sectionName(improvement.goal.sectionId)}`}
+                  title={improvement.goal.title}
+                  before={improvement.progressBefore}
+                  after={improvement.progressAfter}
+                  aside={formatTimeAgo(improvement.at, now)}
+                />
+              ))}
+            </ProgressChangeList>
+          )}
+        </section>
 
-      <section className="px-5 pb-16 pt-9" aria-labelledby="songs-heading">
-        <div className="flex h-11 items-center justify-between">
-          <h2 id="songs-heading" className="eyebrow">
-            Your songs
-          </h2>
-          <span className="text-sm text-muted">{plural(songs.length, 'song')}</span>
-        </div>
-        {stats.summaries.length === 0 ? (
-          <p className="text-sm text-muted">
-            No songs yet.{' '}
-            <Link to={paths.newSong} className="text-cream underline">
-              Add one
-            </Link>{' '}
-            to start tracking it.
-          </p>
-        ) : (
-          <ul className="divide-y divide-line">
-            {stats.summaries.map((summary) => (
-              <SongRow key={summary.song.id} summary={summary} />
-            ))}
-          </ul>
-        )}
-      </section>
+        <section className="px-5 pb-16 pt-9 desk:pb-0" aria-labelledby="songs-heading">
+          <div className="flex h-11 items-center justify-between">
+            <h2 id="songs-heading" className="eyebrow">
+              Your songs
+            </h2>
+            <span className="text-sm text-muted">{plural(songs.length, 'song')}</span>
+          </div>
+          {stats.summaries.length === 0 ? (
+            <p className="text-sm text-muted">
+              No songs yet.{' '}
+              <Link to={paths.newSong} className="text-cream underline">
+                Add one
+              </Link>{' '}
+              to start tracking it.
+            </p>
+          ) : (
+            <ul className="divide-y divide-line">
+              {stats.summaries.map((summary) => (
+                <SongRow key={summary.song.id} summary={summary} />
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </Page>
   )
 }
@@ -128,7 +130,9 @@ function Figure({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex flex-col-reverse">
       <dt className="mt-0.5 text-[13px] text-muted">{label}</dt>
-      <dd className="text-[28px] font-semibold leading-[1.1] tabular-nums">{value}</dd>
+      <dd className="text-[28px] font-semibold leading-[1.1] tabular-nums desk:text-[40px]">
+        {value}
+      </dd>
     </div>
   )
 }

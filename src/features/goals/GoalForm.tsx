@@ -8,6 +8,7 @@ import { Stepper } from '../../components/Stepper'
 import { wouldCycle } from '../../domain/prerequisites'
 import { orderGoals } from '../../domain/progress'
 import { goalFormSchema, type Goal, type GoalFormValues, type Section } from '../../domain/schemas'
+import { cn } from '../../lib/cn'
 
 const DEFAULT_TARGET_BPM = 80
 
@@ -25,6 +26,8 @@ interface Props {
   footer?: ReactNode
   /** Replaces the default page padding, e.g. when the form sits inside a sheet. */
   className?: string
+  /** On a wide page: two columns at `desk:`, description and "Finish first" on the right. Not for sheets. */
+  wide?: boolean
 }
 
 /** The fields shared by New goal and Edit goal. */
@@ -37,6 +40,7 @@ export function GoalForm({
   onSubmit,
   footer,
   className = 'px-5 pb-10 pt-2',
+  wide = false,
 }: Props) {
   const {
     register,
@@ -71,7 +75,15 @@ export function GoalForm({
   const targets = [{ id: null, name: 'Whole song' }, ...sections]
 
   return (
-    <form onSubmit={submit} noValidate className={`flex flex-col gap-[22px] ${className}`}>
+    <form
+      onSubmit={submit}
+      noValidate
+      className={cn(
+        'flex flex-col gap-[22px]',
+        className,
+        wide && 'desk:grid desk:grid-cols-2 desk:gap-x-16 desk:px-20 desk:pb-16 desk:pt-6',
+      )}
+    >
       <div role="group" aria-labelledby="applies-to-label">
         <div id="applies-to-label" className="eyebrow">
           Applies to
@@ -96,13 +108,15 @@ export function GoalForm({
         error={errors.title?.message}
         {...register('title')}
       />
-      <TextAreaField
-        label="Description"
-        placeholder="What does success look like?"
-        className="min-h-[100px] font-sans text-base"
-        error={errors.description?.message}
-        {...register('description')}
-      />
+      <div className={cn(wide && 'desk:col-start-2 desk:row-start-1')}>
+        <TextAreaField
+          label="Description"
+          placeholder="What does success look like?"
+          className={cn('min-h-[100px] font-sans text-base', wide && 'desk:min-h-[140px]')}
+          error={errors.description?.message}
+          {...register('description')}
+        />
+      </div>
       <Stepper
         label="Target tempo"
         value={tempoField.value}
@@ -112,7 +126,12 @@ export function GoalForm({
       />
 
       {candidates.length > 0 && (
-        <div role="group" aria-labelledby="finish-first-label" aria-describedby="finish-first-help">
+        <div
+          role="group"
+          aria-labelledby="finish-first-label"
+          aria-describedby="finish-first-help"
+          className={cn(wide && 'desk:col-start-2 desk:row-span-3 desk:row-start-2')}
+        >
           <div id="finish-first-label" className="eyebrow">
             Finish first
           </div>
