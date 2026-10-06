@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { Button } from '../../components/Button'
 import { Icon } from '../../components/Icon'
 import { IconButton, IconLink } from '../../components/IconButton'
@@ -23,7 +23,7 @@ import { SUBDIVISIONS } from '../../domain/subdivision'
 import { cn } from '../../lib/cn'
 import { formatTimeAgo } from '../../lib/formatDate'
 import { formatDuration } from '../../lib/formatDuration'
-import { withReturn } from '../../lib/returnTo'
+import { tempoFrom, withReturn } from '../../lib/returnTo'
 import { useStoredChoice } from '../../lib/useStoredChoice'
 import { paths } from '../../paths'
 import { groupGoals } from '../goals/groups'
@@ -161,7 +161,12 @@ function PracticeView({
     goal
       ? chooseTempo(recallTempo(session.id, goalKey), goal, attempts)
       : (recallTempo(session.id, null)?.bpm ?? FREE_PLAY_BPM)
-  const [tempo, setTempo] = useState(() => ({ goalKey, bpm: startBpm() }))
+  // Arriving with a tempo (Home's "Start at 80 BPM") lands on it; later goals start as usual.
+  const location = useLocation()
+  const [tempo, setTempo] = useState(() => ({
+    goalKey,
+    bpm: tempoFrom(location.state) ?? startBpm(),
+  }))
   if (tempo.goalKey !== goalKey) setTempo({ goalKey, bpm: startBpm() })
   const bpm = tempo.bpm
   const changeBpm = (next: number) => {

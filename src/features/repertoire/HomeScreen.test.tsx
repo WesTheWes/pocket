@@ -136,3 +136,80 @@ describe('HomeScreen', () => {
     expect(screen.queryByText('No songs yet')).not.toBeInTheDocument()
   })
 })
+
+describe('start here', () => {
+  it('suggests one goal from the song practised last, with the reason and a tempo to start at', async () => {
+    await loadSamples()
+    renderApp('/')
+    const card = within(await screen.findByRole('region', { name: 'Start here' }))
+    expect(card.getByText('Piano Man · Verse')).toBeInTheDocument()
+    expect(card.getByText('First 4 bars with only bass and melody')).toBeInTheDocument()
+    expect(card.getByText('fastest Solid 64 of 84 BPM · 20 to go')).toBeInTheDocument()
+    expect(card.getByText(/Last time you wrote: “Better once I slowed bar 3/)).toBeInTheDocument()
+    expect(card.getByText(/Not Solid at 76\. Drop to 72/)).toBeInTheDocument()
+    expect(card.getByRole('link', { name: 'Start at 72 BPM' })).toHaveAttribute(
+      'href',
+      '/practice/piano-man?goal=piano-man-g3',
+    )
+  })
+
+  it('lands Practice on that tempo', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/')
+    await user.click(await screen.findByRole('link', { name: 'Start at 72 BPM' }))
+    expect(await screen.findByRole('slider', { name: 'Tempo' })).toHaveValue('72')
+  })
+
+  it('shows nothing to start with no songs', async () => {
+    renderApp('/')
+    await screen.findByText('No songs yet')
+    expect(screen.queryByRole('region', { name: 'Start here' })).not.toBeInTheDocument()
+    expect(screen.queryByText('This week')).not.toBeInTheDocument()
+  })
+})
+
+describe('this week', () => {
+  it('marks today once you have practised, and counts the streak', async () => {
+    await loadSamples()
+    const session = await repos.sessions.startOrResume('piano-man')
+    await repos.sessions.end(session.id)
+    renderApp('/')
+    const days = within(await screen.findByRole('list', { name: 'Days practised this week' }))
+    expect(days.getAllByRole('listitem')).toHaveLength(7)
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' })
+    expect(days.getByLabelText(`${today}, practised`)).toBeInTheDocument()
+    expect(screen.getByText(/1 day · 1-day streak/)).toBeInTheDocument()
+  })
+})
+
+describe('open, not started', () => {
+  it('lists goals that just opened up and have never been tried', async () => {
+    await loadSamples()
+    // The waltz pattern is done, so a goal that needs it is open.
+    const goal = await repos.goals.create({
+      songId: 'piano-man',
+      sectionId: 'piano-man-s1',
+      title: 'Verse, hands together',
+      targetBpm: 72,
+      requires: ['piano-man-g2'],
+    })
+    renderApp('/')
+    const open = within(await screen.findByRole('region', { name: 'Open, not started' }))
+    expect(open.getByText('Verse, hands together')).toBeInTheDocument()
+    expect(open.getByText('Piano Man · Verse · target 72')).toBeInTheDocument()
+    expect(open.getByRole('link', { name: 'Start Verse, hands together' })).toHaveAttribute(
+      'href',
+      `/practice/piano-man?goal=${goal.id}`,
+    )
+    // The walk-up fill is open too, but has attempts, so it is not listed.
+    expect(open.queryByText('Walk-up fill into bar 5')).not.toBeInTheDocument()
+  })
+
+  it('is absent when nothing is waiting', async () => {
+    await loadSamples()
+    renderApp('/')
+    await screen.findByRole('region', { name: 'Start here' })
+    expect(screen.queryByRole('region', { name: 'Open, not started' })).not.toBeInTheDocument()
+  })
+})

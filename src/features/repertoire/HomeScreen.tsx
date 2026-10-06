@@ -6,7 +6,14 @@ import { Icon } from '../../components/Icon'
 import { IconLink } from '../../components/IconButton'
 import { Page } from '../../components/Page'
 import { SongCard } from '../../components/SongCard'
-import { useAllAttempts, useAllGoals, useAllSections, useSongs } from '../../data/hooks'
+import {
+  useAllAttempts,
+  useAllGoals,
+  useAllSections,
+  useAllSessions,
+  useSongs,
+} from '../../data/hooks'
+import { openGoals, suggestGoal } from '../../domain/suggest'
 import { paths } from '../../paths'
 import { DevTools } from '../../app/DevTools'
 import {
@@ -16,6 +23,12 @@ import {
   type SortKey,
   type StatusFilter,
 } from './summaries'
+import { OpenGoals } from './OpenGoals'
+import { StartHere } from './StartHere'
+import { WeekStrip } from './WeekStrip'
+
+/** Enough to glance at; the Goals screens list the rest. */
+const OPEN_GOALS_SHOWN = 3
 
 const FILTERS: Array<{ value: StatusFilter; label: string }> = [
   { value: 'all', label: 'All' },
@@ -34,6 +47,9 @@ export function HomeScreen() {
   const sections = useAllSections()
   const goals = useAllGoals()
   const attempts = useAllAttempts()
+  const sessions = useAllSessions()
+  // A snapshot for "this week" and the streak, not a ticking clock.
+  const [now] = useState(() => Date.now())
 
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<StatusFilter>('all')
@@ -47,10 +63,19 @@ export function HomeScreen() {
     [songs, sections, goals, attempts],
   )
 
+  const suggestion = useMemo(
+    () =>
+      songs && sections && goals && attempts && sessions
+        ? suggestGoal(songs, sections, goals, attempts, sessions)
+        : null,
+    [songs, sections, goals, attempts, sessions],
+  )
+
   // Still loading from IndexedDB.
-  if (!summaries) return <Page wide />
+  if (!summaries || !songs || !sections || !goals || !attempts || !sessions) return <Page wide />
 
   const visible = sortSummaries(filterSummaries(summaries, { query, filter }), sort)
+  const opened = openGoals(goals, attempts).slice(0, OPEN_GOALS_SHOWN)
 
   return (
     <Page wide>
@@ -82,7 +107,23 @@ export function HomeScreen() {
         </div>
       </header>
 
-      <div className="flex items-center justify-between px-5 pt-2 desk:px-20 desk:pt-8">
+      {summaries.length > 0 && (
+        <div className="flex flex-col gap-6 px-5 pt-6 desk:grid desk:grid-cols-[5fr_7fr] desk:items-start desk:gap-x-10 desk:px-20 desk:pt-9">
+          <WeekStrip sessions={sessions} now={now} />
+          {suggestion && (
+            <div className="desk:col-start-2 desk:row-span-2 desk:row-start-1">
+              <StartHere suggestion={suggestion} />
+            </div>
+          )}
+          {opened.length > 0 && (
+            <div className="desk:col-start-1">
+              <OpenGoals goals={opened} songs={songs} sections={sections} />
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between px-5 pt-6 desk:px-20 desk:pt-10">
         <div className="flex gap-2">
           {FILTERS.map(({ value, label }) => (
             <Chip key={value} selected={filter === value} onClick={() => setFilter(value)}>

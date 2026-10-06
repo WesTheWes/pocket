@@ -114,6 +114,19 @@ src/
 - The current goal lives in the URL (`?goal=`) so a reload keeps your place. Landing on a goal resets the tempo to `startingBpm`.
 - Practice is one DOM that adapts with `desk:` classes (CSS `order` moves Finish and the timer), so each control exists once.
 
+## Gamification (src/domain/week.ts, levels.ts, suggest.ts)
+
+- Practice should feel like levels with a clear place to start. Everything derives from stored
+  data; nothing new is saved. `week.ts`: `weekDays` (Monday-first, by local day), `streakDays`
+  (days in a row up to today; a streak survives until the end of today). `levels.ts`: a goal's
+  level is its depth in the `requires` graph (`goalLevels`, `songLevels`, `currentLevel`).
+  `suggest.ts`: `suggestGoal` (the song practised last, its first goal neither done nor locked),
+  `nextStep` (two Solid at a tempo → +4, never past the target; one Solid → again; a miss → −4),
+  `goalReason`, `unlockedBy`, `openGoals`.
+- Home shows `WeekStrip`, `StartHere` (links to Practice with `withReturn(home, { bpm })`;
+  Practice lands on `tempoFrom(location.state)`) and `OpenGoals`. Celebration is understated:
+  yellow, rings, serif; no confetti, emoji or points.
+
 ## Song plans (src/domain/songPlan.ts, src/features/songs/PlanSongScreen.tsx)
 
 - "Plan a song" (`/songs/plan`, linked from Home and New song) creates a whole song from a plan an

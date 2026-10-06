@@ -8,3 +8,10 @@ export function formatDuration(ms: number): string {
   const seconds = total % 60
   return hours > 0 ? `${hours}:${pad(minutes)}:${pad(seconds)}` : `${pad(minutes)}:${pad(seconds)}`
 }
+
+/** "48 min", "1 h 12 min", "0 min": practice totals, to the minute. */
+export function formatMinutes(ms: number): string {
+  const minutes = Math.round(Math.max(0, ms) / 60_000)
+  const hours = Math.floor(minutes / 60)
+  return hours > 0 ? `${hours} h ${minutes % 60} min` : `${minutes} min`
+}
