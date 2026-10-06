@@ -28,5 +28,14 @@ export function createDb(name = 'pocket'): PocketDb {
         if (song.tempo === undefined) song.tempo = null
       }),
   )
+  // Version 3 gave attempts a note. Attempts saved before then have an empty one.
+  db.version(3).upgrade((tx) =>
+    tx
+      .table('attempts')
+      .toCollection()
+      .modify((attempt: Partial<Attempt>) => {
+        if (attempt.note === undefined) attempt.note = ''
+      }),
+  )
   return db
 }

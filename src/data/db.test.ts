@@ -30,4 +30,31 @@ describe('createDb', () => {
     db.close()
     await Dexie.delete(name)
   })
+
+  it('gives attempts saved before version 3 an empty note', async () => {
+    const name = 'upgrade-test-3'
+    // The database as version 2 left it: an attempt with no note field.
+    const old = new Dexie(name)
+    old.version(2).stores({
+      songs: 'id, createdAt',
+      sections: 'id, songId',
+      goals: 'id, songId, sectionId',
+      attempts: 'id, goalId, sessionId, at',
+      sessions: 'id, songId, startedAt',
+    })
+    await old.table('attempts').add({
+      id: 't1',
+      goalId: 'g1',
+      sessionId: null,
+      bpm: 60,
+      level: 4,
+      at: 0,
+    })
+    old.close()
+
+    const db = createDb(name)
+    expect(await db.attempts.get('t1')).toMatchObject({ bpm: 60, note: '' })
+    db.close()
+    await Dexie.delete(name)
+  })
 })

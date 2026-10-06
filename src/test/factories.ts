@@ -48,6 +48,7 @@ export function makeAttempt(overrides: Partial<Attempt> = {}): Attempt {
     sessionId: null,
     bpm: 72,
     level: 4,
+    note: '',
     at: 0,
     ...overrides,
   }

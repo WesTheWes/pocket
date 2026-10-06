@@ -255,6 +255,15 @@ describe('attempts', () => {
     await expect(repos.attempts.create({ goalId: goal.id, level: 6 })).rejects.toThrow()
   })
 
+  it('stores a note, empty by default, and can change it later', async () => {
+    const { repos, goal } = await setup()
+    const plain = await repos.attempts.create({ goalId: goal.id, level: 3 })
+    expect(plain.note).toBe('')
+    const noted = await repos.attempts.create({ goalId: goal.id, level: 3, note: 'Bar 3 drags' })
+    expect(noted.note).toBe('Bar 3 drags')
+    expect(await repos.attempts.update(noted.id, { note: '' })).toMatchObject({ note: '' })
+  })
+
   it('edits and deletes an attempt', async () => {
     const { repos, goal } = await setup()
     const attempt = await repos.attempts.create({ goalId: goal.id, bpm: 60, level: 3 })

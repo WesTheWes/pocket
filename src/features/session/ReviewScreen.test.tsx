@@ -179,3 +179,32 @@ describe('ReviewScreen', () => {
     expect(await screen.findByText('Song not found')).toBeInTheDocument()
   })
 })
+
+describe('attempt notes', () => {
+  it('lists the notes written during the session under the goal', async () => {
+    await loadSamples()
+    renderApp(REVIEW)
+    await screen.findByText('Practice complete')
+    const notes = within(
+      within(card('First 4 bars with only bass and melody')).getByRole('list', {
+        name: 'Notes for First 4 bars with only bass and melody',
+      }),
+    )
+      .getAllByRole('listitem')
+      .map((li) => li.textContent)
+    expect(notes).toEqual([
+      '68 BPMLeft hand drags behind in bar 3.',
+      '76 BPMBetter once I slowed bar 3 right down. Try 80 next time.',
+    ])
+  })
+
+  it('shows no notes list for a goal whose session attempts had none', async () => {
+    await loadSamples()
+    await repos.attempts.update('piano-man-g5-a2', { note: '' })
+    renderApp(REVIEW)
+    await screen.findByText('Practice complete')
+    expect(
+      within(card('Walk-up fill into bar 5')).queryByRole('list', { name: /^Notes for/ }),
+    ).not.toBeInTheDocument()
+  })
+})

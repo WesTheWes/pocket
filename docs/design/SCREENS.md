@@ -59,7 +59,7 @@ Each goal card: the title, an orange progress bar (`goalProgress`), and one line
 
 ## Goal progress
 
-Section label, goal title, description. A summary card: the progress bar with "fastest Solid 72 of 84 BPM" and a "Done" state. Under it, a "Practice this goal" button that starts Practice at this goal (hidden when you came here from Practice). A "Log attempt" card: tempo stepper (with a "No tempo" toggle), five quality options as selectable rows (each with a mini meter, the label, and a check on the selected one), and "Save attempt". Below, History: newest first, each row with date, BPM (or "no tempo") and quality (meter, color and label), and edit and delete icon buttons. An edit button in the top bar opens Edit goal.
+Section label, goal title, description. A summary card: the progress bar with "fastest Solid 72 of 84 BPM" and a "Done" state. Under it, a "Practice this goal" button that starts Practice at this goal (hidden when you came here from Practice). A "Log attempt" card: tempo stepper (with a "No tempo" toggle), five quality options as selectable rows (each with a mini meter, the label, and a check on the selected one), a short Note box ("What went wrong, what to try next"), and "Save attempt". Below, History: newest first, each row with date, BPM (or "no tempo") and quality (meter, color and label), the note under them when there is one, and edit and delete icon buttons. An edit button in the top bar opens Edit goal.
 
 ## Practice
 
@@ -73,7 +73,7 @@ Shown after Finish. Total time (large serif, `sessionElapsedMs`), song, and two 
 
 **Progress**: a card of before/after rows (`ProgressChange`, with a Before/After legend): first "Whole song · Overall progress · every goal" (`songProgressChange`), then one row per goal worked on (`progressBefore` / `progressAfter`). Each row: "45% → 61%" and a track with a hollow dot (before), a filled orange dot (after) and a line between; one muted dot when unchanged.
 
-**Worked on**: one card per goal with attempts in this session: section, title, edit button (opens Goal progress), then Tempo and Quality comparing the goal's last attempt before the session with its last attempt in it ("54 → 60 BPM", "Many mistakes → Few mistakes"; just the session value when there was nothing before), a quality meter of the last attempt with the Solid segment outlined, "Last time: 3 months ago" when the earlier attempt is over 14 days older than the session, and a change tag (`changeTag` in `reviewText.ts`): "Done", what went up ("+6 BPM · quality up"), "Fastest Solid now 76 BPM", what went down (muted), or "No change".
+**Worked on**: one card per goal with attempts in this session: section, title, edit button (opens Goal progress), then Tempo and Quality comparing the goal's last attempt before the session with its last attempt in it ("54 → 60 BPM", "Many mistakes → Few mistakes"; just the session value when there was nothing before), a quality meter of the last attempt with the Solid segment outlined, "Last time: 3 months ago" when the earlier attempt is over 14 days older than the session, and a change tag (`changeTag` in `reviewText.ts`): "Done", what went up ("+6 BPM · quality up"), "Fastest Solid now 76 BPM", what went down (muted), or "No change". Any notes written in the session are listed under it, each with the tempo it was logged at.
 
 Buttons side by side: "Practice again" (secondary) and "Done" (primary, back to Home).
 

@@ -88,7 +88,7 @@ src/
   StrictMode's doubled effects cannot create two sessions.
 - `repos.backup` has `exportAll`, `replaceAll` (validates first, then swaps in one transaction) and
   `clear`. Sample data comes from `createSeedData(now)` in `src/data/seed.ts`.
-- The Dexie schema is at version 2 (songs gained `tempo`; its `upgrade` fills in null). When a record shape changes, add a Dexie version with an upgrade and bump `BACKUP_VERSION` together, so stored data and old backup files both keep working.
+- The Dexie schema is at version 3 (v2: songs gained `tempo`, v3: attempts gained `note`; each `upgrade` fills in the default). When a record shape changes, add a Dexie version with an upgrade and bump `BACKUP_VERSION` together, so stored data and old backup files both keep working.
 - Never name an error `NotFoundError`: Dexie turns any error with that name thrown inside a
   transaction into its own `DexieError`. Ours is `RecordNotFoundError`.
 
@@ -120,7 +120,7 @@ src/
 
 - Quality levels are stored as numbers 1-5: Can't play at all, Many mistakes, Few mistakes, Solid,
   Perfection. Labels live in one constant in src/domain/quality.ts.
-- Each attempt logs an optional BPM and a level, and may carry a sessionId.
+- Each attempt logs an optional BPM, a level and an optional note (what went wrong, what to try next; `''` when none), and may carry a sessionId. Notes show on history rows, Review's Worked-on cards (every note from the session) and Practice's goal card (the latest note for the goal, `latestNote` in src/domain/notes.ts, with its age).
 - A song has an optional tempo (`Song.tempo`, null when not set). New goals, from New goal or Practice's goal sheet, start their target BPM at it (`newGoalTargetBpm`), else 80.
 - A goal has an optional, always-editable target BPM. There is no per-goal target level: every goal
   is measured against Solid (4).

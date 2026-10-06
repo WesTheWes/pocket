@@ -8,9 +8,11 @@ export interface NewAttempt {
   level: Attempt['level']
   /** Set when the attempt is logged during a practice session. */
   sessionId?: string | null
+  /** What went wrong or what to try next. Omitted when nothing was written. */
+  note?: string
 }
 
-export type AttemptPatch = Partial<Pick<Attempt, 'bpm' | 'level'>>
+export type AttemptPatch = Partial<Pick<Attempt, 'bpm' | 'level' | 'note'>>
 
 export function createAttemptsRepo({ db, now, newId }: RepoContext) {
   return {
@@ -35,6 +37,7 @@ export function createAttemptsRepo({ db, now, newId }: RepoContext) {
           sessionId: input.sessionId ?? null,
           bpm: input.bpm ?? null,
           level: input.level,
+          note: input.note ?? '',
           at: now(),
         })
         await db.attempts.add(attempt)

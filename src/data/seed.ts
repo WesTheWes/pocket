@@ -4,8 +4,14 @@ import type { Attempt, Goal, PocketData, Section, Session, Song } from '../domai
 const MINUTE = 60_000
 const DAY = 24 * 60 * MINUTE
 
-/** [bpm, level, days ago, logged during the song's practice session?] */
-type AttemptSeed = [bpm: number | null, level: QualityLevel, daysAgo: number, inSession?: boolean]
+/** [bpm, level, days ago, logged during the song's practice session?, note] */
+type AttemptSeed = [
+  bpm: number | null,
+  level: QualityLevel,
+  daysAgo: number,
+  inSession?: boolean,
+  note?: string,
+]
 
 interface GoalSeed {
   /** Section name, or null for a whole-song goal. */
@@ -87,8 +93,8 @@ const pianoMan: SongSeed = {
       attempts: [
         [60, 3, 9],
         [64, 4, 6],
-        [68, 2, 2, true],
-        [76, 3, 2, true],
+        [68, 2, 2, true, 'Left hand drags behind in bar 3.'],
+        [76, 3, 2, true, 'Better once I slowed bar 3 right down. Try 80 next time.'],
       ],
     },
     {
@@ -108,7 +114,7 @@ const pianoMan: SongSeed = {
       attempts: [
         [60, 2, 7],
         [50, 2, 2, true],
-        [42, 4, 2, true],
+        [42, 4, 2, true, 'Clean at 42. Push toward 50 next.'],
       ],
     },
     {
@@ -272,7 +278,7 @@ export function createSeedData(now: number): PocketData {
       }
       data.goals.push(goal)
 
-      goalSeed.attempts.forEach(([bpm, level, daysAgo, inSession], attemptIndex) => {
+      goalSeed.attempts.forEach(([bpm, level, daysAgo, inSession, note], attemptIndex) => {
         // Attempts in the practice session are spaced 5 minutes apart from its start.
         const at =
           inSession && session
@@ -284,6 +290,7 @@ export function createSeedData(now: number): PocketData {
           sessionId: inSession && session ? session.id : null,
           bpm,
           level,
+          note: note ?? '',
           at,
         }
         data.attempts.push(attempt)

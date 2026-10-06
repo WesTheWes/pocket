@@ -43,7 +43,7 @@ Quality is always shown three ways: a five-segment meter, its color (`q1` to `q5
 - The header shows the song with a picker to switch songs, and a Finish button that ends the session and opens Review.
 - A timer counts practice time (mm:ss, then h:mm:ss) and can be paused. Starting Practice creates a session (`startSession`); the timer is `useSessionTimer(session)`, derived from the stored session, so a reload keeps the time. Switching songs finishes the current session and starts a new one.
 - The section chips each carry a progress bar (the section's progress) so you can see what needs work. Tapping a chip jumps to that section's first goal. A "Whole song" chip covers whole-song goals.
-- The goal card shows the section, goal position ("Goal 3 of 8"), title, description, and a progress bar with "fastest Solid 72 of 84 BPM". A "Log attempt" link opens the goal's progress screen.
+- The goal card shows the section, goal position ("Goal 3 of 8"), title, description, a progress bar with "fastest Solid 72 of 84 BPM", and under it the latest note written for the goal ("Last note · 2 days ago …"). A "Log attempt" link opens the goal's progress screen.
 - Previous and next buttons move through goals. Landing on a goal sets the metronome to `startingBpm(goal, attempts)`: the last tempo logged, else the target, else 80.
 - The metronome has play and pause, minus and plus buttons, a slider (40 to 200 BPM; the buttons and `setBpm` allow 30 to 240), a big BPM readout, and four beat dots that pulse in time with an accented downbeat. It clicks. Use `useMetronome`. Start it from the play button's click handler so the browser allows audio.
 - Attempts logged during a session carry its `sessionId`.

@@ -9,6 +9,7 @@ import { ProgressBar } from '../../components/ProgressBar'
 import { repos } from '../../data'
 import { useActiveSession, useGoals, useSections, useSong, useSongAttempts } from '../../data/hooks'
 import { goalSummary } from '../../domain/goalSummary'
+import { latestNote } from '../../domain/notes'
 import {
   averageProgress,
   firstUnfinishedGoal,
@@ -19,6 +20,7 @@ import {
 import type { Attempt, Goal, Section, Session, Song } from '../../domain/schemas'
 import { SUBDIVISIONS } from '../../domain/subdivision'
 import { cn } from '../../lib/cn'
+import { formatTimeAgo } from '../../lib/formatDate'
 import { formatDuration } from '../../lib/formatDuration'
 import { withReturn } from '../../lib/returnTo'
 import { useStoredChoice } from '../../lib/useStoredChoice'
@@ -173,6 +175,10 @@ function PracticeView({
   const metronome = useMetronome(bpm, subdivision)
 
   const currentSection = goal ? sections.find((s) => s.id === goal.sectionId) : undefined
+  // What you wrote last time about this goal, so it is in front of you when you come back.
+  // `now` only dates that note; session time never comes from here.
+  const lastNote = goal ? latestNote(goal.id, attempts) : null
+  const [now] = useState(() => Date.now())
   const sectionName = currentSection?.name
   const sectionLabel = (g: Goal) => sections.find((s) => s.id === g.sectionId)?.name ?? 'Whole song'
 
@@ -397,6 +403,14 @@ function PracticeView({
                   </button>
                 </div>
               </div>
+              {lastNote && (
+                <p className="mt-3 text-sm leading-[1.5] text-muted desk:mt-4 desk:text-base">
+                  <span className="font-semibold text-cream">
+                    Last note · {formatTimeAgo(lastNote.at, now).toLowerCase()}
+                  </span>{' '}
+                  {lastNote.note}
+                </p>
+              )}
             </>
           ) : (
             <>

@@ -33,6 +33,7 @@ export function WorkedOnCard({
   const { goal, lastBefore } = change
   const tag = changeTag(change)
   const level = lastAttempt(change).level
+  const notes = change.attempts.filter((attempt) => attempt.note !== '')
   return (
     <li className="rounded-row bg-surface p-5">
       <div className="flex items-start justify-between gap-2">
@@ -73,6 +74,19 @@ export function WorkedOnCard({
       >
         {tag.text}
       </div>
+
+      {notes.length > 0 && (
+        <ul aria-label={`Notes for ${goal.title}`} className="mt-3 flex flex-col gap-1.5">
+          {notes.map((attempt) => (
+            <li key={attempt.id} className="flex gap-2 text-sm text-muted">
+              <span className="shrink-0 tabular-nums">
+                {attempt.bpm === null ? 'No tempo' : `${attempt.bpm} BPM`}
+              </span>
+              <span className="whitespace-pre-wrap text-cream">{attempt.note}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </li>
   )
 }

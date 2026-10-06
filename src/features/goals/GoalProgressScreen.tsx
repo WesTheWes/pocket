@@ -138,6 +138,7 @@ export function GoalProgressScreen() {
                 when={formatAttemptDate(attempt.at, now)}
                 bpm={attempt.bpm}
                 level={attempt.level}
+                note={attempt.note}
                 onEdit={() => setEditing(attempt)}
                 onDelete={() => setRemoving(attempt)}
               />

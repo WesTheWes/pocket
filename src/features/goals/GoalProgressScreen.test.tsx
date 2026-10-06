@@ -320,3 +320,36 @@ describe('editing and deleting attempts', () => {
     expect(await repos.attempts.listByGoal('piano-man-g3')).toHaveLength(3)
   })
 })
+
+describe('attempt notes', () => {
+  it('saves a note with the attempt and shows it in the history', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp(URL_BARS)
+    await screen.findByRole('heading', { name: 'First 4 bars with only bass and melody', level: 1 })
+    await user.click(screen.getByRole('radio', { name: 'Solid' }))
+    await user.type(screen.getByRole('textbox', { name: 'Note' }), '  Bar 3 still drags  ')
+    await user.click(screen.getByRole('button', { name: 'Save attempt' }))
+    await waitFor(() => expect(historyText()[0]).toContain('Bar 3 still drags'))
+    // The form is ready for the next attempt, with an empty note.
+    expect(screen.getByRole('textbox', { name: 'Note' })).toHaveValue('')
+    const latest = (await repos.attempts.listByGoal('piano-man-g3'))[0]
+    expect(latest.note).toBe('Bar 3 still drags')
+  })
+
+  it('edits the note of an earlier attempt', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp(URL_BARS)
+    await screen.findByRole('heading', { name: 'First 4 bars with only bass and melody', level: 1 })
+    expect(historyText()[0]).toContain('Better once I slowed bar 3 right down.')
+    await user.click(within(history()).getAllByRole('button', { name: /^Edit attempt/ })[0])
+    const note = screen.getByRole('textbox', { name: 'Note' })
+    expect(note).toHaveValue('Better once I slowed bar 3 right down. Try 80 next time.')
+    await user.clear(note)
+    await user.type(note, 'Fixed it')
+    await user.click(screen.getByRole('button', { name: 'Save attempt' }))
+    await waitFor(() => expect(historyText()[0]).toContain('Fixed it'))
+    expect(historyText()[0]).not.toContain('Better once')
+  })
+})

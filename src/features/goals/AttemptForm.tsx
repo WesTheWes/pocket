@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Button } from '../../components/Button'
+import { TextAreaField } from '../../components/Field'
 import { QualityPicker } from '../../components/QualityPicker'
 import { Stepper } from '../../components/Stepper'
 import { useToast } from '../../components/toastContext'
@@ -31,6 +32,7 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLog
   const fallbackBpm = initialBpm ?? startingBpm(goal, attempts)
   const [bpm, setBpm] = useState<number | null>(editing ? editing.bpm : fallbackBpm)
   const [level, setLevel] = useState<QualityLevel | null>(editing?.level ?? null)
+  const [note, setNote] = useState(editing?.note ?? '')
   const [error, setError] = useState<string>()
   const [saving, setSaving] = useState(false)
   const ref = useRef<HTMLFormElement>(null)
@@ -50,13 +52,20 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLog
     setError(undefined)
     try {
       if (editing) {
-        await repos.attempts.update(editing.id, { bpm, level })
+        await repos.attempts.update(editing.id, { bpm, level, note: note.trim() })
         notify('Attempt updated')
         onDone()
       } else {
         const session = await repos.sessions.getActive(goal.songId)
-        await repos.attempts.create({ goalId: goal.id, bpm, level, sessionId: session?.id ?? null })
+        await repos.attempts.create({
+          goalId: goal.id,
+          bpm,
+          level,
+          note: note.trim(),
+          sessionId: session?.id ?? null,
+        })
         setLevel(null)
+        setNote('')
         notify('Attempt saved')
         onLogged?.()
       }
@@ -98,6 +107,13 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLog
           }}
         />
       </div>
+      <TextAreaField
+        label="Note"
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+        placeholder="What went wrong, what to try next"
+        className="min-h-[88px] text-sm"
+      />
       {error && (
         <p role="alert" className="text-sm text-pink">
           {error}

@@ -1193,3 +1193,20 @@ describe('editing the song, its sections and its structure during practice', () 
 })
 
 const CHORD_LINE = 'Intro    C G/B Am Am/G F C/E Dm7 G7'
+
+describe('the last note', () => {
+  it('shows what you wrote last time about the goal, with its age', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    expect(
+      await screen.findByText(/Better once I slowed bar 3 right down\. Try 80 next time\./),
+    ).toHaveTextContent(/^Last note · 2 days ago/)
+  })
+
+  it('shows nothing for a goal with no notes', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g2')
+    await screen.findByRole('heading', { level: 1, name: 'Left hand waltz pattern' })
+    expect(screen.queryByText(/^Last note/)).not.toBeInTheDocument()
+  })
+})

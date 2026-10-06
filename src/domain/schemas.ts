@@ -57,6 +57,8 @@ export const attemptSchema = z.object({
   sessionId: id.nullable(),
   bpm: bpmSchema.nullable(),
   level: qualitySchema,
+  /** What went wrong or what to try next. Empty when nothing was written. */
+  note: z.string(),
   at: timestamp,
 })
 
