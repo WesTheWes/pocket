@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import { repos } from '../../data'
 import { createSeedData } from '../../data/seed'
@@ -259,5 +260,50 @@ describe('charts', () => {
     expect(
       within(card('Walk-up fill into bar 5')).queryByRole('img', { name: /^Tempos/ }),
     ).not.toBeInTheDocument()
+  })
+})
+
+describe('firsts and next time', () => {
+  it('lists what the session was the first to do', async () => {
+    await loadSamples()
+    renderApp(REVIEW)
+    await screen.findByText('Practice complete')
+    const firsts = within(screen.getByRole('region', { name: 'Today’s firsts' }))
+    const cards = firsts.getAllByRole('listitem').map((li) => li.textContent)
+    expect(cards).toEqual(['First Solid42 BPM on Walk-up fill into bar 5'])
+  })
+
+  it('celebrates a goal done and counts what it opened', async () => {
+    await loadSamples()
+    const session = await repos.sessions.startOrResume('piano-man')
+    await repos.attempts.create({
+      goalId: 'piano-man-g4',
+      bpm: 90,
+      level: 4,
+      sessionId: session.id,
+    })
+    await repos.sessions.end(session.id)
+    renderApp(`/practice/piano-man/review/${session.id}`)
+    await screen.findByText('Practice complete')
+    expect(screen.getByText('Unlocked').previousElementSibling).toHaveTextContent('1')
+    const cards = within(screen.getByRole('region', { name: 'Today’s firsts' }))
+      .getAllByRole('listitem')
+      .map((li) => li.textContent)
+    // Level 1 still has open goals, so no level was reached.
+    expect(cards).toEqual(['Goal doneFull chorus with block chords'])
+  })
+
+  it('suggests where to start next time, landing Practice on the tempo', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp(REVIEW)
+    await screen.findByText('Practice complete')
+    const next = within(screen.getByRole('region', { name: 'Next time, start with' }))
+    expect(next.getByText('First 4 bars with only bass and melody')).toBeInTheDocument()
+    expect(next.getByText('Verse · fastest Solid 64 of 84 BPM · 20 to go')).toBeInTheDocument()
+    await user.click(
+      next.getByRole('link', { name: 'Start First 4 bars with only bass and melody' }),
+    )
+    expect(await screen.findByRole('slider', { name: 'Tempo' })).toHaveValue('72')
   })
 })

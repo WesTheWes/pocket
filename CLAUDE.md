@@ -132,6 +132,9 @@ src/
   finished: `AttemptForm.onLogged(attempt)` lets Goal progress tell; from Practice it navigates back
   with `{ celebrate: goalId }` (read by `celebrationFrom`) and Practice shows the sheet, clearing the
   state on close; elsewhere Goal progress shows it.
+- Review adds "Today's firsts" (`sessionFirsts` in src/domain/firsts.ts: goal done, first or new
+  fastest Solid, level reached with how many goals opened, longest session in 30 days, streak
+  kept; at most four) and "Next time, start with" (`suggestGoal` for the song).
 
 ## Song plans (src/domain/songPlan.ts, src/features/songs/PlanSongScreen.tsx)
 

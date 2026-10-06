@@ -74,13 +74,17 @@ Desktop: left panel with the back link, song picker, timer, the full goal list (
 
 ## Practice review
 
-Shown after Finish. Total time (large serif, `sessionElapsedMs`), song, and two counts: goals worked and goals improved (`sessionChanges`).
+Shown after Finish. Total time (large serif, `sessionElapsedMs`), song, and the counts: goals worked, goals improved (`sessionChanges`) and, when any, goals unlocked (`openedInSession`).
+
+**Today's firsts**: a 2×2 of cards (`sessionFirsts` in src/domain/firsts.ts, at most four, most important first): Goal done, First Solid / New fastest Solid ("84 BPM, up from 76, on …"), Level N reached ("2 goals opened"), Longest this month, Streak kept. Each card: a small icon disc, a bold title, a muted line. Absent when the session had none.
 
 **Over time**: a card with a line chart (`ProgressHistoryChart`, hand-drawn SVG) of the song's overall progress before its first session and after each finished one (`progressHistory` in src/domain/history.ts), the reviewed session ringed in yellow, "Before" and "This session" under the ends, and "3 sessions" top right. The chart's label and a hidden list say the same in words.
 
 **Progress**: a card of before/after rows (`ProgressChange`, with a Before/After legend): first "Whole song · Overall progress · every goal" (`songProgressChange`), then one row per goal worked on (`progressBefore` / `progressAfter`). Each row: "45% → 61%" and a track with a hollow dot (before), a filled orange dot (after) and a line between; one muted dot when unchanged.
 
 **Worked on**: one card per goal with attempts in this session: section, title, edit button (opens Goal progress), then Tempo and Quality comparing the goal's last attempt before the session with its last attempt in it ("54 → 60 BPM", "Many mistakes → Few mistakes"; just the session value when there was nothing before), a small chart of the session's tempos for the goal in order, each dot coloured by its quality, against a dashed line at the target (`SessionTempoChart`; absent when no attempt had a tempo), a quality meter of the last attempt with the Solid segment outlined, "Last time: 3 months ago" when the earlier attempt is over 14 days older than the session, and a change tag (`changeTag` in `reviewText.ts`): "Done", what went up ("+6 BPM · quality up"), "Fastest Solid now 76 BPM", what went down (muted), or "No change". Any notes written in the session are listed under it, each with the tempo it was logged at.
+
+**Next time, start with**: the same suggestion as Home's Start here, for this song (`suggestGoal` with just this song): section and where it stands, the goal's title, the next step, and a play button that opens Practice at that tempo.
 
 Buttons side by side: "Practice again" (secondary) and "Done" (primary, back to Home).
 
