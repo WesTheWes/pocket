@@ -3,7 +3,7 @@ import { Button } from '../../components/Button'
 import { Icon } from '../../components/Icon'
 import { IconButton } from '../../components/IconButton'
 import { bpmGained, doneFacts } from '../../domain/celebrate'
-import { currentLevel } from '../../domain/levels'
+import { currentLevel, nextOnPath } from '../../domain/levels'
 import { latestNote } from '../../domain/notes'
 import { doneCount, goalDone } from '../../domain/progress'
 import type { Attempt, Goal, Section } from '../../domain/schemas'
@@ -43,7 +43,8 @@ export function UnlockSheet({
   const sectionGoals = section ? goals.filter((g) => g.sectionId === section.id) : []
   const sectionComplete = section !== undefined && sectionGoals.every((g) => goalDone(g, attempts))
   const note = latestNote(goal.id, attempts)
-  const next = opened[0]
+  // Where the path goes next: the next open goal after this one, not merely what just opened.
+  const next = nextOnPath(goal, goals, sections, attempts)
 
   return (
     <BottomSheet

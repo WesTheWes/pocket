@@ -92,10 +92,10 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     renderApp(PRACTICE)
     await screen.findByRole('timer', { name: 'Practice time' })
     fireEvent.change(metronome(), { target: { value: '100' } })
-    await user.click(screen.getByRole('button', { name: 'Next goal' })) // the fill: last logged 42
-    expect(metronome()).toHaveAttribute('aria-valuetext', '42 BPM')
+    await user.click(screen.getByRole('button', { name: 'Next goal' })) // the outro: last logged 72
+    expect(metronome()).toHaveAttribute('aria-valuetext', '72 BPM')
     await user.click(screen.getByRole('link', { name: 'Log attempt' }))
-    expect(await logTempo()).toHaveValue('42')
+    expect(await logTempo()).toHaveValue('72')
   })
 
   it('does not apply to a goal opened from somewhere else', async () => {

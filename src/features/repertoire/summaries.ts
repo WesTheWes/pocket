@@ -1,8 +1,8 @@
+import { pathOrder } from '../../domain/levels'
 import {
   firstUnfinishedGoal,
   goalStats,
   lastPracticedAt,
-  orderGoals,
   songStatus,
   type SongStatus,
 } from '../../domain/progress'
@@ -19,7 +19,7 @@ export interface SongSummary {
   progress: number
   status: SongStatus
   lastPracticedAt: number | null
-  /** The goal the play button should open: the first not done, else the first. Null if no goals. */
+  /** The goal the play button opens: the first open goal on the path, else the first not done, else the first. */
   nextGoalId: string | null
 }
 
@@ -44,7 +44,7 @@ export function summarizeSongs(
 
   return songs.map((song) => {
     const songGoals = goalsBySong.get(song.id) ?? []
-    const ordered = orderGoals(songGoals, sectionsBySong.get(song.id) ?? [])
+    const ordered = pathOrder(songGoals, sectionsBySong.get(song.id) ?? [])
     const stats = goalStats(songGoals, attempts)
     return {
       song,

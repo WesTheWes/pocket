@@ -168,9 +168,11 @@ describe('finishing a goal', () => {
     const sheet = within(
       await screen.findByRole('dialog', { name: 'Full chorus with block chords' }),
     )
-    await user.click(sheet.getByRole('button', { name: /^Next: Play the entire section/ }))
+    await user.click(
+      sheet.getByRole('button', { name: 'Next: Play start to finish without stopping' }),
+    )
     await waitFor(() => expect(router.state.location.pathname).toBe('/practice/piano-man'))
-    expect(router.state.location.search).toBe('?goal=piano-man-g6')
+    expect(router.state.location.search).toBe('?goal=piano-man-g0')
   })
 
   it('does not celebrate an attempt that leaves the goal unfinished', async () => {

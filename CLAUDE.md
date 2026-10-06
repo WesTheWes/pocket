@@ -136,6 +136,10 @@ src/
 - Review adds "Today's firsts" (`sessionFirsts` in src/domain/firsts.ts: goal done, first or new
   fastest Solid, level reached with how many goals opened, longest session in 30 days, streak
   kept; at most four) and "Next time, start with" (`suggestGoal` for the song).
+- One path order everywhere (`pathOrder` in levels.ts: level by level; within a level, section
+  goals in play order, whole-song goals last): Practice's Prev/Next and "Goal N of M", Home's play
+  button and Start here (`startGoal`), Review's next time, and the unlock sheet's Next
+  (`nextOnPath`: the next open goal after the one finished, wrapping round).
 - Song has a Path | Sections toggle (`useStoredChoice`, `pocket:song:view`, Path by default):
   `SongPath` draws `songLevels` on a rail with the current goal (`startGoal`) expanded.
 

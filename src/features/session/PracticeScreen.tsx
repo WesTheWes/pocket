@@ -10,6 +10,7 @@ import { repos } from '../../data'
 import { useActiveSession, useGoals, useSections, useSong, useSongAttempts } from '../../data/hooks'
 import { solidRun } from '../../domain/celebrate'
 import { goalSummary } from '../../domain/goalSummary'
+import { pathOrder } from '../../domain/levels'
 import { latestNote } from '../../domain/notes'
 import { nextStep, unlockedBy } from '../../domain/suggest'
 import {
@@ -19,7 +20,6 @@ import {
   goalDone,
   goalProgress,
   lockReason,
-  orderGoals,
   toPercent,
 } from '../../domain/progress'
 import type { Attempt, Goal, Section, Session, Song } from '../../domain/schemas'
@@ -143,7 +143,8 @@ function PracticeView({
   const elapsed = useSessionTimer(session)
   const paused = session.pausedAt !== null
 
-  const ordered = useMemo(() => orderGoals(goals, sections), [goals, sections])
+  // Goals in path order (level by level), which Prev, Next and "Goal N of M" follow.
+  const ordered = useMemo(() => pathOrder(goals, sections), [goals, sections])
   const groups = groupGoals(goals, sections, attempts, 'all').filter((g) => g.goals.length > 0)
 
   // The goal comes from the URL, so a reload keeps your place; otherwise start at the first

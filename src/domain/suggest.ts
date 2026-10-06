@@ -1,3 +1,4 @@
+import { pathOrder } from './levels'
 import { latestNote } from './notes'
 import {
   fastestSolidBpm,
@@ -5,7 +6,6 @@ import {
   goalLocked,
   goalProgress,
   lastPracticedAt,
-  orderGoals,
   songStatus,
   startingBpm,
 } from './progress'
@@ -133,18 +133,17 @@ export interface Suggestion {
 }
 
 /**
- * The goal to start a song on: its first goal that is not done and not locked, a section's goal
- * before a whole-song one (the song is put together last). Undefined when every goal is done.
+ * The goal to start a song on: the first goal on the path (`pathOrder`: level by level, section
+ * goals before whole-song ones) that is not done and not locked. Undefined when nothing is open.
  */
 export function startGoal(
   goals: Goal[],
   sections: Section[],
   attempts: Attempt[],
 ): Goal | undefined {
-  const open = orderGoals(goals, sections).filter(
+  return pathOrder(goals, sections).find(
     (candidate) => !goalDone(candidate, attempts) && !goalLocked(candidate, goals, attempts),
   )
-  return open.find((candidate) => candidate.sectionId !== null) ?? open[0]
 }
 
 /**

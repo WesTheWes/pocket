@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { makeAttempt, makeGoal, makeSection } from '../test/factories'
-import { currentLevel, goalLevel, levelCount, songLevels } from './levels'
+import { currentLevel, goalLevel, levelCount, nextOnPath, pathOrder, songLevels } from './levels'
 
 const a = makeGoal({ id: 'a', title: 'A', targetBpm: 100, createdAt: 1 })
 const b = makeGoal({ id: 'b', title: 'B', targetBpm: 100, createdAt: 2, requires: ['a'] })
@@ -27,13 +27,19 @@ describe('goalLevel', () => {
 })
 
 describe('songLevels', () => {
-  it('groups goals by level, lowest first, in goal order within a level', () => {
+  it('groups goals by level, lowest first; within a level, sections first, whole song last', () => {
     const verse = makeSection({ id: 'v', order: 0 })
     const levels = songLevels([c, d, b, { ...a, sectionId: 'v' }], [verse])
     expect(levels.map((l) => [l.level, l.goals.map((g) => g.id)])).toEqual([
-      [1, ['d', 'a']],
+      [1, ['a', 'd']],
       [2, ['b']],
       [3, ['c']],
+    ])
+    expect(pathOrder([c, d, b, { ...a, sectionId: 'v' }], [verse]).map((g) => g.id)).toEqual([
+      'a',
+      'd',
+      'b',
+      'c',
     ])
   })
 
@@ -49,5 +55,21 @@ describe('currentLevel', () => {
     expect(currentLevel(goals, [solid('a'), solid('d')])).toBe(2)
     expect(currentLevel(goals, [solid('a'), solid('b'), solid('c'), solid('d')])).toBe(3)
     expect(levelCount(goals)).toBe(3)
+  })
+})
+
+describe('nextOnPath', () => {
+  it('is the next open goal after the one given, wrapping round, never a locked one', () => {
+    // Path: a, d (level 1), b (needs a), c (needs b, a).
+    expect(nextOnPath(a, goals, [], [solid('a')])?.id).toBe('d')
+    expect(nextOnPath(d, goals, [], [solid('a'), solid('d')])?.id).toBe('b')
+    expect(nextOnPath(a, goals, [], [solid('a'), solid('d')])?.id).toBe('b')
+    expect(nextOnPath(b, goals, [], [solid('b')])?.id).toBe('a')
+  })
+
+  it('is undefined once nothing is open', () => {
+    expect(
+      nextOnPath(c, goals, [], [solid('a'), solid('b'), solid('c'), solid('d')]),
+    ).toBeUndefined()
   })
 })

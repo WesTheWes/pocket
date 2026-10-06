@@ -1,5 +1,5 @@
 import { requirementCycles } from './prerequisites'
-import { goalDone, orderGoals } from './progress'
+import { goalDone, goalLocked, orderGoals } from './progress'
 import type { Attempt, Goal, Section } from './schemas'
 
 /*
@@ -41,17 +41,46 @@ export interface Level {
   goals: Goal[]
 }
 
-/** The song's goals grouped by level, lowest first. Empty for a song with no goals. */
+/**
+ * The song's goals grouped by level, lowest first; within a level, section goals in play order
+ * and whole-song goals last (the song is put together last). Empty for a song with no goals.
+ */
 export function songLevels(goals: Goal[], sections: Section[]): Level[] {
   const levels = goalLevels(goals)
   const grouped = new Map<number, Goal[]>()
-  for (const goal of orderGoals(goals, sections)) {
+  const ordered = orderGoals(goals, sections)
+  const inLevelOrder = [
+    ...ordered.filter((goal) => goal.sectionId !== null),
+    ...ordered.filter((goal) => goal.sectionId === null),
+  ]
+  for (const goal of inLevelOrder) {
     const level = levels.get(goal.id) ?? 1
     grouped.set(level, [...(grouped.get(level) ?? []), goal])
   }
   return [...grouped.entries()]
     .sort(([a], [b]) => a - b)
     .map(([level, levelGoals]) => ({ level, goals: levelGoals }))
+}
+
+/** Every goal in path order: level by level, as `songLevels` lists them. */
+export function pathOrder(goals: Goal[], sections: Section[]): Goal[] {
+  return songLevels(goals, sections).flatMap((level) => level.goals)
+}
+
+/**
+ * The next open goal (not done, not locked) after `goal` on the path, wrapping round to the
+ * first open one; undefined when nothing is open.
+ */
+export function nextOnPath(
+  goal: Goal,
+  goals: Goal[],
+  sections: Section[],
+  attempts: Attempt[],
+): Goal | undefined {
+  const path = pathOrder(goals, sections)
+  const index = path.findIndex((other) => other.id === goal.id)
+  const after = index === -1 ? path : [...path.slice(index + 1), ...path.slice(0, index)]
+  return after.find((other) => !goalDone(other, attempts) && !goalLocked(other, goals, attempts))
 }
 
 /** The lowest level with something still to do; the top level once everything is done. */

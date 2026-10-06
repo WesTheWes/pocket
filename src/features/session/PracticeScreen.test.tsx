@@ -131,13 +131,13 @@ describe('the timer', () => {
 })
 
 describe('choosing the goal', () => {
-  it('starts at the first goal that is not done', async () => {
+  it('starts at the first open goal on the path (sections before the whole song)', async () => {
     await loadSamples()
     renderApp('/practice/piano-man')
     await screen.findByRole('timer', { name: 'Practice time' })
-    expect(goalTitle()).toBe('Play start to finish without stopping')
-    expect(screen.getByText('Whole song · Goal 1 of 8')).toBeInTheDocument()
-    expect(screen.getByText('fastest Solid 56 of 84 BPM')).toBeInTheDocument()
+    expect(goalTitle()).toBe('First 4 bars with only bass and melody')
+    expect(screen.getByText('Verse · Goal 3 of 8')).toBeInTheDocument()
+    expect(screen.getByText('fastest Solid 64 of 84 BPM')).toBeInTheDocument()
   })
 
   it('opens the goal named in the address, so a reload keeps your place', async () => {
@@ -145,26 +145,27 @@ describe('choosing the goal', () => {
     renderApp('/practice/piano-man?goal=piano-man-g4')
     await screen.findByRole('timer', { name: 'Practice time' })
     expect(goalTitle()).toBe('Full chorus with block chords')
-    expect(screen.getByText('Chorus · Goal 5 of 8')).toBeInTheDocument()
+    expect(screen.getByText('Chorus · Goal 4 of 8')).toBeInTheDocument()
   })
 
   it('moves with Prev goal and Next goal, and stops at both ends', async () => {
     await loadSamples()
     const user = userEvent.setup()
-    const view = renderApp('/practice/piano-man')
+    // The path starts at the Intro goal and ends with the level-2 Bridge goal.
+    const view = renderApp('/practice/piano-man?goal=piano-man-g1')
     const { router } = view
     await screen.findByRole('timer', { name: 'Practice time' })
     expect(screen.getByRole('button', { name: 'Prev goal' })).toBeDisabled()
 
     await user.click(screen.getByRole('button', { name: 'Next goal' }))
-    expect(goalTitle()).toBe('Harmonica line on right hand')
-    expect(router.state.location.search).toBe('?goal=piano-man-g1')
+    expect(goalTitle()).toBe('Left hand waltz pattern')
+    expect(router.state.location.search).toBe('?goal=piano-man-g2')
     await user.click(screen.getByRole('button', { name: 'Prev goal' }))
-    expect(goalTitle()).toBe('Play start to finish without stopping')
+    expect(goalTitle()).toBe('Harmonica line on right hand')
 
     // A separate render, at the last goal.
     view.unmount()
-    renderApp('/practice/piano-man?goal=piano-man-g7')
+    renderApp('/practice/piano-man?goal=piano-man-g6')
     expect(await screen.findByRole('button', { name: 'Next goal' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Prev goal' })).toBeEnabled()
   })
@@ -186,18 +187,19 @@ describe('choosing the goal', () => {
       'Bridge, 0% complete',
       'Outro, 100% complete',
     ])
-    expect(within(sections).getByRole('button', { name: /^Whole song/ })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
-
-    await user.click(within(sections).getByRole('button', { name: /^Verse/ }))
-    expect(goalTitle()).toBe('Left hand waltz pattern')
+    // The path starts in the Verse, so its chip is pressed.
     expect(within(sections).getByRole('button', { name: /^Verse/ })).toHaveAttribute(
       'aria-pressed',
       'true',
     )
-    expect(within(sections).getByRole('button', { name: /^Whole song/ })).toHaveAttribute(
+
+    await user.click(within(sections).getByRole('button', { name: /^Chorus/ }))
+    expect(goalTitle()).toBe('Full chorus with block chords')
+    expect(within(sections).getByRole('button', { name: /^Chorus/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(within(sections).getByRole('button', { name: /^Verse/ })).toHaveAttribute(
       'aria-pressed',
       'false',
     )
@@ -210,7 +212,10 @@ describe('choosing the goal', () => {
     const list = await screen.findByRole('navigation', { name: 'Goals' })
     const buttons = within(list).getAllByRole('button')
     expect(buttons).toHaveLength(8)
-    expect(buttons[0]).toHaveAttribute('aria-current', 'true')
+    expect(within(list).getByRole('button', { name: /First 4 bars/ })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
 
     await user.click(within(list).getByRole('button', { name: /Walk-up fill into bar 5/ }))
     expect(goalTitle()).toBe('Walk-up fill into bar 5')
@@ -264,14 +269,14 @@ describe('the metronome tempo', () => {
     const user = userEvent.setup()
     renderApp('/practice/piano-man')
     await screen.findByRole('timer', { name: 'Practice time' })
-    expect(tempo()).toHaveAttribute('aria-valuetext', '70 BPM') // last logged on the whole-song goal
+    expect(tempo()).toHaveAttribute('aria-valuetext', '76 BPM') // last logged on the Verse goal
     await user.click(screen.getByRole('button', { name: 'Faster' }))
-    expect(tempo()).toHaveAttribute('aria-valuetext', '71 BPM')
+    expect(tempo()).toHaveAttribute('aria-valuetext', '77 BPM')
 
     await user.click(screen.getByRole('button', { name: 'Next goal' }))
-    expect(tempo()).toHaveAttribute('aria-valuetext', '76 BPM') // Intro goal: last logged 76
+    expect(tempo()).toHaveAttribute('aria-valuetext', '68 BPM') // Chorus goal: last logged 68
     await user.click(screen.getByRole('button', { name: 'Prev goal' }))
-    expect(tempo()).toHaveAttribute('aria-valuetext', '71 BPM') // back to what you set, not 70
+    expect(tempo()).toHaveAttribute('aria-valuetext', '77 BPM') // back to what you set, not 76
   })
 
   it('changes by one with Slower and Faster, and by the slider', async () => {
@@ -536,7 +541,7 @@ describe('adding and editing goals during a session', () => {
       expect(goalTitle()).toBe('Melody and bass, first 4 bars')
       expect((await repos.goals.get('piano-man-g3'))?.title).toBe('Melody and bass, first 4 bars')
       // Still the same goal, in the same place.
-      expect(screen.getByText('Verse · Goal 4 of 8')).toBeInTheDocument()
+      expect(screen.getByText('Verse · Goal 3 of 8')).toBeInTheDocument()
     })
 
     it('recalculates progress when you change the target tempo', async () => {
@@ -631,7 +636,7 @@ describe('adding and editing goals during a session', () => {
       expect(
         await screen.findByRole('heading', { name: 'Hands together, slowly', level: 1 }),
       ).toBeInTheDocument()
-      expect(screen.getByText('Chorus · Goal 7 of 9')).toBeInTheDocument()
+      expect(screen.getByText('Chorus · Goal 5 of 9')).toBeInTheDocument()
       const created = (await repos.goals.listBySong('piano-man')).find(
         (g) => g.title === 'Hands together, slowly',
       )
@@ -653,7 +658,8 @@ describe('adding and editing goals during a session', () => {
       await user.click(within(sheet).getByRole('button', { name: 'Add goal' }))
 
       await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
-      expect(await screen.findByText('Whole song · Goal 2 of 9')).toBeInTheDocument()
+      // Whole-song goals come after the sections' within their level.
+      expect(await screen.findByText('Whole song · Goal 7 of 9')).toBeInTheDocument()
       const created = (await repos.goals.listBySong('piano-man')).find(
         (g) => g.title === 'Play it for a friend',
       )
@@ -1058,7 +1064,7 @@ describe('editing the song, its sections and its structure during practice', () 
       await user.click(within(sheet).getByRole('button', { name: 'Save changes' }))
       await gone()
 
-      expect(await screen.findByText('Refrain · Goal 5 of 8')).toBeInTheDocument()
+      expect(await screen.findByText('Refrain · Goal 4 of 8')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /^Refrain, \d+% complete$/ })).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /^Chorus,/ })).not.toBeInTheDocument()
     })
@@ -1287,8 +1293,11 @@ describe('momentum', () => {
     expect(sheet.getByText('+45')).toBeInTheDocument()
     expect(sheet.getByText('4 of 8')).toBeInTheDocument()
     expect(sheet.getByText('Play the entire section in a stride piano style')).toBeInTheDocument()
-    await user.click(sheet.getByRole('button', { name: /^Next: Play the entire section/ }))
-    await waitFor(() => expect(router.state.location.search).toBe('?goal=piano-man-g6'))
+    // Next follows the path: after the chorus goal come the (done) outro and the whole-song goal.
+    await user.click(
+      sheet.getByRole('button', { name: 'Next: Play start to finish without stopping' }),
+    )
+    await waitFor(() => expect(router.state.location.search).toBe('?goal=piano-man-g0'))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(router.state.location.state).toBeNull()
   })
@@ -1299,8 +1308,10 @@ describe('momentum', () => {
     await repos.attempts.create({ goalId: 'piano-man-g3', bpm: 84, level: 4 })
     renderApp('/practice/piano-man?goal=piano-man-g3', { state: { celebrate: 'piano-man-g3' } })
     const sheet = within(await screen.findByRole('dialog'))
-    // Nothing needed this goal, so there is no "Next": the one button keeps you here.
-    await user.click(sheet.getByRole('button', { name: 'Keep going' }))
+    expect(
+      sheet.getByRole('button', { name: 'Next: Full chorus with block chords' }),
+    ).toBeInTheDocument()
+    await user.click(sheet.getByRole('button', { name: 'Stay on this one' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(goalTitle()).toBe('First 4 bars with only bass and melody')
   })

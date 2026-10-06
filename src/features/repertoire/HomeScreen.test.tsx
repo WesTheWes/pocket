@@ -57,7 +57,7 @@ describe('HomeScreen', () => {
     await loadSamples()
     renderApp('/')
     const play = await screen.findByRole('link', { name: 'Practice Piano Man' })
-    expect(play).toHaveAttribute('href', '/practice/piano-man?goal=piano-man-g0')
+    expect(play).toHaveAttribute('href', '/practice/piano-man?goal=piano-man-g3')
   })
 
   it('filters by status', async () => {
