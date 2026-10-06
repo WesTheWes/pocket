@@ -41,7 +41,7 @@ const backupText = (data = sampleData()) => serializeBackup(createBackup(data, 1
 describe('createBackup and serializeBackup', () => {
   it('wraps the data with a header saying what it is and when it was made', () => {
     const backup = createBackup(sampleData(), 123)
-    expect(backup).toMatchObject({ app: 'pocket', version: 3, exportedAt: 123 })
+    expect(backup).toMatchObject({ app: 'pocket', version: 4, exportedAt: 123 })
     expect(backup.data.songs).toHaveLength(2)
   })
 
@@ -81,7 +81,7 @@ describe('parseBackup', () => {
     const result = parseBackup(backupText(data))
     expect(result).toEqual({
       ok: true,
-      backup: { app: 'pocket', version: 3, exportedAt: 1_700_000_000_000, data },
+      backup: { app: 'pocket', version: 4, exportedAt: 1_700_000_000_000, data },
     })
   })
 
@@ -116,34 +116,54 @@ describe('parseBackup', () => {
   })
 
   it('refuses a backup from a newer version, saying so', () => {
-    const newer = JSON.stringify({ ...JSON.parse(backupText()), version: 4 })
+    const newer = JSON.stringify({ ...JSON.parse(backupText()), version: 5 })
     const result = parseBackup(newer)
     expect(!result.ok && result.error).toMatch(/newer version/)
   })
 
-  it('upgrades a version 1 backup, whose songs have no tempo and attempts no note', () => {
+  it('upgrades a version 1 backup: no song tempo, no attempt note, no goal requirements', () => {
     const data = sampleData()
     const old = JSON.parse(backupText(data))
     old.version = 1
     for (const song of old.data.songs) delete song.tempo
     for (const attempt of old.data.attempts) delete attempt.note
+    for (const goal of old.data.goals) delete goal.requires
     const result = parseBackup(JSON.stringify(old))
     expect(result).toEqual({
       ok: true,
-      backup: { app: 'pocket', version: 3, exportedAt: 1_700_000_000_000, data },
+      backup: { app: 'pocket', version: 4, exportedAt: 1_700_000_000_000, data },
     })
   })
 
-  it('upgrades a version 2 backup, whose attempts have no note', () => {
+  it('upgrades a version 2 backup, whose attempts have no note and goals no requirements', () => {
     const data = sampleData()
     const old = JSON.parse(backupText(data))
     old.version = 2
     for (const attempt of old.data.attempts) delete attempt.note
+    for (const goal of old.data.goals) delete goal.requires
     const result = parseBackup(JSON.stringify(old))
     expect(result).toEqual({
       ok: true,
-      backup: { app: 'pocket', version: 3, exportedAt: 1_700_000_000_000, data },
+      backup: { app: 'pocket', version: 4, exportedAt: 1_700_000_000_000, data },
     })
+  })
+
+  it('upgrades a version 3 backup, whose goals have no requirements', () => {
+    const data = sampleData()
+    const old = JSON.parse(backupText(data))
+    old.version = 3
+    for (const goal of old.data.goals) delete goal.requires
+    const result = parseBackup(JSON.stringify(old))
+    expect(result).toEqual({
+      ok: true,
+      backup: { app: 'pocket', version: 4, exportedAt: 1_700_000_000_000, data },
+    })
+  })
+
+  it('still refuses a current backup whose goals have no requirements', () => {
+    const current = JSON.parse(backupText())
+    delete current.data.goals[0].requires
+    expect(parseBackup(JSON.stringify(current)).ok).toBe(false)
   })
 
   it('still refuses a current backup whose attempts have no note', () => {
@@ -250,6 +270,30 @@ describe('checkIntegrity', () => {
     const foreign = sampleData()
     foreign.songs[0].structure.push('b1')
     expect(checkIntegrity(foreign).join('\n')).toMatch(/structure.*b1/i)
+  })
+
+  it('finds a requirement that is missing, from another song, or the goal itself', () => {
+    const missing = sampleData()
+    missing.goals[0].requires = ['ghost']
+    expect(checkIntegrity(missing).join('\n')).toMatch(/requires.*ghost.*isn’t in the backup/i)
+
+    const foreign = sampleData()
+    foreign.goals[0].requires = ['g3'] // g3 belongs to song s2, g1 to s1
+    expect(checkIntegrity(foreign).join('\n')).toMatch(/requires.*g3.*different song/i)
+
+    const self = sampleData()
+    self.goals[0].requires = ['g1']
+    expect(checkIntegrity(self).join('\n')).toMatch(/g1 requires itself/i)
+  })
+
+  it('finds goals that require each other in a circle', () => {
+    const data = sampleData()
+    data.goals[0].requires = ['g2']
+    data.goals[1].requires = ['g1']
+    const problems = checkIntegrity(data).join('\n')
+    expect(problems).toMatch(/g1.*circle/i)
+    expect(problems).toMatch(/g2.*circle/i)
+    expect(problems).not.toMatch(/g3/)
   })
 
   it('reports each kind of problem rather than only the first', () => {

@@ -48,6 +48,8 @@ export const goalSchema = z.object({
   description: z.string(),
   /** Null means the goal has no tempo target; any Solid attempt completes it. */
   targetBpm: bpmSchema.nullable(),
+  /** Goals (of the same song) to finish before this one. A suggested order, never a hard block. */
+  requires: z.array(id),
   createdAt: timestamp,
 })
 
@@ -114,6 +116,7 @@ export const goalFormSchema = z.object({
   title: z.string().trim().min(1, 'Enter a title'),
   description: z.string(),
   targetBpm: bpmSchema.nullable(),
+  requires: z.array(id),
 })
 
 export type GoalFormValues = z.infer<typeof goalFormSchema>

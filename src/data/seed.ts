@@ -19,6 +19,8 @@ interface GoalSeed {
   title: string
   description?: string
   targetBpm: number | null
+  /** Positions (in this song's goal list) of goals to finish first. */
+  requires?: number[]
   attempts: AttemptSeed[]
 }
 
@@ -111,6 +113,7 @@ const pianoMan: SongSeed = {
       section: 'Chorus',
       title: 'Walk-up fill into bar 5',
       targetBpm: 84,
+      requires: [2],
       attempts: [
         [60, 2, 7],
         [50, 2, 2, true],
@@ -121,6 +124,7 @@ const pianoMan: SongSeed = {
       section: 'Bridge',
       title: 'Play the entire section in a stride piano style',
       targetBpm: 100,
+      requires: [4],
       attempts: [[60, 1, 3]],
     },
     {
@@ -274,6 +278,7 @@ export function createSeedData(now: number): PocketData {
         title: goalSeed.title,
         description: goalSeed.description ?? '',
         targetBpm: goalSeed.targetBpm,
+        requires: (goalSeed.requires ?? []).map((index) => `${seed.id}-g${index}`),
         createdAt: song.createdAt + goalIndex * MINUTE,
       }
       data.goals.push(goal)

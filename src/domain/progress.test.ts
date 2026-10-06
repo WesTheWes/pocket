@@ -3,13 +3,16 @@ import { makeAttempt, makeGoal, makeSection, makeSong } from '../test/factories'
 import {
   newGoalTargetBpm,
   averageProgress,
+  blockingGoals,
   doneCount,
   fastestSolidBpm,
   firstUnfinishedGoal,
   goalDone,
   goalProgress,
+  goalLocked,
   goalStats,
   lastPracticedAt,
+  lockReason,
   orderGoals,
   songStatus,
   startingBpm,
@@ -149,6 +152,48 @@ describe('orderGoals', () => {
     const ordered = orderGoals([chorusGoal, verseLate, whole, verseEarly], [chorus, verse])
     expect(ordered.map((g) => g.id)).toEqual(['whole', 'v1', 'v2', 'c1'])
   })
+
+  it('moves a goal after the goals it requires, as little as possible', () => {
+    const wholeAfterChorus = { ...whole, requires: ['c1'] }
+    const earlyAfterLate = { ...verseEarly, requires: ['v2'] }
+    const ordered = orderGoals(
+      [chorusGoal, verseLate, wholeAfterChorus, earlyAfterLate],
+      [chorus, verse],
+    )
+    expect(ordered.map((g) => g.id)).toEqual(['v2', 'v1', 'c1', 'whole'])
+  })
+
+  it('ignores a requirement that is not in the list, and survives a circle', () => {
+    const ghost = { ...whole, requires: ['ghost'] }
+    expect(orderGoals([ghost, verseEarly], [verse]).map((g) => g.id)).toEqual(['whole', 'v1'])
+    const x = makeGoal({ id: 'x', requires: ['y'], createdAt: 1 })
+    const y = makeGoal({ id: 'y', requires: ['x'], createdAt: 2 })
+    expect(orderGoals([y, x], []).map((g) => g.id)).toEqual(['x', 'y'])
+  })
+})
+
+describe('locked goals', () => {
+  const a = makeGoal({ id: 'a', title: 'A', targetBpm: 100 })
+  const b = makeGoal({ id: 'b', title: 'B', targetBpm: 100, requires: ['a'] })
+  const c = makeGoal({ id: 'c', title: 'C', targetBpm: 100, requires: ['a', 'b', 'ghost'] })
+  const solid = (goalId: string) => makeAttempt({ goalId, bpm: 100, level: 4 })
+
+  it('lists the required goals that are not done, skipping unknown ids', () => {
+    expect(blockingGoals(c, [a, b, c], []).map((g) => g.id)).toEqual(['a', 'b'])
+    expect(blockingGoals(c, [a, b, c], [solid('a')]).map((g) => g.id)).toEqual(['b'])
+  })
+
+  it('is locked until what it requires is done, unless it is done itself', () => {
+    expect(goalLocked(b, [a, b], [])).toBe(true)
+    expect(goalLocked(b, [a, b], [solid('a')])).toBe(false)
+    expect(goalLocked(b, [a, b], [solid('b')])).toBe(false)
+    expect(goalLocked(a, [a, b], [])).toBe(false)
+  })
+
+  it('explains the lock in words, or says nothing', () => {
+    expect(lockReason(c, [a, b, c], [])).toBe('Finish A and B first')
+    expect(lockReason(b, [a, b], [solid('a')])).toBeUndefined()
+  })
 })
 
 describe('firstUnfinishedGoal', () => {
@@ -158,6 +203,12 @@ describe('firstUnfinishedGoal', () => {
 
   it('returns the first goal that is not done', () => {
     expect(firstUnfinishedGoal([a, b], [solid('a')])?.id).toBe('b')
+  })
+
+  it('skips a locked goal, unless every open goal is locked', () => {
+    const locked = { ...a, requires: ['b'] }
+    expect(firstUnfinishedGoal([locked, b], [])?.id).toBe('b')
+    expect(firstUnfinishedGoal([locked], [])?.id).toBe('a')
   })
 
   it('returns the first goal when every goal is done', () => {

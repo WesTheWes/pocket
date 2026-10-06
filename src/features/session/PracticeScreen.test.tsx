@@ -1210,3 +1210,18 @@ describe('the last note', () => {
     expect(screen.queryByText(/^Last note/)).not.toBeInTheDocument()
   })
 })
+
+describe('locked goals', () => {
+  it('marks a locked goal in the list and explains it on the card', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g6')
+    await screen.findByRole('heading', { level: 1, name: /stride piano/ })
+    expect(screen.getByText('Finish Full chorus with block chords first')).toBeInTheDocument()
+    for (const row of screen.getAllByRole('button', { name: /stride piano/ })) {
+      expect(row).toHaveTextContent('Locked, 0%')
+    }
+    for (const row of screen.getAllByRole('button', { name: /Walk-up fill/ })) {
+      expect(row).not.toHaveTextContent('Locked')
+    }
+  })
+})

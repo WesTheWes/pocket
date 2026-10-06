@@ -1,4 +1,5 @@
 import { sectionSchema, songSchema, type Section } from '../domain/schemas'
+import { dropRequirements } from './goals'
 import { RecordNotFoundError, updateRecord, type RepoContext } from './context'
 
 export interface NewSection {
@@ -46,6 +47,7 @@ export function createSectionsRepo({ db, newId }: RepoContext) {
         const goalIds = await db.goals.where('sectionId').equals(id).primaryKeys()
         await db.attempts.where('goalId').anyOf(goalIds).delete()
         await db.goals.where('sectionId').equals(id).delete()
+        await dropRequirements(db, section.songId, goalIds)
         const song = await db.songs.get(section.songId)
         if (song) {
           const structure = song.structure.filter((sectionId) => sectionId !== id)

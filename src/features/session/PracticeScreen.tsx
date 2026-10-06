@@ -14,6 +14,7 @@ import {
   averageProgress,
   firstUnfinishedGoal,
   goalProgress,
+  lockReason,
   orderGoals,
   toPercent,
 } from '../../domain/progress'
@@ -275,7 +276,7 @@ function PracticeView({
                 </span>
                 <span className="block truncate text-[15px] font-medium">{g.title}</span>
               </span>
-              <GoalStatus goal={g} attempts={attempts} />
+              <GoalStatus goal={g} goals={goals} attempts={attempts} />
             </button>
           ))}
         </nav>
@@ -346,7 +347,7 @@ function PracticeView({
                   )}
                 >
                   <span className="min-w-0 flex-1 truncate">{g.title}</span>
-                  <GoalStatus goal={g} attempts={attempts} />
+                  <GoalStatus goal={g} goals={goals} attempts={attempts} />
                 </button>
               )
             })}
@@ -385,6 +386,12 @@ function PracticeView({
               {goal.description && (
                 <p className="mt-1.5 text-sm text-muted desk:mt-2 desk:text-base">
                   {goal.description}
+                </p>
+              )}
+              {lockReason(goal, goals, attempts) && (
+                <p className="mt-2 flex items-center gap-1.5 text-sm text-muted desk:text-base">
+                  <Icon name="lock" size={14} />
+                  {lockReason(goal, goals, attempts)}
                 </p>
               )}
               <div className="mt-4 desk:mt-[22px]">
@@ -478,6 +485,7 @@ function PracticeView({
         target={goalSheet}
         song={song}
         sections={sections}
+        goals={goals}
         onClose={() => setGoalSheet(null)}
         onSaved={(saved) => {
           setGoalSheet(null)

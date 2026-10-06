@@ -5,7 +5,7 @@ import { ConfirmSheet } from '../../components/BottomSheet'
 import { Page } from '../../components/Page'
 import { TopBar } from '../../components/TopBar'
 import { repos } from '../../data'
-import { useGoal, useGoalAttempts, useSections, useSong } from '../../data/hooks'
+import { useGoal, useGoalAttempts, useGoals, useSections, useSong } from '../../data/hooks'
 import { returnTarget } from '../../lib/returnTo'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
@@ -20,6 +20,7 @@ export function EditGoalScreen() {
   const song = useSong(songId)
   const sections = useSections(songId)
   const goal = useGoal(goalId)
+  const goals = useGoals(songId)
   const attempts = useGoalAttempts(goalId)
 
   const [confirming, setConfirming] = useState(false)
@@ -27,7 +28,7 @@ export function EditGoalScreen() {
   const [deleteError, setDeleteError] = useState<string>()
 
   // Still loading from IndexedDB.
-  if (song === undefined || !sections || goal === undefined || !attempts) return <Page />
+  if (song === undefined || !sections || !goals || goal === undefined || !attempts) return <Page />
   if (song === null) return <SongNotFound />
   // Once the delete has gone through, the goal vanishes before we navigate away.
   if (goal === null || goal.songId !== song.id) {
@@ -54,11 +55,14 @@ export function EditGoalScreen() {
         // Defaults are read once, so live updates never overwrite what is being typed.
         key={goal.id}
         sections={sections}
+        goals={goals}
+        goalId={goal.id}
         defaultValues={{
           sectionId: goal.sectionId,
           title: goal.title,
           description: goal.description,
           targetBpm: goal.targetBpm,
+          requires: goal.requires,
         }}
         submitLabel="Save changes"
         onSubmit={async (values) => {

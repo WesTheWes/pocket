@@ -36,6 +36,7 @@ export function makeGoal(overrides: Partial<Goal> = {}): Goal {
     title: 'Hands together',
     description: '',
     targetBpm: 84,
+    requires: [],
     createdAt: 0,
     ...overrides,
   }

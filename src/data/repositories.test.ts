@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { sessionElapsedMs } from '../domain/session'
 import { makeTestRepos } from '../test/repos'
+import { RequirementCycleError } from './goals'
 import { RecordNotFoundError } from './index'
 
 describe('songs', () => {
@@ -186,6 +187,64 @@ describe('goals', () => {
     await expect(repos.goals.update(goal.id, { sectionId: foreign.id })).rejects.toBeInstanceOf(
       RecordNotFoundError,
     )
+  })
+
+  it('stores which goals to finish first, once each', async () => {
+    const { repos } = makeTestRepos()
+    const song = await repos.songs.create({ title: 'S' })
+    const a = await repos.goals.create({ songId: song.id, title: 'A' })
+    const b = await repos.goals.create({ songId: song.id, title: 'B', requires: [a.id, a.id] })
+    expect(b.requires).toEqual([a.id])
+    expect((await repos.goals.update(b.id, { requires: [] })).requires).toEqual([])
+  })
+
+  it('refuses a requirement that is missing, from another song, or the goal itself', async () => {
+    const { repos } = makeTestRepos()
+    const song = await repos.songs.create({ title: 'S' })
+    const other = await repos.songs.create({ title: 'O' })
+    const foreign = await repos.goals.create({ songId: other.id, title: 'F' })
+    const a = await repos.goals.create({ songId: song.id, title: 'A' })
+    await expect(
+      repos.goals.create({ songId: song.id, title: 'B', requires: ['nope'] }),
+    ).rejects.toBeInstanceOf(RecordNotFoundError)
+    await expect(
+      repos.goals.create({ songId: song.id, title: 'B', requires: [foreign.id] }),
+    ).rejects.toBeInstanceOf(RecordNotFoundError)
+    await expect(repos.goals.update(a.id, { requires: [a.id] })).rejects.toBeInstanceOf(
+      RequirementCycleError,
+    )
+  })
+
+  it('refuses requirements that go round in a circle', async () => {
+    const { repos } = makeTestRepos()
+    const song = await repos.songs.create({ title: 'S' })
+    const a = await repos.goals.create({ songId: song.id, title: 'A' })
+    const b = await repos.goals.create({ songId: song.id, title: 'B', requires: [a.id] })
+    const c = await repos.goals.create({ songId: song.id, title: 'C', requires: [b.id] })
+    await expect(repos.goals.update(a.id, { requires: [c.id] })).rejects.toBeInstanceOf(
+      RequirementCycleError,
+    )
+    expect((await repos.goals.get(a.id))?.requires).toEqual([])
+  })
+
+  it('deleting a goal drops it from other goals’ requirements', async () => {
+    const { repos } = makeTestRepos()
+    const song = await repos.songs.create({ title: 'S' })
+    const a = await repos.goals.create({ songId: song.id, title: 'A' })
+    const b = await repos.goals.create({ songId: song.id, title: 'B' })
+    const c = await repos.goals.create({ songId: song.id, title: 'C', requires: [a.id, b.id] })
+    await repos.goals.delete(a.id)
+    expect((await repos.goals.get(c.id))?.requires).toEqual([b.id])
+  })
+
+  it('deleting a section drops its goals from other goals’ requirements', async () => {
+    const { repos } = makeTestRepos()
+    const song = await repos.songs.create({ title: 'S' })
+    const verse = await repos.sections.create(song.id, { name: 'Verse' })
+    const inVerse = await repos.goals.create({ songId: song.id, sectionId: verse.id, title: 'V' })
+    const whole = await repos.goals.create({ songId: song.id, title: 'W', requires: [inVerse.id] })
+    await repos.sections.delete(verse.id)
+    expect((await repos.goals.get(whole.id))?.requires).toEqual([])
   })
 
   it('deleting a goal removes its attempts only', async () => {

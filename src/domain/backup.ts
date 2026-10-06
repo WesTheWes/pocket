@@ -1,10 +1,11 @@
+import { requirementCycles } from './prerequisites'
 import { pocketDataSchema, type PocketData } from './schemas'
 
 /**
  * The backup file format. Bump `BACKUP_VERSION` when the shape of `data` changes, and teach
  * `parseBackup` to upgrade older versions.
  */
-export const BACKUP_VERSION = 3
+export const BACKUP_VERSION = 4
 
 export interface BackupFile {
   app: 'pocket'
@@ -105,6 +106,24 @@ export function checkIntegrity(data: PocketData): string[] {
     }
   }
 
+  const goalSong = new Map(data.goals.map((goal) => [goal.id, goal.songId]))
+  for (const goal of data.goals) {
+    for (const required of goal.requires) {
+      if (required === goal.id) {
+        problems.push(`Goal ${goal.id} requires itself.`)
+      } else if (!goalSong.has(required)) {
+        problems.push(`Goal ${goal.id} requires goal ${required}, which isn’t in the backup.`)
+      } else if (goalSong.get(required) !== goal.songId) {
+        problems.push(
+          `Goal ${goal.id} requires goal ${required}, which belongs to a different song.`,
+        )
+      }
+    }
+  }
+  for (const id of requirementCycles(data.goals)) {
+    problems.push(`Goal ${id} is in a circle of goals that require each other.`)
+  }
+
   for (const attempt of data.attempts) {
     if (!goalIds.has(attempt.goalId)) {
       problems.push(
@@ -180,6 +199,15 @@ function upgradeData(version: number, data: unknown): unknown {
       ...upgraded,
       attempts: upgraded.attempts.map((attempt: unknown) =>
         isRecord(attempt) && !('note' in attempt) ? { ...attempt, note: '' } : attempt,
+      ),
+    }
+  }
+  // Version 4 let goals require other goals. Older goals require none.
+  if (version < 4 && isRecord(upgraded) && Array.isArray(upgraded.goals)) {
+    upgraded = {
+      ...upgraded,
+      goals: upgraded.goals.map((goal: unknown) =>
+        isRecord(goal) && !('requires' in goal) ? { ...goal, requires: [] } : goal,
       ),
     }
   }

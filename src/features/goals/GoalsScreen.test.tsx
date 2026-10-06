@@ -143,3 +143,17 @@ describe('GoalsScreen', () => {
     expect(screen.getAllByText('Chorus').length).toBeGreaterThan(0)
   })
 })
+
+describe('locked goals', () => {
+  it('says which goal to finish first, only while that goal is not done', async () => {
+    await loadSamples()
+    renderApp('/songs/piano-man/goals')
+    const bridge = await screen.findByRole('region', { name: 'Bridge' })
+    expect(
+      within(bridge).getByText('Finish Full chorus with block chords first'),
+    ).toBeInTheDocument()
+    // Walk-up fill requires the waltz pattern, which is done, so it is not locked.
+    const chorus = screen.getByRole('region', { name: 'Chorus' })
+    expect(within(chorus).queryByText(/^Finish /)).not.toBeInTheDocument()
+  })
+})

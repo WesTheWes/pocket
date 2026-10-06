@@ -1,3 +1,4 @@
+import { lockText } from './prerequisites'
 import { isSolid } from './quality'
 import type { Attempt, Goal, Section, Song } from './schemas'
 
@@ -56,17 +57,61 @@ export function songStatus(song: Song, goals: Goal[], attempts: Attempt[]): Song
   return allDone ? 'learned' : 'in-progress'
 }
 
-/** Whole-song goals first, then each section in order, then oldest goal first. */
+/**
+ * Whole-song goals first, then each section in order, then oldest goal first; except that a goal
+ * always comes after the goals it requires (the earliest place that allows it).
+ */
 export function orderGoals(goals: Goal[], sections: Section[]): Goal[] {
   const sectionOrder = new Map(sections.map((section) => [section.id, section.order]))
   const rank = (goal: Goal) =>
     goal.sectionId === null ? -1 : (sectionOrder.get(goal.sectionId) ?? Infinity)
-  return [...goals].sort((a, b) => rank(a) - rank(b) || a.createdAt - b.createdAt)
+  const sorted = [...goals].sort((a, b) => rank(a) - rank(b) || a.createdAt - b.createdAt)
+
+  const ids = new Set(sorted.map((goal) => goal.id))
+  const placed = new Set<string>()
+  const ordered: Goal[] = []
+  while (ordered.length < sorted.length) {
+    const ready = (goal: Goal) =>
+      !placed.has(goal.id) && goal.requires.every((id) => !ids.has(id) || placed.has(id))
+    // A circle of requirements (which the data layer refuses) falls back to the plain order.
+    const next = sorted.find(ready) ?? sorted.find((goal) => !placed.has(goal.id))!
+    placed.add(next.id)
+    ordered.push(next)
+  }
+  return ordered
 }
 
-/** The first goal that is not done, or the first goal when everything is done. */
+/** The goals that `goal` asks you to finish first and that are not done. Unknown ids are ignored. */
+export function blockingGoals(goal: Goal, goals: Goal[], attempts: Attempt[]): Goal[] {
+  const byId = new Map(goals.map((g) => [g.id, g]))
+  return goal.requires.flatMap((id) => {
+    const required = byId.get(id)
+    return required && !goalDone(required, attempts) ? [required] : []
+  })
+}
+
+/**
+ * Locked: not done, and something it requires is not done either. A soft lock: attempts still
+ * count, and once the goal itself is done the lock no longer matters.
+ */
+export function goalLocked(goal: Goal, goals: Goal[], attempts: Attempt[]): boolean {
+  return !goalDone(goal, attempts) && blockingGoals(goal, goals, attempts).length > 0
+}
+
+/** "Finish Hands apart first" while the goal is locked, else undefined. */
+export function lockReason(goal: Goal, goals: Goal[], attempts: Attempt[]): string | undefined {
+  return goalLocked(goal, goals, attempts)
+    ? lockText(blockingGoals(goal, goals, attempts))
+    : undefined
+}
+
+/**
+ * Where to start: the first goal that is neither done nor locked; failing that, the first goal
+ * that is not done; failing that, the first goal.
+ */
 export function firstUnfinishedGoal(goals: Goal[], attempts: Attempt[]): Goal | undefined {
-  return goals.find((goal) => !goalDone(goal, attempts)) ?? goals[0]
+  const open = goals.filter((goal) => !goalDone(goal, attempts))
+  return open.find((goal) => !goalLocked(goal, goals, attempts)) ?? open[0] ?? goals[0]
 }
 
 /** Metronome tempo when landing on a goal: last logged, else the target, else 80. */

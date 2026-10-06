@@ -83,12 +83,14 @@ src/
   record does not exist.
 - Repositories validate every write with the Zod schemas and enforce integrity and cascades inside
   transactions: deleting a section removes its goals, their attempts and its structure slots;
-  deleting a song removes everything under it; deleting a goal removes its attempts.
+  deleting a song removes everything under it; deleting a goal removes its attempts and drops it
+  from other goals' `requires` (so does deleting a section's goals). A goal may only require goals
+  of its own song, never itself, and never in a circle (`RequirementCycleError`).
 - `repos.sessions.startOrResume(songId)` is atomic; use it rather than checking then starting, so
   StrictMode's doubled effects cannot create two sessions.
 - `repos.backup` has `exportAll`, `replaceAll` (validates first, then swaps in one transaction) and
   `clear`. Sample data comes from `createSeedData(now)` in `src/data/seed.ts`.
-- The Dexie schema is at version 3 (v2: songs gained `tempo`, v3: attempts gained `note`; each `upgrade` fills in the default). When a record shape changes, add a Dexie version with an upgrade and bump `BACKUP_VERSION` together, so stored data and old backup files both keep working.
+- The Dexie schema is at version 4 (v2: songs gained `tempo`, v3: attempts gained `note`, v4: goals gained `requires`; each `upgrade` fills in the default). When a record shape changes, add a Dexie version with an upgrade and bump `BACKUP_VERSION` together, so stored data and old backup files both keep working.
 - Never name an error `NotFoundError`: Dexie turns any error with that name thrown inside a
   transaction into its own `DexieError`. Ours is `RecordNotFoundError`.
 
@@ -131,6 +133,13 @@ src/
   song). All of this is derived in src/domain/progress.ts, never stored.
 - Goal cards show progress ("fastest Solid 72 of 84"), not a standalone rating. Levels appear on
   individual attempts: history rows, the log form, the session review.
+- A goal can list other goals of its song to finish first (`Goal.requires`). It is a **soft lock**:
+  a way to give a long goal list a shape, like levels, never a rule. A goal is locked while it is
+  not done and something it requires is not done (`goalLocked`, `blockingGoals`, `lockReason` in
+  src/domain/progress.ts; the graph helpers `wouldCycle`, `requirementCycles`, `lockText` in
+  src/domain/prerequisites.ts). Locked goals still take attempts and count toward progress exactly
+  as before. `orderGoals` places a goal after what it requires, and `firstUnfinishedGoal` (Home's
+  play button, Practice's start) skips locked goals. The UI shows a lock icon with "Finish X first".
 - A song is "Learned" when every goal is done, with a manual override. The Home filter the design
   calls "Mastered" is "Learned".
 - Practice review compares each goal's progress before the session with progress after it, using

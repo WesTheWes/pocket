@@ -20,6 +20,7 @@ export type IconName =
   | 'more'
   | 'download'
   | 'chart'
+  | 'lock'
 
 const glyphs: Record<IconName, ReactNode> = {
   back: <path d="M15 5l-7 7 7 7" />,
@@ -63,6 +64,12 @@ const glyphs: Record<IconName, ReactNode> = {
   up: <path d="M6 15l6-6 6 6" />,
   download: <path d="M12 4v11M7 11l5 5 5-5M5 20h14" />,
   chart: <path d="M5 4v15h15M9 15v-3M13 15V8M17 15v-5" />,
+  lock: (
+    <>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </>
+  ),
   more: (
     <>
       <circle cx="6" cy="12" r="1.4" fill="currentColor" stroke="none" />

@@ -51,21 +51,21 @@ The ordered list of slots: drag handle, position number, section name, remove bu
 
 Title area with the song name, filter chips (All, To do, Done, with counts), then goals grouped under Whole song and then each section in song order. Group headers have a count and a plus button that starts a new goal in that group.
 
-Each goal card: the title, an orange progress bar (`goalProgress`), and one line of text under it: "fastest Solid 72 of 84 BPM", or "No Solid attempt yet" when there is none, or "Solid attempt logged" for a goal with no target tempo. A yellow "Done" check appears on done goals. **There is no quality meter or quality name on the card.** Tapping a goal opens Goal progress; the round play button on its right starts Practice at that goal.
+Each goal card: the title, an orange progress bar (`goalProgress`), and one line of text under it: "fastest Solid 72 of 84 BPM", or "No Solid attempt yet" when there is none, or "Solid attempt logged" for a goal with no target tempo. A yellow "Done" check appears on done goals. **There is no quality meter or quality name on the card.** Tapping a goal opens Goal progress; the round play button on its right starts Practice at that goal. A locked goal (something it requires is not done) shows a lock icon and "Finish Full chorus with block chords first" under the summary.
 
 ## New goal, Edit goal
 
-"Applies to" chips (Whole song and each section), Title, Description, Target tempo (a stepper with minus and plus around a big number, 30 to 240, with a "No target tempo" toggle that clears it), and Save. Edit adds Delete goal. There is no target-level field: every goal is measured against Solid.
+"Applies to" chips (Whole song and each section), Title, Description, Target tempo (a stepper with minus and plus around a big number, 30 to 240, with a "No target tempo" toggle that clears it), "Finish first" (chips for every other goal of the song, in goal order; picked ones are the goals to finish before this one, with a note that it only sets the order; a chip that would make a circle is disabled; hidden when the song has no other goals), and Save. Edit adds Delete goal. There is no target-level field: every goal is measured against Solid.
 
 ## Goal progress
 
-Section label, goal title, description. A summary card: the progress bar with "fastest Solid 72 of 84 BPM" and a "Done" state. Under it, a "Practice this goal" button that starts Practice at this goal (hidden when you came here from Practice). A "Log attempt" card: tempo stepper (with a "No tempo" toggle), five quality options as selectable rows (each with a mini meter, the label, and a check on the selected one), a short Note box ("What went wrong, what to try next"), and "Save attempt". Below, History: newest first, each row with date, BPM (or "no tempo") and quality (meter, color and label), the note under them when there is one, and edit and delete icon buttons. An edit button in the top bar opens Edit goal.
+Section label, goal title, description, and while the goal is locked a lock icon with "Finish X and Y first", each a link to that goal's progress (its back arrow returns here). A summary card: the progress bar with "fastest Solid 72 of 84 BPM" and a "Done" state. Under it, a "Practice this goal" button that starts Practice at this goal (hidden when you came here from Practice). A "Log attempt" card: tempo stepper (with a "No tempo" toggle), five quality options as selectable rows (each with a mini meter, the label, and a check on the selected one), a short Note box ("What went wrong, what to try next"), and "Save attempt". Below, History: newest first, each row with date, BPM (or "no tempo") and quality (meter, color and label), the note under them when there is one, and edit and delete icon buttons. An edit button in the top bar opens Edit goal.
 
 ## Practice
 
 See "Practice screen behavior" in the README. Mobile: header (song picker, Finish), timer with pause, section chips in a 3-column grid with progress bars, goal card, metronome (beat dots, BPM readout with minus and plus, slider, big play and pause button), and previous and next goal buttons pinned to the bottom. The song picker is a bottom sheet listing songs.
 
-Desktop: left panel with the back link, song picker, timer, the full goal list (section label and title, the current goal highlighted), and Finish. The main area holds the section chips (with progress bars in a row), a larger goal card, and a horizontal metronome panel.
+Desktop: left panel with the back link, song picker, timer, the full goal list (section label and title, the current goal highlighted; a locked goal shows a lock icon beside its percentage), and Finish. The main area holds the section chips (with progress bars in a row), a larger goal card, and a horizontal metronome panel.
 
 ## Practice review
 

@@ -14,6 +14,8 @@ interface Props {
   target: GoalSheetTarget | null
   song: Song
   sections: Section[]
+  /** Every goal of the song, offered under "Finish first". */
+  goals: Goal[]
   onClose: () => void
   /** Called with the saved goal, after it has been written. */
   onSaved: (goal: Goal) => void
@@ -23,7 +25,7 @@ interface Props {
  * Add or edit a goal without leaving Practice, so the metronome keeps playing and the timer keeps
  * running. It is the same form as the New goal and Edit goal screens.
  */
-export function GoalSheet({ target, song, sections, onClose, onSaved }: Props) {
+export function GoalSheet({ target, song, sections, goals, onClose, onSaved }: Props) {
   const editing = target?.mode === 'edit'
 
   return (
@@ -38,6 +40,8 @@ export function GoalSheet({ target, song, sections, onClose, onSaved }: Props) {
           key={target.mode === 'edit' ? target.goal.id : 'new'}
           className="pt-5"
           sections={sections}
+          goals={goals}
+          goalId={target.mode === 'edit' ? target.goal.id : undefined}
           defaultValues={
             target.mode === 'edit'
               ? {
@@ -45,12 +49,14 @@ export function GoalSheet({ target, song, sections, onClose, onSaved }: Props) {
                   title: target.goal.title,
                   description: target.goal.description,
                   targetBpm: target.goal.targetBpm,
+                  requires: target.goal.requires,
                 }
               : {
                   sectionId: target.sectionId,
                   title: '',
                   description: '',
                   targetBpm: newGoalTargetBpm(song),
+                  requires: [],
                 }
           }
           submitLabel={target.mode === 'edit' ? 'Save changes' : 'Add goal'}

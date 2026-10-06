@@ -13,10 +13,12 @@ interface Props {
   summary: string
   /** Where the round play button goes. No button without it. */
   practiceTo?: string
+  /** "Finish Hands apart first" while the goal is locked. */
+  lockedBy?: string
 }
 
 /** A goal with its progress. Deliberately shows no standalone rating: levels belong to attempts. */
-export function GoalCard({ to, title, progress, done, summary, practiceTo }: Props) {
+export function GoalCard({ to, title, progress, done, summary, practiceTo, lockedBy }: Props) {
   return (
     <div className="flex items-center gap-2 rounded-row bg-surface pr-2.5">
       <Link to={to} className="block min-w-0 flex-1 py-3.5 pl-4">
@@ -33,6 +35,12 @@ export function GoalCard({ to, title, progress, done, summary, practiceTo }: Pro
           <ProgressBar value={progress} label={`${title} progress`} size="lg" />
         </div>
         <div className="mt-2.5 text-[13px] text-muted">{summary}</div>
+        {lockedBy && (
+          <div className="mt-1.5 flex items-center gap-1.5 text-[13px] text-muted">
+            <Icon name="lock" size={14} />
+            {lockedBy}
+          </div>
+        )}
       </Link>
       {practiceTo && (
         <IconLink to={practiceTo} icon="play" variant="tonal" label={`Practice ${title}`} />

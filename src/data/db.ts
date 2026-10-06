@@ -37,5 +37,14 @@ export function createDb(name = 'pocket'): PocketDb {
         if (attempt.note === undefined) attempt.note = ''
       }),
   )
+  // Version 4 let goals require other goals. Goals saved before then require none.
+  db.version(4).upgrade((tx) =>
+    tx
+      .table('goals')
+      .toCollection()
+      .modify((goal: Partial<Goal>) => {
+        if (goal.requires === undefined) goal.requires = []
+      }),
+  )
   return db
 }

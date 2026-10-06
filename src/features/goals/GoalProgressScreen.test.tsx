@@ -353,3 +353,28 @@ describe('attempt notes', () => {
     expect(historyText()[0]).not.toContain('Better once')
   })
 })
+
+describe('locked goals', () => {
+  it('links to the goal to finish first, and comes back', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/songs/piano-man/goals/piano-man-g6')
+    await screen.findByRole('heading', { name: /stride piano/, level: 1 })
+    expect(screen.getByText(/^Finish/)).toHaveTextContent(
+      'Finish Full chorus with block chords first',
+    )
+    await user.click(screen.getByRole('link', { name: 'Full chorus with block chords' }))
+    await screen.findByRole('heading', { name: 'Full chorus with block chords', level: 1 })
+    expect(screen.getByRole('link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/songs/piano-man/goals/piano-man-g6',
+    )
+  })
+
+  it('says nothing on a goal whose requirements are done', async () => {
+    await loadSamples()
+    renderApp('/songs/piano-man/goals/piano-man-g5')
+    await screen.findByRole('heading', { name: 'Walk-up fill into bar 5', level: 1 })
+    expect(screen.queryByText(/^Finish/)).not.toBeInTheDocument()
+  })
+})

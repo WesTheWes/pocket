@@ -253,3 +253,60 @@ describe('Deleting a goal', () => {
     expect(screen.queryByText('Goal not found')).not.toBeInTheDocument()
   })
 })
+
+describe('Finish first', () => {
+  const group = () => screen.getByRole('group', { name: 'Finish first' })
+  const chip = (title: string | RegExp) => within(group()).getByRole('button', { name: title })
+
+  it('offers every goal of the song in order, none picked, and saves the picked ones', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/songs/piano-man/goals/new')
+    await screen.findByRole('group', { name: 'Applies to' })
+    expect(
+      within(group())
+        .getAllByRole('button')
+        .map((b) => b.getAttribute('aria-pressed')),
+    ).toEqual(Array(8).fill('false'))
+    expect(group()).toHaveAccessibleDescription(/only sets the order/)
+    await user.click(chip(/Harmonica line on right hand/))
+    expect(chip(/Harmonica line/)).toHaveAttribute('aria-pressed', 'true')
+    await user.type(screen.getByRole('textbox', { name: 'Title' }), 'Both hands, intro')
+    await user.click(screen.getByRole('button', { name: 'Add goal' }))
+    await waitFor(async () => {
+      const goals = await repos.goals.listBySong('piano-man')
+      expect(goals.find((g) => g.title === 'Both hands, intro')?.requires).toEqual(['piano-man-g1'])
+    })
+  })
+
+  it('shows what an existing goal requires, never offering the goal itself', async () => {
+    await loadSamples()
+    renderApp('/songs/piano-man/goals/piano-man-g6/edit')
+    await screen.findByRole('textbox', { name: 'Title' })
+    expect(within(group()).getAllByRole('button')).toHaveLength(7)
+    expect(chip(/Full chorus with block chords/)).toHaveAttribute('aria-pressed', 'true')
+    expect(within(group()).queryByRole('button', { name: /stride piano/ })).not.toBeInTheDocument()
+  })
+
+  it('will not let two goals require each other', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    // The stride goal already requires the block chords goal, so the reverse is refused.
+    renderApp('/songs/piano-man/goals/piano-man-g4/edit')
+    await screen.findByRole('textbox', { name: 'Title' })
+    expect(chip(/stride piano/)).toBeDisabled()
+    await user.click(chip(/Walk-up fill/))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+    await waitFor(async () =>
+      expect((await repos.goals.get('piano-man-g4'))?.requires).toEqual(['piano-man-g5']),
+    )
+  })
+
+  it('is not shown for the only goal of a song', async () => {
+    await loadSamples()
+    const song = await repos.songs.create({ title: 'Solo' })
+    renderApp(`/songs/${song.id}/goals/new`)
+    await screen.findByRole('group', { name: 'Applies to' })
+    expect(screen.queryByRole('group', { name: 'Finish first' })).not.toBeInTheDocument()
+  })
+})

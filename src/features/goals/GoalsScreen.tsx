@@ -8,7 +8,7 @@ import { Page } from '../../components/Page'
 import { TopBar } from '../../components/TopBar'
 import { useGoals, useSections, useSong, useSongAttempts } from '../../data/hooks'
 import { goalSummary } from '../../domain/goalSummary'
-import { goalDone, goalProgress } from '../../domain/progress'
+import { goalDone, goalProgress, lockReason } from '../../domain/progress'
 import { paths } from '../../paths'
 import { SongNotFound } from '../songs/SongNotFound'
 import { filterCounts, groupGoals, type GoalFilter } from './groups'
@@ -87,6 +87,7 @@ export function GoalsScreen() {
                       done={goalDone(goal, attempts)}
                       summary={goalSummary(goal, attempts)}
                       practiceTo={paths.practice(song.id, goal.id)}
+                      lockedBy={lockReason(goal, goals, attempts)}
                     />
                   ))}
                 </div>

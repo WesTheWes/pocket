@@ -57,4 +57,32 @@ describe('createDb', () => {
     db.close()
     await Dexie.delete(name)
   })
+
+  it('gives goals saved before version 4 no requirements', async () => {
+    const name = 'upgrade-test-4'
+    // The database as version 3 left it: a goal with no requires field.
+    const old = new Dexie(name)
+    old.version(3).stores({
+      songs: 'id, createdAt',
+      sections: 'id, songId',
+      goals: 'id, songId, sectionId',
+      attempts: 'id, goalId, sessionId, at',
+      sessions: 'id, songId, startedAt',
+    })
+    await old.table('goals').add({
+      id: 'g1',
+      songId: 's1',
+      sectionId: null,
+      title: 'G',
+      description: '',
+      targetBpm: null,
+      createdAt: 0,
+    })
+    old.close()
+
+    const db = createDb(name)
+    expect(await db.goals.get('g1')).toMatchObject({ title: 'G', requires: [] })
+    db.close()
+    await Dexie.delete(name)
+  })
 })
