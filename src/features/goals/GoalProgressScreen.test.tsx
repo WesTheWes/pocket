@@ -238,8 +238,8 @@ describe('logging an attempt', () => {
     renderApp(`/songs/rocket-man/goals/${goal.id}`)
     expect(await screen.findByText(/No attempts yet/)).toBeInTheDocument()
     expect(screen.getByText('No Solid attempt yet')).toBeInTheDocument()
-    // With no history the tempo starts at the target.
-    expect(screen.getByRole('textbox', { name: 'Tempo you played, in BPM' })).toHaveValue('80')
+    // With no history the tempo starts at half the target: room for a clean first go.
+    expect(screen.getByRole('textbox', { name: 'Tempo you played, in BPM' })).toHaveValue('40')
   })
 })
 

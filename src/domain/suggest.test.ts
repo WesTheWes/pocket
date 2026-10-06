@@ -8,7 +8,7 @@ const attempt = (bpm: number | null, level: 1 | 2 | 3 | 4 | 5, at: number, goalI
 
 describe('nextStep', () => {
   it('starts gently with nothing logged', () => {
-    expect(nextStep(goal, [])).toEqual({ bpm: 84, text: 'First go. Start at 84; slower is fine.' })
+    expect(nextStep(goal, [])).toEqual({ bpm: 42, text: 'First go. Start at 42; slower is fine.' })
     expect(nextStep({ ...goal, targetBpm: null }, []).bpm).toBe(80)
   })
 

@@ -1,6 +1,6 @@
 import { lockText } from './prerequisites'
 import { isSolid } from './quality'
-import type { Attempt, Goal, Section, Song } from './schemas'
+import { MIN_BPM, type Attempt, type Goal, type Section, type Song } from './schemas'
 
 export type SongStatus = 'learned' | 'in-progress'
 
@@ -114,14 +114,19 @@ export function firstUnfinishedGoal(goals: Goal[], attempts: Attempt[]): Goal | 
   return open.find((goal) => !goalLocked(goal, goals, attempts)) ?? open[0] ?? goals[0]
 }
 
-/** Metronome tempo when landing on a goal: last logged, else the target, else 80. */
+/**
+ * Metronome tempo when landing on a goal: the last tempo logged; for a goal never tried, half
+ * its target (a first go wants room to be clean), never under 30; with no target, 80.
+ */
 export function startingBpm(goal: Goal, attempts: Attempt[]): number {
   let latest: Attempt | undefined
   for (const attempt of attemptsFor(goal, attempts)) {
     if (attempt.bpm === null) continue
     if (latest === undefined || attempt.at > latest.at) latest = attempt
   }
-  return latest?.bpm ?? goal.targetBpm ?? DEFAULT_STARTING_BPM
+  if (latest) return latest.bpm as number
+  if (goal.targetBpm === null) return DEFAULT_STARTING_BPM
+  return Math.max(MIN_BPM, Math.round(goal.targetBpm / 2))
 }
 
 /** A new goal's target tempo: the song's tempo when it has one, else 80. */

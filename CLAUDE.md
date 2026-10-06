@@ -113,6 +113,9 @@ src/
 - Editing from Practice: the ⋯ button beside the song picker opens `EditMenuSheet` (song details, the current section, add a section, play order). Each opens the regular form in a sheet (`EditSheets.tsx`), so the metronome and timer keep running. `StructureEditor` is the shared body of the Structure screen and the Play order sheet; `GoalStatus` is the shared "percent or Done" used by both Practice goal lists.
 - Practice remembers the tempo you set for each goal for the rest of the session (`tempoMemory.ts`, in sessionStorage so it survives a trip to Log attempt and a reload). A tempo logged after you set it wins (`chooseTempo`).
 - The current goal lives in the URL (`?goal=`) so a reload keeps your place. Landing on a goal resets the tempo to `startingBpm`.
+- `startingBpm`: the last tempo logged on the goal; a goal never tried starts at half its target
+  (floor 30 BPM), so a first go has room to be clean; no target means 80. The log form's default
+  tempo and Practice's landing tempo both come from it.
 - Practice is one DOM that adapts with `desk:` classes (CSS `order` moves Finish and the timer), so each control exists once.
 
 ## Gamification (src/domain/week.ts, levels.ts, suggest.ts)

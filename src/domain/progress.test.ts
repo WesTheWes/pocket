@@ -247,8 +247,9 @@ describe('startingBpm', () => {
     )
   })
 
-  it('falls back to the target tempo, then to 80', () => {
-    expect(startingBpm(goal, [])).toBe(84)
+  it('starts a goal never tried at half its target, never under 30, or at 80 without one', () => {
+    expect(startingBpm(goal, [])).toBe(42)
+    expect(startingBpm({ ...goal, targetBpm: 45 }, [])).toBe(30)
     expect(startingBpm({ ...goal, targetBpm: null }, [])).toBe(80)
   })
 })

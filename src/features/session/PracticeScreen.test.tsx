@@ -252,7 +252,7 @@ describe('the metronome tempo', () => {
     expect(tempo()).toHaveAttribute('aria-valuetext', '76 BPM')
   })
 
-  it('starts at the target when nothing has been logged yet', async () => {
+  it('starts at half the target when nothing has been logged yet', async () => {
     await loadSamples()
     const goal = await repos.goals.create({
       songId: 'rocket-man',
@@ -261,7 +261,7 @@ describe('the metronome tempo', () => {
     })
     renderApp(`/practice/rocket-man?goal=${goal.id}`)
     await screen.findByRole('timer', { name: 'Practice time' })
-    expect(tempo()).toHaveAttribute('aria-valuetext', '100 BPM')
+    expect(tempo()).toHaveAttribute('aria-valuetext', '50 BPM')
   })
 
   it('starts each goal at its own tempo, and remembers what you set on it', async () => {
@@ -666,7 +666,7 @@ describe('adding and editing goals during a session', () => {
       expect(created?.sectionId).toBeNull()
     })
 
-    it('starts the metronome at the new goal’s target tempo', async () => {
+    it('starts the metronome at half the new goal’s target tempo', async () => {
       await loadSamples()
       const user = userEvent.setup()
       renderApp('/practice/piano-man?goal=piano-man-g4')
@@ -677,7 +677,7 @@ describe('adding and editing goals during a session', () => {
       await user.tab()
       await user.click(within(await dialog()).getByRole('button', { name: 'Add goal' }))
       await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
-      await waitFor(() => expect(tempo()).toHaveAttribute('aria-valuetext', '132 BPM'))
+      await waitFor(() => expect(tempo()).toHaveAttribute('aria-valuetext', '66 BPM'))
     })
 
     it('asks for a title and adds nothing without one', async () => {

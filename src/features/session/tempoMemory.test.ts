@@ -33,9 +33,9 @@ describe('chooseTempo', () => {
     expect(chooseTempo({ bpm: 110, at: 1000 }, goal, [attempt(90, 900)])).toBe(110)
   })
 
-  it('with nothing remembered, starts where you left off: last logged, else target, else 80', () => {
+  it('with nothing remembered, starts where you left off: last logged, else half the target, else 80', () => {
     expect(chooseTempo(undefined, goal, [attempt(72, 100)])).toBe(72)
-    expect(chooseTempo(undefined, goal, [])).toBe(84)
+    expect(chooseTempo(undefined, goal, [])).toBe(42)
     expect(chooseTempo(undefined, { ...goal, targetBpm: null }, [])).toBe(80)
   })
 })
