@@ -34,7 +34,7 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     fireEvent.change(metronome(), { target: { value: '100' } })
     expect(metronome()).toHaveAttribute('aria-valuetext', '100 BPM')
 
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     expect(await logTempo()).toHaveValue('100')
   })
 
@@ -46,7 +46,7 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     await user.click(screen.getByRole('button', { name: 'Faster' }))
     await user.click(screen.getByRole('button', { name: 'Faster' }))
     await user.click(screen.getByRole('button', { name: 'Faster' }))
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     expect(await logTempo()).toHaveValue('71') // 68 + 3
   })
 
@@ -55,7 +55,7 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     const user = userEvent.setup()
     renderApp(PRACTICE)
     await screen.findByRole('timer', { name: 'Practice time' })
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     expect(await logTempo()).toHaveValue('68')
   })
 
@@ -65,7 +65,7 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     renderApp(PRACTICE)
     await screen.findByRole('timer', { name: 'Practice time' })
     fireEvent.change(metronome(), { target: { value: '90' } })
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     await user.click(await screen.findByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
     await screen.findByRole('status')
@@ -80,7 +80,7 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     renderApp(PRACTICE)
     await screen.findByRole('timer', { name: 'Practice time' })
     fireEvent.change(metronome(), { target: { value: '100' } })
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     await user.click(await screen.findByRole('checkbox', { name: 'No tempo' }))
     await user.click(screen.getByRole('checkbox', { name: 'No tempo' }))
     expect(await logTempo()).toHaveValue('100')
@@ -94,7 +94,7 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     fireEvent.change(metronome(), { target: { value: '100' } })
     await user.click(screen.getByRole('button', { name: 'Next goal' })) // the outro: last logged 72
     expect(metronome()).toHaveAttribute('aria-valuetext', '72 BPM')
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     expect(await logTempo()).toHaveValue('72')
   })
 
@@ -120,7 +120,7 @@ describe('Log attempt from Practice carries the metronome tempo', () => {
     renderApp(PRACTICE)
     await screen.findByRole('timer', { name: 'Practice time' })
     fireEvent.change(metronome(), { target: { value: '100' } })
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     await screen.findByRole('region', { name: 'History' })
     await user.click(screen.getAllByRole('button', { name: /^Edit attempt from/ })[2])
     expect(await logTempo()).toHaveValue('45') // the oldest attempt's own tempo
@@ -134,7 +134,7 @@ describe('Practice remembers the tempo you set for each goal', () => {
     renderApp(PRACTICE)
     await screen.findByRole('timer', { name: 'Practice time' })
     fireEvent.change(metronome(), { target: { value: '120' } })
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     await screen.findByRole('region', { name: 'History' })
     await user.click(screen.getByRole('link', { name: 'Back' }))
 
@@ -148,7 +148,7 @@ describe('Practice remembers the tempo you set for each goal', () => {
     renderApp(PRACTICE)
     await screen.findByRole('timer', { name: 'Practice time' })
     fireEvent.change(metronome(), { target: { value: '120' } })
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     const tempoBox = await logTempo()
     await user.clear(tempoBox)
     await user.type(tempoBox, '90')
@@ -173,7 +173,7 @@ describe('Practice remembers the tempo you set for each goal', () => {
     const user = userEvent.setup()
     renderApp(PRACTICE)
     await screen.findByRole('timer', { name: 'Practice time' })
-    await user.click(screen.getByRole('link', { name: 'Log attempt' }))
+    await user.click(screen.getByRole('link', { name: 'History' }))
     await user.click(await screen.findByRole('radio', { name: 'Solid' }))
     await user.click(screen.getByRole('button', { name: 'Save attempt' }))
     await screen.findByRole('status') // saving takes you straight back to Practice

@@ -43,6 +43,7 @@ import {
 import { GoalSheet, type GoalSheetTarget } from './GoalSheet'
 import { GoalStatus } from './GoalStatus'
 import { PracticeNotes } from './PracticeNotes'
+import { LogAttemptSheet } from './LogAttemptSheet'
 import { SongPickerSheet } from './SongPickerSheet'
 import { UnlockSheet } from './UnlockSheet'
 import { chooseTempo, recallTempo, rememberTempo } from './tempoMemory'
@@ -139,6 +140,7 @@ function PracticeView({
   const [search, setSearch] = useSearchParams()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [goalSheet, setGoalSheet] = useState<GoalSheetTarget | null>(null)
+  const [logging, setLogging] = useState(false)
   const [editSheet, setEditSheet] = useState<EditSheetKind | null>(null)
   const elapsed = useSessionTimer(session)
   const paused = session.pausedAt !== null
@@ -407,7 +409,7 @@ function PracticeView({
                     state={withReturn(paths.practice(song.id, goal.id), { bpm })}
                     className="flex h-11 items-center px-1.5 text-[13px] font-semibold text-orange desk:text-sm"
                   >
-                    Log attempt
+                    History
                   </Link>
                   <IconButton
                     icon="edit"
@@ -539,6 +541,14 @@ function PracticeView({
         </div>
 
         {goal && (
+          <div className="mt-4 px-5 desk:mt-5 desk:px-0">
+            <Button icon="plus" onClick={() => setLogging(true)} className="w-full desk:h-14">
+              Log attempt
+            </Button>
+          </div>
+        )}
+
+        {goal && (
           <div className="sticky bottom-0 z-10 mt-auto flex gap-2.5 border-t border-line bg-canvas px-5 pb-6 pt-3 desk:static desk:mt-6 desk:border-0 desk:bg-transparent desk:px-0 desk:pb-0 desk:pt-0">
             <Button
               variant="secondary"
@@ -564,6 +574,20 @@ function PracticeView({
         )}
       </div>
 
+      {goal && (
+        <LogAttemptSheet
+          open={logging}
+          goal={goal}
+          attempts={attempts}
+          bpm={bpm}
+          onClose={() => setLogging(false)}
+          onLogged={(saved) => {
+            setLogging(false)
+            // Logged here, the attempt is celebrated here too when it finishes the goal.
+            if (!done && goalDone(goal, [...attempts, saved])) setCelebrating(goal.id)
+          }}
+        />
+      )}
       {celebrated && (
         <UnlockSheet
           open

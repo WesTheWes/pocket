@@ -21,14 +21,25 @@ interface Props {
   onDone: () => void
   /** Called with a new attempt once it is saved (e.g. to go back to Practice). */
   onLogged?: (attempt: Attempt) => void
+  /** In a sheet: no card or heading, and the note folded away behind "Add a note". */
+  compact?: boolean
 }
 
 /**
  * Logs an attempt: the tempo you played and how it felt. Remount it (change its `key`) to start
  * a different attempt. New attempts pick up the song's open practice session, if there is one.
  */
-export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLogged }: Props) {
+export function AttemptForm({
+  goal,
+  attempts,
+  initialBpm,
+  editing,
+  onDone,
+  onLogged,
+  compact = false,
+}: Props) {
   const { notify } = useToast()
+  const [showNote, setShowNote] = useState(!compact)
   const fallbackBpm = initialBpm ?? startingBpm(goal, attempts)
   const [bpm, setBpm] = useState<number | null>(editing ? editing.bpm : fallbackBpm)
   const [level, setLevel] = useState<QualityLevel | null>(editing?.level ?? null)
@@ -81,12 +92,17 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLog
       ref={ref}
       onSubmit={submit}
       noValidate
-      className="flex flex-col gap-[18px] rounded-card bg-surface p-5"
-      aria-labelledby="attempt-form-title"
+      className={
+        compact ? 'flex flex-col gap-4' : 'flex flex-col gap-[18px] rounded-card bg-surface p-5'
+      }
+      aria-labelledby={compact ? undefined : 'attempt-form-title'}
+      aria-label={compact ? 'Log attempt' : undefined}
     >
-      <h2 id="attempt-form-title" className="text-base font-semibold">
-        {editing ? 'Edit attempt' : 'Log attempt'}
-      </h2>
+      {!compact && (
+        <h2 id="attempt-form-title" className="text-base font-semibold">
+          {editing ? 'Edit attempt' : 'Log attempt'}
+        </h2>
+      )}
       <Stepper
         label="Tempo you played"
         value={bpm}
@@ -107,13 +123,23 @@ export function AttemptForm({ goal, attempts, initialBpm, editing, onDone, onLog
           }}
         />
       </div>
-      <TextAreaField
-        label="Note"
-        value={note}
-        onChange={(event) => setNote(event.target.value)}
-        placeholder="What went wrong, what to try next"
-        className="min-h-[88px] text-sm"
-      />
+      {showNote ? (
+        <TextAreaField
+          label="Note"
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+          placeholder="What went wrong, what to try next"
+          className="min-h-[88px] text-sm"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowNote(true)}
+          className="-my-1 self-start px-1 text-sm font-semibold text-orange"
+        >
+          Add a note
+        </button>
+      )}
       {error && (
         <p role="alert" className="text-sm text-pink">
           {error}

@@ -228,7 +228,7 @@ describe('choosing the goal', () => {
   it('links to logging an attempt for the current goal', async () => {
     await loadSamples()
     renderApp('/practice/piano-man?goal=piano-man-g3')
-    expect(await screen.findByRole('link', { name: 'Log attempt' })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: 'History' })).toHaveAttribute(
       'href',
       '/songs/piano-man/goals/piano-man-g3',
     )
@@ -1330,5 +1330,66 @@ describe('volume', () => {
     renderApp('/practice/piano-man')
     expect(await screen.findByRole('slider', { name: 'Volume' })).toHaveValue('40')
     localStorage.removeItem('pocket:metronome:volume')
+  })
+})
+
+describe('logging an attempt from Practice', () => {
+  const sheet = async () => within(await screen.findByRole('dialog', { name: 'Log attempt' }))
+
+  it('opens a sheet at the metronome tempo and saves without leaving the session', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    const { router } = renderApp('/practice/piano-man?goal=piano-man-g3')
+    await screen.findByRole('timer', { name: 'Practice time' })
+    fireEvent.change(tempo(), { target: { value: '90' } })
+    await user.click(screen.getByRole('button', { name: 'Start metronome' }))
+    await user.click(screen.getByRole('button', { name: 'Log attempt' }))
+
+    const form = await sheet()
+    expect(form.getByRole('textbox', { name: 'Tempo you played, in BPM' })).toHaveValue('90')
+    expect(form.queryByRole('textbox', { name: 'Note' })).not.toBeInTheDocument()
+    await user.click(form.getByRole('radio', { name: 'Few mistakes' }))
+    await user.click(form.getByRole('button', { name: 'Save attempt' }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(router.state.location.pathname).toBe('/practice/piano-man')
+    expect(screen.getByRole('button', { name: 'Stop metronome' })).toBeInTheDocument()
+    const [latest] = await repos.attempts.listByGoal('piano-man-g3')
+    const [session] = await openSessions('piano-man')
+    expect(latest).toMatchObject({ bpm: 90, level: 3, note: '', sessionId: session.id })
+    expect(await screen.findByText('Attempt saved')).toBeInTheDocument()
+  })
+
+  it('can add a note, and celebrates an attempt that finishes the goal', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    await screen.findByRole('timer', { name: 'Practice time' })
+    fireEvent.change(tempo(), { target: { value: '84' } })
+    await user.click(screen.getByRole('button', { name: 'Log attempt' }))
+    const form = await sheet()
+    await user.click(form.getByRole('button', { name: 'Add a note' }))
+    await user.type(form.getByRole('textbox', { name: 'Note' }), 'Finally')
+    await user.click(form.getByRole('radio', { name: 'Solid' }))
+    await user.click(form.getByRole('button', { name: 'Save attempt' }))
+
+    const unlock = within(
+      await screen.findByRole('dialog', { name: 'First 4 bars with only bass and melody' }),
+    )
+    expect(unlock.getByText('Goal done')).toBeInTheDocument()
+    // The sheet fills in from the live query, a moment after it opens.
+    expect(await unlock.findByText('Your note: “Finally”')).toBeInTheDocument()
+    const [latest] = await repos.attempts.listByGoal('piano-man-g3')
+    expect(latest).toMatchObject({ bpm: 84, level: 4, note: 'Finally' })
+  })
+
+  it('still links to the full history, carrying the tempo', async () => {
+    await loadSamples()
+    renderApp('/practice/piano-man?goal=piano-man-g3')
+    await screen.findByRole('timer', { name: 'Practice time' })
+    expect(screen.getByRole('link', { name: 'History' })).toHaveAttribute(
+      'href',
+      '/songs/piano-man/goals/piano-man-g3',
+    )
   })
 })

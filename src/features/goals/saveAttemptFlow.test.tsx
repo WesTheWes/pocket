@@ -27,7 +27,7 @@ describe('saving an attempt that you logged from Practice', () => {
     await loadSamples()
     const user = userEvent.setup()
     const view = renderApp('/practice/piano-man?goal=piano-man-g4')
-    await user.click(await screen.findByRole('link', { name: 'Log attempt' }))
+    await user.click(await screen.findByRole('link', { name: 'History' }))
     await user.click(await screen.findByRole('radio', { name: 'Solid' }))
     return { user, ...view }
   }
@@ -72,7 +72,7 @@ describe('saving an attempt that you logged from Practice', () => {
     await loadSamples()
     const user = userEvent.setup()
     const { router } = renderApp('/practice/piano-man?goal=piano-man-g4')
-    await user.click(await screen.findByRole('link', { name: 'Log attempt' }))
+    await user.click(await screen.findByRole('link', { name: 'History' }))
     await save(user)
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Choose how it felt')
@@ -112,7 +112,7 @@ describe('saving an attempt anywhere else', () => {
     await loadSamples()
     const user = userEvent.setup()
     const { router } = renderApp('/practice/piano-man?goal=piano-man-g4')
-    await user.click(await screen.findByRole('link', { name: 'Log attempt' }))
+    await user.click(await screen.findByRole('link', { name: 'History' }))
     await screen.findByRole('region', { name: 'History' })
     await user.click(screen.getAllByRole('button', { name: /^Edit attempt from/ })[0])
     await user.click(await screen.findByRole('radio', { name: 'Solid' }))
@@ -139,7 +139,7 @@ describe('finishing a goal', () => {
     await loadSamples()
     const user = userEvent.setup()
     renderApp('/practice/piano-man?goal=piano-man-g6')
-    await user.click(await screen.findByRole('link', { name: 'Log attempt' }))
+    await user.click(await screen.findByRole('link', { name: 'History' }))
     await screen.findByRole('heading', { name: /stride piano/, level: 1 })
     const tempo = screen.getByRole('textbox', { name: 'Tempo you played, in BPM' })
     await user.clear(tempo)

@@ -130,6 +130,10 @@ src/
 - Home shows `WeekStrip`, `StartHere` (links to Practice with `withReturn(home, { bpm })`;
   Practice lands on `tempoFrom(location.state)`) and `OpenGoals`. Celebration is understated:
   yellow, rings, serif; no confetti, emoji or points.
+- Logging from Practice happens in `LogAttemptSheet` (the `AttemptForm` with `compact`: no card,
+  the note behind "Add a note"), opened by the big Log attempt button under the metronome, so the
+  metronome keeps running; the goal card's small "History" link still opens Goal progress with
+  `withReturn(practice, { bpm })`.
 - Practice's goal card adds "N to go", a Next step box (`nextStep`, with a one-tap Set), "Finishing
   this opens" chips (`unlockedBy`), a "N Solid in a row" chip (`solidRun`, src/domain/celebrate.ts)
   and "PB" beside BPM. `UnlockSheet` (src/features/session) celebrates a goal an attempt just
