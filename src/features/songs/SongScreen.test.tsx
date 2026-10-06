@@ -1,12 +1,19 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import { repos } from '../../data'
 import { createSeedData } from '../../data/seed'
 import { renderApp } from '../../test/renderApp'
 
 afterEach(async () => {
+  localStorage.clear()
   await repos.backup.clear()
 })
+
+/** The Song screen opens on the path; these tests look at the sections list. */
+async function showSections() {
+  await userEvent.click(await screen.findByRole('button', { name: 'Sections' }))
+}
 
 async function loadSamples() {
   await repos.backup.replaceAll(createSeedData(Date.now()))
@@ -28,6 +35,7 @@ describe('SongScreen', () => {
   it('lists each section with its own goal count and progress', async () => {
     await loadSamples()
     renderApp('/songs/piano-man')
+    await showSections()
     await screen.findByText('3 of 8 goals done')
 
     const sections = screen.getByRole('region', { name: 'Sections' })
@@ -61,6 +69,7 @@ describe('SongScreen', () => {
   it('links to practice, goals, sections and editing', async () => {
     await loadSamples()
     renderApp('/songs/piano-man')
+    await showSections()
     await screen.findByText('3 of 8 goals done')
     expect(screen.getByRole('link', { name: 'Practice' })).toHaveAttribute(
       'href',
@@ -83,6 +92,7 @@ describe('SongScreen', () => {
   it('guides you when a song has no sections, structure or goals yet', async () => {
     await loadSamples()
     renderApp('/songs/rocket-man')
+    await showSections()
     expect(await screen.findByText('No goals yet')).toBeInTheDocument()
     expect(screen.getByText(/Break the song into sections/)).toBeInTheDocument()
     expect(screen.getByText(/Set the order the sections are played/)).toBeInTheDocument()
@@ -103,6 +113,7 @@ describe('SongScreen', () => {
   it("practices a section from its first unfinished goal, or its first when it's all done", async () => {
     await loadSamples()
     renderApp('/songs/piano-man')
+    await showSections()
     await screen.findByText('3 of 8 goals done')
 
     // Verse: the waltz pattern (g2) is done, so it starts at the first 4 bars (g3).
@@ -120,6 +131,7 @@ describe('SongScreen', () => {
     await loadSamples()
     const section = await repos.sections.create('piano-man', { name: 'Coda', notes: '' })
     renderApp('/songs/piano-man')
+    await showSections()
     await screen.findByText(section.name)
     expect(screen.queryByRole('link', { name: 'Practice Coda' })).not.toBeInTheDocument()
   })
@@ -142,5 +154,50 @@ describe('links', () => {
     await screen.findByRole('heading', { name: 'Sir Duke', level: 1 })
     expect(screen.getByText(/Keep the recording/)).toBeInTheDocument()
     expect(screen.queryByRole('list', { name: 'Song links' })).not.toBeInTheDocument()
+  })
+})
+
+describe('the path', () => {
+  it('shows the goals as levels: done, where you are, open and locked', async () => {
+    await loadSamples()
+    renderApp('/songs/piano-man')
+    const path = within(await screen.findByRole('region', { name: 'Path' }))
+    expect(path.getByText('Level 1 of 2 · 3 of 8 goals done')).toBeInTheDocument()
+    expect(path.getByRole('list', { name: 'Levels' }).children).toHaveLength(2)
+    expect(path.getByRole('heading', { name: 'Level 1 · You are here' })).toBeInTheDocument()
+    expect(path.getByRole('heading', { name: 'Level 2' })).toBeInTheDocument()
+    // The current goal is expanded, with a start button.
+    expect(
+      path.getByRole('link', { name: 'Start First 4 bars with only bass and melody' }),
+    ).toHaveAttribute('href', '/practice/piano-man?goal=piano-man-g3')
+    expect(path.getByText('fastest Solid 64 of 84 BPM · 20 to go')).toBeInTheDocument()
+    // Done, open and locked goals read as such.
+    expect(path.getByRole('link', { name: /Harmonica line on right hand/ })).toHaveTextContent(
+      'Intro',
+    )
+    expect(path.getByRole('link', { name: /Walk-up fill into bar 5/ })).toHaveTextContent('50%')
+    expect(path.getByRole('link', { name: /stride piano/ })).toHaveTextContent(
+      'Finish Full chorus with block chords first',
+    )
+    expect(screen.queryByRole('region', { name: 'Sections' })).not.toBeInTheDocument()
+  })
+
+  it('switches to the sections and remembers it', async () => {
+    await loadSamples()
+    const user = userEvent.setup()
+    const { unmount } = renderApp('/songs/piano-man')
+    await user.click(await screen.findByRole('button', { name: 'Sections' }))
+    expect(screen.getByRole('region', { name: 'Sections' })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Path' })).not.toBeInTheDocument()
+    unmount()
+    renderApp('/songs/piano-man')
+    expect(await screen.findByRole('region', { name: 'Sections' })).toBeInTheDocument()
+  })
+
+  it('invites you to add goals when there are none', async () => {
+    await loadSamples()
+    renderApp('/songs/rocket-man')
+    const path = within(await screen.findByRole('region', { name: 'Path' }))
+    expect(path.getByText(/the path through the song appears here/)).toBeInTheDocument()
   })
 })

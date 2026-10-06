@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router'
 import { ButtonLink } from '../../components/Button'
-import { Tag } from '../../components/Chip'
+import { Chip, Tag } from '../../components/Chip'
 import { Icon } from '../../components/Icon'
 import { IconLink } from '../../components/IconButton'
 import { Page } from '../../components/Page'
@@ -10,8 +10,12 @@ import { SectionRow } from '../../components/SectionRow'
 import { TopBar } from '../../components/TopBar'
 import { useGoals, useSections, useSong, useSongAttempts } from '../../data/hooks'
 import { firstUnfinishedGoal, goalStats, orderGoals, toPercent } from '../../domain/progress'
+import { useStoredChoice } from '../../lib/useStoredChoice'
 import { paths } from '../../paths'
 import { SongNotFound } from './SongNotFound'
+import { SongPath } from './SongPath'
+
+const SONG_VIEWS = ['path', 'sections'] as const
 
 export function SongScreen() {
   const { songId = '' } = useParams()
@@ -19,6 +23,8 @@ export function SongScreen() {
   const sections = useSections(songId)
   const goals = useGoals(songId)
   const attempts = useSongAttempts(songId)
+  // The path (goals as levels) or the plain list of sections; remembered between visits.
+  const [view, setView] = useStoredChoice('pocket:song:view', SONG_VIEWS, 'path')
 
   // Still loading from IndexedDB.
   if (song === undefined || !sections || !goals || !attempts) return <Page wide />
@@ -93,39 +99,59 @@ export function SongScreen() {
             </ButtonLink>
           </div>
 
-          <section className="px-5 pt-7 desk:px-0" aria-labelledby="sections-heading">
-            <div className="flex h-11 items-center justify-between">
-              <h2 id="sections-heading" className="eyebrow">
-                Sections
+          <div role="group" aria-label="Show" className="flex gap-2 px-5 pt-6 desk:px-0 desk:pt-7">
+            <Chip selected={view === 'path'} onClick={() => setView('path')}>
+              Path
+            </Chip>
+            <Chip selected={view === 'sections'} onClick={() => setView('sections')}>
+              Sections
+            </Chip>
+          </div>
+
+          {view === 'path' && (
+            <section className="px-5 pt-3 desk:px-0" aria-labelledby="path-heading">
+              <h2 id="path-heading" className="sr-only">
+                Path
               </h2>
-              <AddLink to={paths.newSection(song.id)} />
-            </div>
-            {sections.length === 0 ? (
-              <p className="py-2 text-sm text-muted">
-                Break the song into sections like Verse and Chorus, then set goals for each.
-              </p>
-            ) : (
-              <div>
-                {sections.map((section) => {
-                  const sectionGoals = goals.filter((goal) => goal.sectionId === section.id)
-                  const stats = goalStats(sectionGoals, attempts)
-                  // Play starts at the section's first unfinished goal.
-                  const start = firstUnfinishedGoal(orderGoals(sectionGoals, sections), attempts)
-                  return (
-                    <SectionRow
-                      key={section.id}
-                      to={paths.section(song.id, section.id)}
-                      name={section.name}
-                      goalCount={stats.goalCount}
-                      doneCount={stats.doneCount}
-                      progress={stats.progress}
-                      practiceTo={start && paths.practice(song.id, start.id)}
-                    />
-                  )
-                })}
+              <SongPath song={song} sections={sections} goals={goals} attempts={attempts} />
+            </section>
+          )}
+
+          {view === 'sections' && (
+            <section className="px-5 pt-3 desk:px-0" aria-labelledby="sections-heading">
+              <div className="flex h-11 items-center justify-between">
+                <h2 id="sections-heading" className="eyebrow">
+                  Sections
+                </h2>
+                <AddLink to={paths.newSection(song.id)} />
               </div>
-            )}
-          </section>
+              {sections.length === 0 ? (
+                <p className="py-2 text-sm text-muted">
+                  Break the song into sections like Verse and Chorus, then set goals for each.
+                </p>
+              ) : (
+                <div>
+                  {sections.map((section) => {
+                    const sectionGoals = goals.filter((goal) => goal.sectionId === section.id)
+                    const stats = goalStats(sectionGoals, attempts)
+                    // Play starts at the section's first unfinished goal.
+                    const start = firstUnfinishedGoal(orderGoals(sectionGoals, sections), attempts)
+                    return (
+                      <SectionRow
+                        key={section.id}
+                        to={paths.section(song.id, section.id)}
+                        name={section.name}
+                        goalCount={stats.goalCount}
+                        doneCount={stats.doneCount}
+                        progress={stats.progress}
+                        practiceTo={start && paths.practice(song.id, start.id)}
+                      />
+                    )
+                  })}
+                </div>
+              )}
+            </section>
+          )}
         </div>
 
         <div>

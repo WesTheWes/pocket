@@ -133,9 +133,23 @@ export interface Suggestion {
 }
 
 /**
+ * The goal to start a song on: its first goal that is not done and not locked, a section's goal
+ * before a whole-song one (the song is put together last). Undefined when every goal is done.
+ */
+export function startGoal(
+  goals: Goal[],
+  sections: Section[],
+  attempts: Attempt[],
+): Goal | undefined {
+  const open = orderGoals(goals, sections).filter(
+    (candidate) => !goalDone(candidate, attempts) && !goalLocked(candidate, goals, attempts),
+  )
+  return open.find((candidate) => candidate.sectionId !== null) ?? open[0]
+}
+
+/**
  * One goal to start on: from the song practised most recently (by session, else by attempt;
- * never a learned song), its first goal that is not done and not locked. A section's goal
- * comes before a whole-song one: the song is put together last.
+ * never a learned song), its `startGoal`.
  */
 export function suggestGoal(
   songs: Song[],
@@ -165,10 +179,7 @@ export function suggestGoal(
     const songGoals = goals.filter((goal) => goal.songId === song.id)
     if (songGoals.length === 0 || songStatus(song, songGoals, attempts) === 'learned') continue
     const songSections = sections.filter((section) => section.songId === song.id)
-    const open = orderGoals(songGoals, songSections).filter(
-      (candidate) => !goalDone(candidate, attempts) && !goalLocked(candidate, songGoals, attempts),
-    )
-    const goal = open.find((candidate) => candidate.sectionId !== null) ?? open[0]
+    const goal = startGoal(songGoals, songSections, attempts)
     if (!goal) continue
     return {
       song,

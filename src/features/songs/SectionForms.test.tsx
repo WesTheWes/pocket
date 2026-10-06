@@ -75,6 +75,8 @@ describe('New section', () => {
     await user.click(screen.getByRole('button', { name: 'Add section' }))
 
     expect(await screen.findByRole('heading', { name: 'Rocket Man', level: 1 })).toBeInTheDocument()
+    // The Song screen opens on the path; the new section is in the sections list.
+    await user.click(screen.getByRole('button', { name: 'Sections' }))
     expect(router.state.location.pathname).toBe('/songs/rocket-man')
     const [section] = await repos.sections.listBySong('rocket-man')
     expect(section).toMatchObject({ name: 'Verse', notes: 'Watch the pickup', order: 0 })

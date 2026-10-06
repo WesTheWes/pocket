@@ -135,6 +135,8 @@ src/
 - Review adds "Today's firsts" (`sessionFirsts` in src/domain/firsts.ts: goal done, first or new
   fastest Solid, level reached with how many goals opened, longest session in 30 days, streak
   kept; at most four) and "Next time, start with" (`suggestGoal` for the song).
+- Song has a Path | Sections toggle (`useStoredChoice`, `pocket:song:view`, Path by default):
+  `SongPath` draws `songLevels` on a rail with the current goal (`startGoal`) expanded.
 
 ## Song plans (src/domain/songPlan.ts, src/features/songs/PlanSongScreen.tsx)
 
